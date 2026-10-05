@@ -16,7 +16,7 @@ and coding agents and knowing which of them needs you.
 9. [The terminal](#9-the-terminal)
 10. [States and attention](#10-states-and-attention)
 11. [Agents](#11-agents)
-12. [Desktop notifications](#12-desktop-notifications)
+12. [Notifications](#12-notifications)
 13. [Keys](#13-keys)
 14. [The command palette and the overview](#14-the-command-palette-and-the-overview)
 15. [Settings and themes](#15-settings-and-themes)
@@ -47,8 +47,12 @@ What it does:
   keeps running.
 - Shows on every pane whether its program is working, waiting for you, done or failed.
   It counts the panes that need you, and one key takes you to the most urgent.
-- Sends a desktop notification when a pane starts waiting, finishes or fails, unless
-  you're looking at it.
+- Tells you when a pane starts waiting, finishes or fails, unless you're looking at it:
+  with a notice inside the window while insensical is in front, and a desktop
+  notification when it isn't.
+- Shows what each project's programs hold in memory, and puts a project to sleep when
+  you say so: its programs end, and its panes and what they showed are kept.
+- Has every setting on one sheet, to be switched or picked without opening a file.
 - Does everything the window does from the command line too.
 
 ### How far it has been checked
@@ -60,14 +64,20 @@ Read this before you rely on it.
   window on Arch Linux under Hyprland, at a fractional scale of 1.33. The most recent
   additions have been checked off-screen only, not in a real window: moving the daemon
   to a new version in place, panes showing what they showed after a stop, the scratch
-  pane, the overview, finding a file, the list of what follows the leader, the offer to
-  set agents up, and dragging tabs. Where that matters most, this manual says so.
+  pane, finding a file and its coloured icons, the list of what follows the leader, the
+  offer to set agents up, dragging tabs, notices inside the window, the ranked palette,
+  what a project's programs hold, putting a project to sleep, the window keeping its
+  size, a waiting pane's light beating as it arrives, and the sheet of keys at three
+  columns. The tray's icon was read over D-Bus from a tray that listed it, and its menu
+  picked from there; neither has been looked at in a panel. A password prompt was tested with a script that hides what's typed, not with
+  `sudo` itself. The two sounds have never been listened to. Where that matters most,
+  this manual says so.
 - **macOS.** It builds on a Mac and its tests pass there, including the window's tests,
-  drawn off-screen (macOS 26.6.2, Apple silicon). A development build has been opened
-  in a real window there, looked at, and had its main keys pressed. The application
-  has also been installed from the source, updated in place, quit and brought back.
-  Nobody has done real work in it. Every statement about macOS in this manual marked
-  "never run" is unverified; `docs/macos.md` lists what was checked.
+  drawn off-screen (macOS 26.6.2, Apple silicon). It has been installed from the
+  source, updated in place, quit and brought back, and its author works in it there. A
+  development build has been driven in a real window and looked at, feature by feature.
+  `docs/macos.md` lists what was checked, and for each item who saw it. Every
+  statement about macOS in this manual marked "never run" is unverified.
 
 ---
 
@@ -79,9 +89,9 @@ Read this before you rely on it.
 - Zig 0.16.x on `PATH`, to build the terminal engine.
 - On Linux, what the window toolkit (gpui) needs: Wayland or X11 development files, and
   Vulkan.
-- A Nerd Font. The UI's icons are Nerd Font glyphs, and the default font is
-  `JetBrainsMono Nerd Font`. If your font has no Nerd Font glyphs, the icons are missing
-  or show as boxes. There's no bundled symbols font to fall back on.
+- No particular font. The default is `JetBrainsMono Nerd Font`, and any font works: the
+  UI draws its own icons, and the Nerd Font icons programs print come from an icon
+  font that's part of the application.
 
 On macOS, you need macOS 13.0 or later. To build it, you need the full Xcode
 application, not only the Command Line Tools.
@@ -133,11 +143,10 @@ same way.
 the desktop entry, the icon, the user unit and completions for bash, zsh and fish. Put
 them where your system looks for them.
 
-**macOS 13 and later, on Apple silicon** (written, never run). With Homebrew:
+**macOS 13 and later, on Apple silicon.** With Homebrew:
 
 ```sh
-brew tap mah3uz/insensical https://github.com/mah3uz/insensical-release
-brew install --cask insensical
+brew install --cask mah3uz/tap/insensical
 ```
 
 Homebrew also puts `isc` on the `PATH`. Or open the `.dmg` and drag the application to
@@ -159,7 +168,9 @@ packaged one until `just uninstall-local` removes it. In `packaging/arch`, `make
 builds the package `insensical-git` instead, from the repository as it is on GitHub.
 
 **From the source, on a Mac.** `just install-mac` builds `insensical.app`, puts it in
-`/Applications` and links `isc` into `~/.local/bin`. `just uninstall-mac` removes both.
+`/Applications` and links `isc` into `~/.local/bin`. If you have Homebrew, it also links
+the completions for zsh, bash and fish where Homebrew's shells look for them, and a
+shell you start afterwards completes `isc`. `just uninstall-mac` removes all of it.
 
 The package also installs a user unit, but doesn't enable it. To start the daemon at
 login, run `systemctl --user enable --now insensical`. You don't have to: the first
@@ -341,7 +352,8 @@ Two things to know from the start:
   - A pane in a project with no root, and with no directory set for the pane, starts in
     the home directory.
 - If a daemon is already running, the window shows what the daemon has.
-- The window opens at 1200×800, centred. **It doesn't remember its size or position.**
+- The window opens centred, at the size it had when it was last open, or 1200×800 the
+  first time. It doesn't remember where on the screen it was.
 - Each `insensical` process has one window. Two processes give you two windows on the
   same daemon; see [Two windows](#two-windows).
 - On Linux, the window asks the desktop's settings portal whether the desktop is dark
@@ -367,7 +379,7 @@ update notice, the notice about agents, the count of panes that need you, the sw
 for floating panes, `+` for a new tab), that's where it is with `tabs = "top"`. With
 tabs down the side, the same things are at the top and bottom of the sidebar.
 
-Every button is a glyph. Hover over one to see what it does and, where a command does
+Every button is an icon. Hover over one to see what it does and, where a command does
 the same thing, that command's keys in the current keymap. A pane's header buttons show
 their keys on the focused pane only, and a tab's close button on the front tab only,
 because those are what the keys act on.
@@ -385,7 +397,15 @@ which. Press `Ctrl+Shift+B` to hide them, and again to show them in the same pla
 - **When hidden, neither is shown** and the panes get the whole window. The count of
   panes that need you and the notices are then off screen. `Ctrl+Shift+A` still goes to
   the pane that needs you, and the palette still lists them.
-- The window opens with tabs shown. It doesn't remember that you hid them.
+- The window remembers that you hid the tabs, and opens with them hidden.
+
+### With nothing open
+
+A window with no pane to show says so, and lists four ways on, each with its key: a new
+tab, a new project, the command palette and the sheet of every key. Each is a button.
+
+A setting that couldn't be used is said in red at the foot of the sidebar, or in the top
+bar. Click it to open the settings sheet, which lists every such problem.
 
 ### What resizes terminals and what does not
 
@@ -399,8 +419,9 @@ zoom, the leader's panel and the restart question.
 
 ### What the window does not remember
 
-The window doesn't remember its size and position, which sidebar rows are folded, or
-whether the sidebar is shown from one launch to the next.
+The window remembers its size and whether the tabs were hidden. It doesn't remember
+its position, which sidebar rows are folded, or that the keys were locked. A desktop
+that tiles its windows gives the window whatever size it chooses.
 
 ### Two windows
 
@@ -414,15 +435,37 @@ the other shows a pane that doesn't fit.
   whatever `font-size` is. On Linux that's the family fontconfig gives for `system-ui`,
   looked up once when the application starts. Use `interface-font` to name another. If
   you name the terminal's font, the UI uses the terminal's typeface.
-- Icons in the UI are glyphs from the terminal's font. If your `font-family` isn't a
-  Nerd Font, they show as empty boxes.
+- Icons in the UI are drawings, not letters of a font, so they look the same whatever
+  font you use. Icons a program prints in a terminal come from the terminal's font if
+  it's a Nerd Font, and otherwise from the icon font that comes with insensical (Nerd
+  Fonts' symbols), so `font-family` doesn't have to be a Nerd Font.
+- **A program is shown as a tile**: its own mark (Claude's, Neovim's, Docker's, Git's
+  and the rest) on a small glossy card in the program's colours, like an application's
+  icon. A program insensical has no mark for gets a terminal's. The colours belong to the program and not
+  to the theme, so Neovim is green and Claude Code is coral in every theme, and you can
+  find a pane by colour before you read its name. The tile is in the sidebar, the pane
+  header, the tab strip, the dock, the overview and the palette.
+- **The foot of the sidebar** has the window's tools: Settings, Show every key, and the
+  overview of every tab, and at its other end a button for a new project. With the
+  sidebar hidden, the three tools are at the right end of the top bar.
+- **A tab is shown as a deck**: the tile of the pane that has the keyboard, or had it
+  last, in front, and the tiles of up to two more of its panes behind it like cards.
+  Floating and minimized panes count. A tab with one pane shows one tile. The deck is in
+  the sidebar's tab rows and on the tabs along the top; hover over a tab at the top to
+  see how many panes it holds.
 - `density = "comfortable"`, the default, draws each pane as a rounded card with space
   around it. `compact` puts panes edge to edge with a hairline between them.
 - `pane-gap` sets the space between panes directly, in pixels from 0 to 40. If you
   leave it out, it's 6 when comfortable and 0 when compact.
 - The focused pane has an accent-coloured border. Unfocused panes aren't dimmed.
-- Only two things are animated: a blinking cursor, and the spinning mark of a pane
-  that's working.
+- **Little moves.** A sheet, a question and a notice fade in over a moment, and a pane
+  you float, put back, bring back from the dock or zoom clears from a light wash so you
+  can see where it went. A blinking cursor blinks, and the mark of a pane that's working
+  turns. Nothing slides, and what a terminal shows is never animated.
+- `motion = "off"` stops all of it: nothing fades, the working mark stands still and no
+  cursor blinks. `"system"`, the default, follows the desktop. On Linux that's GNOME's
+  `enable-animations` setting, read once as the window starts; on a desktop without it,
+  motion is on. On macOS it's Reduce Motion.
 - A state is never shown by colour alone: each has a mark and a word.
 - Terminal content isn't exposed to screen readers.
 
@@ -500,6 +543,39 @@ sidebar row, or use `isc project select NAME`.
 `isc ls` prints it (`4` or `project:4`). Two projects can have the same name. The name
 then means the first one listed, and the number tells them apart.
 
+### Putting a project to sleep
+
+A project you aren't working on still holds whatever its programs hold: a few megabytes
+for a shell, several hundred for an agent. **Putting it to sleep ends its programs and
+keeps everything else.**
+
+- Its tabs, splits, floating and minimized panes stay as they are, and so does what
+  each pane showed, which is written to disk.
+- Nothing runs in it and it holds no memory. In the sidebar its heading says `asleep`
+  and its rows are dimmed.
+- **Waking it** puts a shell in each pane, in the pane's directory, under what the pane
+  showed. What ran there is typed at the prompt for you to run again with Enter: an
+  agent's own resume command if it gave one, otherwise the command the pane was
+  started with. This is what happens to every pane when the daemon restarts
+  ([section 17](#17-stopping-restarting-and-new-versions)).
+- A project that's asleep when the daemon stops is asleep when it starts.
+
+To put a project to sleep: hover over its heading in the sidebar and press the sleep
+mark; or choose "Put this project to sleep, or wake it" in the palette for the project
+in front (the command is `sleep-project`, with no default key); or
+`isc project sleep NAME`. The window shows what would end and asks first. `isc` doesn't
+ask.
+
+To wake it: select the project and press Enter or `Wake it`; or the same mark, command
+or `isc project wake NAME`.
+
+- insensical never puts a project to sleep by itself.
+- You can't start a pane in a sleeping project. Wake it first.
+- Closing a sleeping project removes it and what was kept of its panes.
+- **With `keep-scrollback = false` nothing is written to disk**, so a project that
+  wakes has its panes and directories but not what they showed.
+- A program that ignores being hung up is ended a third of a second later.
+
 ### The sidebar
 
 The sidebar is a tree: project, tab, pane. It's shown while `tabs = "sidebar"`. Press
@@ -507,22 +583,41 @@ The sidebar is a tree: project, tab, pane. It's shown while `tabs = "sidebar"`. 
 
 | Row | Shows |
 |---|---|
-| Project | A fold mark, a folder icon (accent-coloured for the current project) and the name. On the right: how many panes it holds. When it's folded, this is instead the number of its panes that need you, with the mark and colour of the most urgent, if any do. |
-| Tab | A fold mark, a tab icon, then the tab's name if it has one, otherwise the directory of its focused pane. When it's folded, on the right: the mark of its most urgent pane. |
-| Pane | The program's icon, then the pane's name if it has one, otherwise its directory. On the right: a mark if it's floating or minimized, and its state. |
+| Project | A fold mark and the name, as a heading over its rows: brighter for the current project. On the right: what its programs hold in memory, and how many panes it holds. When it's folded, this is instead the number of its panes that need you, with the mark and colour of the most urgent, if any do. |
+| Tab | A fold mark, the tab's deck of tiles, then the tab's name if it has one, otherwise what its focused pane is called. When it's folded, on the right: the mark of its most urgent pane. |
+| Pane | The program's icon, then what the pane is called. On the right: a mark if it's floating or minimized, and its state. |
 
+**What a pane is called** is the same in the sidebar, on a dock chip, in the palette and
+in a question about closing:
+
+- the name you gave it, if you gave one;
+- otherwise the title its program set, unless the program is a shell. An agent's title
+  says what it's working on;
+- otherwise the program and the last part of its directory, such as `nvim · api`. A
+  shell is called by its directory alone, such as `api`: its icon already says it's a
+  shell. The home directory is written `~`.
+
+The pane's own header still shows the title and the whole directory.
+
+- **A tab that holds one pane and has no name has no row of its own.** Its pane's row
+  stands in its place, one level up. Split the pane or name the tab and the tab's row
+  appears. To name such a tab, choose "Name this tab" in the palette.
+- **A pane that needs you says why on its row.** If the pane is `waiting`, `failed` or
+  `done` and gave a note, the note shows on a second line, in the state's colour. The
+  row is taller for as long as that lasts, so the rows below it move down.
 - Click a row to go to it. Click a minimized pane's row to bring the pane back.
-- Directories are written with `~` for the home directory and are cut short at the
-  *beginning*, because the end tells you the most.
+- Each project stands a little apart from the one above it.
 - The rename and close buttons take up room on the row even when they're invisible, so
-  a long path is cut a little sooner than the row's width suggests.
+  a long name is cut a little sooner than the row's width suggests.
 
 **Naming.** A pencil appears at the end of the row under the pointer. Press it, type a
 name, and press Enter. Escape cancels. For a tab or a pane, Enter on an empty field
-removes the name, and the directory shows again. The daemon keeps names: they survive a
+removes the name. The daemon keeps names: they survive a
 restart and appear in the tab strip, the pane's header, notifications and `isc ls`. From
-the command line, use `isc tab rename TAB NAME` or `isc rename PANE NAME`. There's no key
-and no palette entry for naming a tab or a pane.
+the command line, use `isc tab rename TAB NAME` or `isc rename PANE NAME`. From the
+palette, choose "Name this pane" or "Name this tab" (`name-pane`, `name-tab`; neither
+has a default key): the sidebar's field takes the name, or with the sidebar hidden or
+the tabs along the top, a field over the window does.
 
 **Folding.** The mark at the start of a project or tab row hides what's under it.
 Folding is per window and isn't remembered. While the filter field has text, its matches
@@ -557,15 +652,16 @@ last pane, the tab closes too.
 | Switch | Click the tab; `Ctrl+Tab` / `Ctrl+Shift+Tab`; `Ctrl+PageDown` / `Ctrl+PageUp`; `isc tab next`, `isc tab prev`, `isc tab select TAB`. |
 | Close | The cross that appears on the tab, a middle click on the tab, `Ctrl+Shift+Q`, or `isc tab close [TAB]`. The window asks first. |
 | Move | `Ctrl+Shift+PageUp` / `Ctrl+Shift+PageDown`; `isc tab move TAB INDEX`, counted from 0; or drag the tab onto another. |
-| Name | The pencil on its sidebar row, or `isc tab rename TAB NAME`. |
+| Name | The pencil on its sidebar row, "Name this tab" in the palette, or `isc tab rename TAB NAME`. |
 
 - **Closing a tab closes every pane in it.** The window shows what would end and asks
   first; `isc tab close` doesn't ask.
 - When you drag a tab onto another, it takes that tab's place and the others shift along.
   While you carry a tab over another, the tab under the pointer is outlined. If you drop
   it anywhere else, nothing moves.
-- A tab in the strip shows the icon of its focused pane's program, the number of panes
-  when there are several, and its name or that pane's title. It shows a state mark only
+- A tab in the strip shows its deck of tiles, with its focused pane's program in front,
+  and its name or what that pane is called
+  ([section 6](#6-projects-and-the-sidebar)). It shows a state mark only
   when one of its panes needs you.
 - You can't select a tab by its number from the keyboard.
 
@@ -623,23 +719,31 @@ If you don't give a pane a command, it runs the first of these that applies:
   the title is shown, because the pane's state has its own mark. A mark joined to a
   word, as in `*scratch*`, is kept. `isc ls` shows the title exactly as the program set
   it.
-- **Icon**: chosen from the program's name. Anything not in this list gets the terminal
-  icon:
+- **Tile**: chosen from the program's name. Some two hundred programs have their own
+  mark, in their maker's colour. Anything else gets the terminal's.
 
   | Kind | Programs |
   |---|---|
-  | Editors | nvim, vim, vi |
-  | Version control | git, lazygit, tig, gh, jj |
-  | Rust | cargo, rustc, rustup |
-  | JavaScript | node, npm, pnpm, yarn, bun, deno, npx |
-  | Python | python, ipython, uv, pip |
-  | Other languages | go, lua, ruby, irb, rails, bundle, java, gradle, mvn |
-  | Containers | docker, podman, lazydocker, kubectl, k9s, helm |
-  | Databases | psql, mysql, sqlite3, redis-cli, pgcli |
-  | Remote | ssh, mosh |
-  | Monitors | htop, btop, top, nvtop |
-  | Agents | claude, codex, gemini, opencode, aider, amp, goose |
-  | Shells | sh, bash, zsh, fish, nu, dash |
+  | Agents | claude, codex, gemini, copilot, cursor-agent, ollama, and aider, amp, opencode, goose and pi, which share one mark in different colours |
+  | Editors | nvim, vim, emacs, hx, zed |
+  | Version control | git, lazygit, tig, gitui, jj, gh, glab |
+  | Rust, Go, Zig | cargo, rustc, rustup, go, zig |
+  | JavaScript | node, npm, pnpm, yarn, bun, deno, tsc, vite, webpack, esbuild, next, nuxt, astro, ng, eslint, prettier, jest, vitest, turbo, nx, tailwindcss |
+  | Python | python, ipython, pip, uv, ruff, pytest, jupyter, poetry, conda, django (`manage.py`), flask, uvicorn, gunicorn |
+  | Ruby and PHP | ruby, irb, rake, bundle, rails, gem, php, artisan (Laravel), composer, symfony |
+  | Other languages | lua, perl, R, julia, nim, crystal, elixir, erlang, ghc, ocaml, kotlin, swift, scala, clojure, dart, flutter, dotnet, java, gradle, mvn, cmake, make, gcc, clang, gleam |
+  | Databases | psql, pgcli, mysql, mariadb, sqlite3, redis-cli, mongosh, clickhouse, duckdb, supabase, prisma |
+  | Containers and clouds | docker, podman, kubectl, k9s, helm, terraform, tofu, ansible, vagrant, pulumi, gcloud, wrangler, vercel, netlify, fly, nginx, caddy, tailscale |
+  | The system | pacman, yay, apt, dnf, nix, brew, flatpak, tmux, curl, ffmpeg, mpv, htop, gpg |
+  | Remote | ssh, mosh, sftp, scp, rsync |
+  | Monitors | btop, top, nvtop, glances, btm |
+  | Shells | sh, bash, zsh, fish, nu, dash, ksh, pwsh |
+
+  **A tool run by a language's program is known by its own name.** Vite runs as
+  `node`, Rails as `ruby`, Laravel's `artisan` as `php` and Django's `manage.py` as
+  `python`. The daemon looks at what the program was started with and calls the pane
+  `vite`, `rails`, `artisan` or `manage`, for the tools it knows. A script of your own
+  stays `node` or `python`.
 
   The list is fixed. You can't add to it in the settings.
 
@@ -696,6 +800,13 @@ The pointer changes over a divider; nothing else marks it.
   repeats correctly at keyboard speed. Two presses that arrive in the same instant, as
   from a script or a macro, move the edge once.
 - On a floating pane, the same keys move its right and bottom edges.
+- While you drag, the programs in the panes are resized as you go, at most once every
+  25 milliseconds, and once more at the size you let go at.
+- **A program is told of a resize in two ways.** Every program gets the usual signal.
+  One that asked the terminal for a written report of every resize, as some editors
+  and agents do, gets that too, but only while it's the program in the foreground. If
+  it's killed without taking its request back, the shell it leaves behind isn't sent
+  reports it never asked for.
 
 ### Moving and swapping
 
@@ -816,22 +927,63 @@ behave the way they do in Ghostty.
 
 ### `TERM`
 
-`TERM` is `xterm-ghostty` when Ghostty's terminal description is installed. Otherwise
-it's `xterm-256color`. insensical looks for the description under `$TERMINFO`,
-`~/.terminfo`, `/usr/share/terminfo`, `/usr/lib/terminfo` and `/etc/terminfo`. insensical
-doesn't ship the description.
+`TERM` is `xterm-ghostty`, Ghostty's description of the terminal, which says everything
+a pane can do. The description comes with insensical:
+
+- If your system already has it (under `$TERMINFO`, `~/.terminfo`,
+  `/usr/share/terminfo`, `/usr/lib/terminfo` or `/etc/terminfo`), that one is used.
+- Otherwise the daemon compiles its own copy with your system's `tic`, the first time a
+  pane starts, into `terminfo` in the state directory, and points the pane's programs
+  at it with `TERMINFO_DIRS`.
+- If there's no `tic`, `TERM` is `xterm-256color`.
+- `term = "xterm-256color"` in the settings makes it that for every pane started from
+  then on.
 
 **Over `ssh`** to a machine that doesn't have that description, programs complain about
-an unknown terminal. Set `TERM` there, or install the description there.
+an unknown terminal. Install the description there (`infocmp -x xterm-ghostty | ssh
+host tic -x -`), or set `TERM=xterm-256color` for that command, or set `term` as above
+if most of your work is on other machines.
 
 Every pane also has these set: `COLORTERM=truecolor`, `TERM_PROGRAM=insensical`,
 `TERM_PROGRAM_VERSION`, `INSENSICAL_PANE` and `INSENSICAL_SOCKET`.
 
 ### Scrollback
 
-Each pane keeps 10 MB of history. That's an amount of memory, not a number of lines, and
-there's no setting for it. The history is held in the daemon's memory. Section 17 covers
+Each pane keeps 10 MB of history. That's an amount of memory, not a number of lines.
+The `scrollback` setting changes it, from 1 to 200 megabytes, for panes started after
+the change; a pane that's running keeps what it was started with. The history is held in the daemon's memory. Section 17 covers
 what happens to it when the daemon stops.
+
+**What panes cost.** Measured on Linux with 70 panes open in one daemon:
+
+| | Memory in the daemon |
+|---|---|
+| A pane at a prompt with little history | about 0.4 MB |
+| A pane whose history is full, while it is printing | about 11.5 MB |
+| The same pane once it has been quiet for a moment | about 1.6 MB, for output that repeats as a build's does |
+
+- **History is packed away when a pane goes quiet**, and unpacked when you scroll into
+  it or search it. Nothing is lost and you do nothing. Output that repeats packs to a
+  fraction of its size; output that doesn't packs less.
+- A pane you aren't looking at costs the window nothing: only the panes of the tab in
+  front are drawn, or hold a copy of their history in the window.
+- An idle daemon uses no CPU, however many panes it holds.
+- **The programs cost more than the panes.** A shell is some megabytes and an agent
+  can be several hundred. insensical doesn't limit or stop them.
+- **The window says what each project's programs hold.** On the right of a project's
+  heading in the sidebar is the memory held by everything running in the project, and
+  its share of a processor when it's using one: `1.2 GB · 40% cpu`. It's shown only
+  when there's room for all of it after the project's name: a long name in a narrow
+  sidebar is shown whole and the figure is left out. The overview says the same for
+  each pane. `isc usage` prints it for every pane.
+- A pane's figure covers its program and everything that program started.
+- In the daemon a pane is one thread and three descriptors. While a pane's program
+  prints faster than about fifty megabytes a second, the pane has a second thread that
+  does nothing but read; it's given back when the output stops.
+- The window asks for these figures every five seconds, and only while it's in front.
+  The share of a processor is what was used between the last two askings.
+- Each pane holds three of the daemon's open files. The daemon raises its own limit as
+  far as the system lets it when it starts.
 
 If a window falls very far behind a flood of output, it's resynchronised, and the output
 nobody could have read is skipped.
@@ -840,18 +992,31 @@ When you switch to a tab, its panes can show empty for an instant, until each on
 receives its screen. If you scroll back into history that hasn't arrived, nothing shows
 that it's missing.
 
+**From command to command.** `Ctrl+Shift+Up` scrolls to the prompt of the command
+before what you're looking at, and `Ctrl+Shift+Down` to the one after (`⌘↑` and `⌘↓` on
+macOS), so going back through a long session takes one key a command however much
+each printed.
+
+- It needs a shell that marks its prompts: fish 4 does, and bash and zsh do with the
+  line `isc shell-integration` prints. Without marks the keys do nothing.
+- After the last command, `Ctrl+Shift+Down` goes to the bottom.
+- A prompt of several lines counts once, at its first line.
+- Prompts in what was restored from a stop of the daemon aren't known.
+
 ### Text
 
 - **Font.** The terminal and the interface use the same family. `font-size` is in points,
-  and the default is 12. On Linux a point is 1⅓ pixels, as in Ghostty, kitty and
+  and the default is 12, or 13 on macOS. On Linux a point is 1⅓ pixels, as in Ghostty, kitty and
   Alacritty. So 12 points is 16 pixels, and the size you set in those terminals gives the
-  same text here. On macOS a point is a pixel (written, never run). Interface text is
+  same text here. On macOS a point is a pixel. Interface text is
   always 12 pixels. A row is 1.3 times the font's size high, rounded up.
 - **There is no font weight setting.** Text uses the family's regular face, and bold and
   italic use those faces. If your other terminal is set to semibold, text here looks
   thinner.
-- **There are no ligatures**, and nothing is shaped across cells. Each cell's character
-  is placed separately.
+- **Ligatures.** Symbols that stand side by side are drawn as the font's ligature for
+  them, if it has one: `->`, `!=`, `<=`, `===`. `font-ligatures = false` turns that off.
+  Only symbols join. Ligatures a font makes of letters, such as `www` or `fi`, aren't
+  formed, and neither are symbols a program gave different colours or weights.
 - Characters the font doesn't have come from the system's fallback fonts. That includes
   emoji.
 - **Icons in cells aren't fitted to their cell.** A wide Nerd Font glyph can overlap its
@@ -920,7 +1085,8 @@ that it's missing.
 
 ### Finding text
 
-Press `Ctrl+Shift+F` to open a field over the pane's top right corner.
+Press `Ctrl+Shift+F` to open a field over the pane's top right corner. When the match
+it's showing would be under the field, the field moves to the pane's bottom right.
 
 - It finds text anywhere in the pane's history, ignoring case. It shows which match
   you're on and how many there are, and brings each match to the middle of the view,
@@ -937,8 +1103,10 @@ Press `Ctrl+Shift+F` to open a field over the pane's top right corner.
 - `Ctrl`+click the path of a file or directory to open it with whatever your desktop
   uses for that kind of file. A directory opens in the file manager.
 - **Anything you can open is marked when the pointer is over it.** It's underlined, and
-  a line at the bottom of the pane shows the key and what it opens, as in "Ctrl+click
-  opens http://localhost:5173/". While you hold `Ctrl`, the pointer becomes a hand. A
+  a small note in the pane's bottom right corner shows the key and what it opens, as in
+  "Ctrl+click opens http://localhost:5173/". The note goes after four seconds if the
+  pointer doesn't move, and comes back when it does; the underline stays. While you
+  hold `Ctrl`, the pointer becomes a hand. A
   plain click doesn't open it, because a click in a terminal selects.
 - For addresses, only `http://` and `https://` are ever opened. Brackets and punctuation
   around the address are left out.
@@ -946,15 +1114,34 @@ Press `Ctrl+Shift+F` to open a field over the pane's top right corner.
   - It's read from the directory the pane's shell is in. `~/` is the home directory.
   - A path that starts with a slash but doesn't exist from the root is tried from the
     pane's directory. That's how a bundler prints `/src/App.vue`.
-  - A line and column after the path, as in `src/main.rs:12:5`, are left out and aren't
-    passed on. The file opens at its beginning.
+  - A line and column after the path, as in `src/main.rs:12:5`, aren't part of the path.
+    They're passed to the editor you chose with `open-files-with` (see below). Your
+    desktop's own opener can't take them, so with it the file opens at its beginning.
   - A bare word with no slash and no dot in it, such as `src`, isn't looked up.
   - **A file that can be run, and a `.desktop` file, are never marked or opened.** That
     way, clicking something a program printed can't start anything.
-  - There is no setting for which program opens a file.
 - An address or path that continues onto the next row is found only up to the end of its
   row.
-- Links that a program marks as links (OSC 8) aren't followed.
+- **Links a program marks** (OSC 8), such as an agent's "open the pull request" or the
+  file names of `ls --hyperlink`, work the same way: the marked words are underlined
+  under the pointer and `Ctrl`+click follows them. Only a web address, or a `file://`
+  link to a file on this machine that exists and can't be run, is followed. Any other
+  kind of link a program marks is ignored.
+
+**Choosing the editor.** `open-files-with` says what a file you `Ctrl`+click opens in:
+
+| Value | Opens the file |
+|---|---|
+| `system` (the default) | With whatever your desktop uses for that kind of file, at its beginning |
+| `code`, `cursor`, `zed`, `subl`, `idea` | In that editor, at the line and column written after the path |
+| `nvim`, `vim`, `hx`, `nano` | In that editor in a new pane, split to the right of the one you clicked in, at that line |
+| a command with `{file}` in it | By running it, with `{file}`, `{line}` and `{column}` filled in: `"myedit --goto {line} {file}"` |
+
+- With no line written after the path, the line is 1.
+- A directory always opens with your desktop's file manager.
+- The settings sheet lists the editors it finds on your `PATH`.
+- A command of your own is cut into words at spaces and run directly, not by a shell.
+  If it can't be started, the desktop opens the file instead.
 
 ### The clipboard and programs
 
@@ -971,11 +1158,16 @@ Press `Ctrl+Shift+F` to open a field over the pane's top right corner.
 
 ### What the terminal does not do
 
-- **Input methods (IME) and dead keys aren't handled.** Chinese, Japanese and Korean
-  input don't work, and neither do accents typed as two keys.
+- **Input methods (IME) are off unless you turn them on.** With `input-method = true`,
+  your system's input method (fcitx, ibus, the Mac's) composes text in a pane: what
+  it's composing shows at the cursor, underlined, and the program is given only the
+  finished text. Keys the input method doesn't take are typed as before. It's off by
+  default because it has been tried only without a real input method: turn it on,
+  and turn it off again if typing misbehaves. Whether accents typed as two keys (dead
+  keys) work with it on depends on the toolkit and hasn't been tried.
 - Images (Kitty graphics, Sixel) aren't shown.
 - Shell-integration marks (OSC 133) are read to learn when a command ends and how it
-  ended. There is no jump between prompts.
+  ended, and where each prompt is.
 
 ---
 
@@ -1011,11 +1203,23 @@ front.
 ### Where a state shows
 
 - On the pane's header and the line under it, its tab, its sidebar row and its dock chip.
-  It also shows as a count in the top bar, in the colour of the most urgent state.
+  A `running` pane has no coloured line: it has its turning mark, in the theme's blue,
+  and no more.
+  It also shows as counts at the head of the sidebar, or in the top bar: how many
+  panes are waiting or failed, in the colour of the most urgent, and before it, in
+  grey with a tick, how many have finished. Either is left out at zero.
 - **In the sidebar, a project or a tab shows a state only while it's folded.** Unfolded,
   the rows beneath it show their own states and its row shows none. Folded, it shows the
   most urgent state of what it holds, and a project shows how many of its panes need you.
   If the settings list no rows beneath it, it always shows a state.
+- **A waiting pane glows.** Its edge and its header take the waiting colour and a soft
+  light of that colour fills the gaps around it, so you catch it from the corner of
+  your eye among many panes. The light beats three times as the pane begins to wait and
+  then stands still; with `motion = "off"` it's still from the start. It never falls on
+  another pane's text or on the sidebar. With `pane-gap = 0` there's no gap to fill, and in a
+  see-through window a tiled pane has nothing to hide the light behind, so in both
+  cases you get the coloured edge and header alone. `attention-glow = false` turns off
+  the light, the coloured edge and the coloured header.
 - A pane's header shows its state as a word, along with what the pane says about it. On
   a tab, in the sidebar and on a dock chip, the state is a mark only. Hover over the mark
   to see the same words, for example "waiting: Needs permission: Bash".
@@ -1057,8 +1261,16 @@ Strongest first:
    - The bell, while nobody is looking, gives `waiting` until you look at the pane.
      **The bell marks a pane and never sends a desktop notification**, because shells
      ring it on every failed completion.
+   - **A password prompt** gives `waiting`, with the line it asks on as what the pane
+     says, such as `[sudo] password for you:`. insensical knows a program is asking
+     because the terminal stops showing what you type while still taking a whole line,
+     which is how `sudo`, `ssh`, `git` and a script's `read -s` ask. The pane waits
+     whether or not you're looking at it, and stops waiting when typing shows again or
+     the command ends. A program that asks while drawing the screen itself, or a
+     `sudo` set to show a star for each character (`pwfeedback`), can't be told from
+     any other full-screen program and isn't noticed.
 3. **The command in the foreground ending**: `done` if the pane was `running`, or if the
-   command ran for 30 seconds or more. This doesn't need shell integration.
+   command ran for 30 seconds or more, or for as long as `long-command` says. This doesn't need shell integration.
 4. **The program itself ending** in a kept pane: `failed` if it exited with a non-zero
    status.
 
@@ -1070,7 +1282,8 @@ and any script that calls `isc status`.
 
 ### Commands that fail, and short commands
 
-- **A long command is one that ran for 30 seconds.** There's no setting for this.
+- **A long command is one that ran for 30 seconds.** `long-command` in the settings
+  changes that, from 1 second to 3600. The daemon reads it as each command ends.
 - **Without shell integration, a failed command shows as `done`, not `failed`.** The end
   of a command is read from the terminal's foreground process, which gives no exit code.
 - **With a shell that marks its commands, a failed command is `failed`**, with a note
@@ -1129,7 +1342,7 @@ per line. Delete a line to be offered that agent again.
 | `isc integrate claude` | The same for one agent: `claude`, `codex`, `gemini`, `opencode` or `pi`. |
 | `isc integrate --yes` | Adds every agent that was found, without asking. |
 | `isc integrate --remove` | Removes them all. If you name an agent, removes that one. |
-| `isc integrate --status` | Prints what was found and what already reports, as JSON. Changes nothing. |
+| `isc integrate --status` | Prints what was found and what already reports, as JSON. `stale` is true for an agent whose hooks are there but name an `isc` that is no longer this one. Changes nothing. |
 
 - An agent counts as found when its program is on `PATH` or its settings directory
   exists.
@@ -1244,12 +1457,49 @@ isc notify "Build" "Finished"
 
 ---
 
-## 12. Desktop notifications
+## 12. Notifications
 
-**When one is sent**: a pane becomes `waiting`, `done` or `failed`; a program sends a
+**When you're told**: a pane becomes `waiting`, `done` or `failed`; a program sends a
 notification sequence; or `isc notify TITLE [BODY]` is called.
 
-**When none is sent**: you're looking at the pane (it has the keyboard, in a window
+**Where you're told depends on where you are.** If insensical is in front, you get a
+notice inside the window and nothing on your desktop. If it isn't in front, or has no
+window open, you get a notification on your desktop.
+
+**The notice in the window** shows at the foot of the sidebar. With the sidebar hidden,
+or the tabs along the top, it lies over the bottom right corner of the window instead.
+It resizes no terminal.
+
+- It has the pane's state mark, `pane · project`, and what the pane says, on up to two
+  lines.
+- Click it to go to the pane. Its `×` closes it.
+- **A finish goes after six seconds.** It stays for as long as the pointer is on it,
+  and the six seconds don't run while insensical isn't in front.
+- **A pane that waits or failed keeps its notice** until you've seen the pane or closed
+  the notice.
+- It shows only if the pane still needs you a second later. An agent that finishes and
+  starts again at once says nothing.
+- Three show at most, the newest lowest. If there are more, a line says `and 2 more`;
+  click it for the overview.
+- It goes as soon as you've seen its pane.
+
+**Sound.** A pane that waits or failed makes a short sound of two rising notes. With
+`sound = "all"` a finish makes a softer single note; with `sound = "off"` nothing makes
+a sound. The default is `needs-you`. The settings sheet has a button to hear each.
+
+- Whichever program tells you makes the sound: the window for a notice, and for a
+  desktop notification the daemon on Linux or the application on macOS.
+- It's played by `pw-play`, `paplay` or `aplay` on Linux, whichever is found first, and
+  by `afplay` on macOS. With none of them there's no sound, and nothing says so.
+- It isn't silenced by the desktop's do-not-disturb, since insensical plays it itself.
+- You can't use sounds of your own.
+
+**Turning them off.** `notifications = false` stops all of them. `notify-waiting`,
+`notify-failed` and `notify-done` turn off one kind each. A pane still shows its state
+whatever these say. The daemon reads them each time, so a change holds from the next
+one on.
+
+**When you're not told**: you're looking at the pane (it has the keyboard, in a window
 that's in front); the pane is muted; or the cause is the bell.
 
 - Each pane has one notification. A new one replaces the pane's previous one, and it's
@@ -1267,9 +1517,15 @@ that's in front); the pane is muted; or the cause is the bell.
 `isc mute [PANE] [--off]`. The pane's states still show, but it sends no notifications.
 The header shows a mute mark.
 
+**Muting a project.** Use "Silence this project's notifications" in the palette (the
+`mute-project` command; it has no default key), or `isc project mute NAME [--off]`.
+None of the project's panes sends a notification, including panes you open in it
+afterwards. Their states still show, and the project's name in the sidebar has a mute
+mark. Muting a project doesn't change which of its panes are muted on their own.
+
 **On Linux** the daemon sends them over D-Bus, so they arrive even with no window open.
-They name the desktop entry `insensical`. If that entry isn't installed, the desktop
-may show them with no application name or icon.
+They name the desktop entry `insensical` and carry its icon. If the entry and the icon
+aren't installed, the desktop may show them with no application name or icon.
 
 **Clicking one** goes to the pane, restores it if it was minimized, and asks a window
 to come forward.
@@ -1279,14 +1535,73 @@ to come forward.
   can't use one. The pane is selected, but the window may stay where it is.
 - With no window open, clicking selects the pane, and nothing visible happens.
 
-**On macOS** a window of the application posts them, not the daemon, and only from an
-app bundle. **With the window closed, none arrive**, even though the application is
-still running. The system asks once whether to allow them. Click one to bring the
-window to the front on the pane it's about. None arrive once you quit the application.
+**On Linux, an icon in the tray says what needs you**, with no window open too. The
+daemon puts it there, so it's there for as long as your programs are.
 
-A notification always comes from the system. It's never a message inside the window.
-There's no count on the application's icon, no way to mute a whole project, and no
-switch for each state.
+- **The icon** is insensical's own, with an amber mark at its corner while any pane
+  needs you: one that waits, failed, or finished and hasn't been seen. Point at it for
+  how many.
+- **Its menu** lists those panes, the most urgent first, each with a sign for its
+  state, its project and name, and what it says. Pick one to go to that pane. Nine are
+  named and the rest counted. Below them: how many panes are running, and Open
+  insensical, which reads Show insensical while a window is open. Clicking the icon
+  itself does what that line does.
+- **Close the window** is there while a window is open. It closes every window and
+  ends nothing: your programs run on, and the icon stays.
+- **Quit insensical…** stops the server, which ends every program in every pane. It
+  asks first, in a window, opening one if there is none: the question names the panes
+  that would end and says what's kept. Nothing stops until you answer **End
+  everything**; `Esc` leaves it all running. Your projects and panes are kept, and each
+  comes back with a new shell when you open insensical again.
+- **With no window open, one opens.** The daemon starts `insensical` from the
+  directory `isc` is in. With a window open, the window is asked to come forward, which
+  on Wayland it may not be able to do, as with a notification.
+- **Not every desktop has a tray.** It needs one that shows status notifier items: KDE
+  Plasma, Waybar and most panels do, and GNOME does only with the AppIndicator
+  extension. Nothing depends on the icon: notifications arrive without it.
+- The icon is found in the installed icon theme. If insensical's icons aren't
+  installed, the tray shows a blank or a placeholder.
+- The daemon only knows of a window that has been in front at least once. Pick from the
+  tray before a new window has ever had the keyboard, and a second window opens.
+- `tray = false` takes the icon away, and **Show in the tray** under **Attention** in
+  the settings is the same switch. The icon follows it within a couple of seconds.
+
+**On macOS** the application posts them, not the daemon, and only from an app bundle.
+They arrive with the window closed too, for as long as the application is running. The
+system asks once whether to allow them. Click one to bring the window to the front on
+the pane it's about; with no window open, one opens there. None arrive once you quit
+the application.
+
+**On macOS, the menu bar and the Dock say what needs you**, so you can tell with the
+window closed or behind other work:
+
+- **In the menu bar**, insensical's mark, with the number of panes that need you
+  beside it: those that wait, failed, or finished and haven't been seen. It's the
+  same number the window shows. With none, the mark is alone; with no server to hear
+  from, it's dimmed. It never changes colour and never moves.
+- **Its menu** lists those panes, the most urgent first, each with its state's mark,
+  the same marks the window draws, its project and name, and what it says. Pick one and insensical comes forward on that
+  pane, opening a window if there is none. Nine are named and the rest counted; the
+  count opens the overview. Below them: how many panes are running, Open insensical,
+  Settings…, Restart… when an update is installed, and Quit.
+- **On the Dock icon**, the same number as a badge, and the same panes in the menu you
+  get by right-clicking the icon. The system can hide a menu bar item when the bar is
+  crowded or behind a notch; the Dock always has it. If the number doesn't appear on
+  the icon, turn on **Badge application icon** for insensical in System Settings,
+  Notifications: macOS shows a badge only where that's allowed.
+- **The settings say what macOS allows.** At the top of **Attention**, a line says
+  whether macOS lets insensical notify you, and whether it lets it put a count on its
+  Dock icon. If either is off, the line is marked and says so, since nothing you switch
+  on below it arrives until macOS allows it. **Open System Settings** takes you to
+  insensical's notifications there. The line follows what you change in System Settings
+  within a couple of seconds.
+- `menu-bar = false` takes the item out of the menu bar, and `dock-badge = false` the
+  number off the Dock icon. Both are in the settings, under **Menu bar and Dock**, a
+  section only a Mac has. Dragging the item out of the bar with `⌘` held turns
+  `menu-bar` off for you.
+
+There's no count on the application's icon on Linux. You can't choose to get desktop notifications while insensical is in front, or
+notices instead of them when it isn't.
 
 ---
 
@@ -1306,16 +1621,36 @@ is the capital.
 On Linux, the direct keys are `Ctrl+Shift` with a letter. They avoid `Super`, which
 window managers own. On macOS, they're `⌘`-based.
 
-**On macOS, closing the window doesn't quit the application; `⌘Q` does**, and so does
-Quit in its menu. If you open the application again while it has no window, it gets
-one. Either way, the daemon and every program under it keep running, and the next
-window shows them. On Linux, closing the window quits. The `quit` command has no key
-there, and is in the palette.
+**On macOS, closing the window doesn't quit the application, and neither does `⌘Q`.**
+insensical lives in the menu bar as well as in its windows. `⌘Q`, and **Close to Menu
+Bar** in its menu, put every window away and leave it there, counting the panes that
+need you and telling you about them. Open it again from the menu bar's item, the Dock
+or Spotlight and it gets a window.
 
-**On macOS, Option isn't Alt.** Option with a key types the character the keyboard
-layout gives it (Option+B is `∫`), and no setting changes that. You can't type a shell's
-Alt+B and Alt+F, or a program's other Alt keys. If the system's own `⌃Space` ("select
-the previous input source") is on, the system takes it before the leader can.
+To quit it, choose **Quit insensical** from its menu or from the menu bar item's menu,
+or press `⌥⌘Q`. If a pane is running or waiting when you quit, insensical asks first:
+on a Mac it's the application that tells you when a pane needs you, and once it's quit
+nothing does until you open it again. `Esc` goes back, `W` closes the window and leaves
+the application running, `Enter` quits. With nothing running, or no window open, it
+quits at once. If you've turned `menu-bar` off there's no item to go to, and `⌘Q` quits.
+
+The menu also has About insensical, which shows its version, `Settings…` (`⌘,`), which
+opens a window for the settings if there is none, the system's Services, and Hide
+(`⌘H`), Hide Others (`⌥⌘H`) and Show All. `⌘H`, `⌥⌘H` and `⌥⌘Q` are the application's
+and don't reach a program in a pane.
+
+The first time you close its last window, one notification says that insensical is
+still running and how to quit it. It's said once and never again. Whether a window is
+open or not, the daemon and every program under it keep running, and the next window
+shows them. On Linux, closing the window quits. The `quit` command has no key there,
+and is in the palette.
+
+**On macOS, Option isn't Alt unless you say so.** Option with a key types the
+character the keyboard layout gives it (Option+B is `∫`), so a shell's Alt+B and Alt+F,
+and a program's other Alt keys, don't answer. Set `option-as-alt = true` and Option
+with a key is Alt to the program in the pane. You then can't type the layout's Option
+characters in a pane; it's both Option keys or neither. If the system's own `⌃Space`
+("select the previous input source") is on, the system takes it before the leader can.
 
 **A chord in the direct keymap doesn't reach the program in the pane.** `` Ctrl+` ``,
 `Ctrl+Shift+Space` and `Ctrl+Shift+I` are among them. To hand a chord back, set it to
@@ -1334,6 +1669,9 @@ the keymap in use, with your own changes. Keys you press one after another have 
 between them.
 
 - A command with no key is listed too, greyed, and says so.
+- If a command has no key only because your own `[keys.direct]` or `[keys.leader]` table
+  leaves it out, the sheet says `not in your [keys.direct]` beside it, in the colour of
+  something waiting for you.
 - Typing narrows the sheet to what matches, by a command's words, its heading or its
   keys: `split`, `float`, `ctrl alt`.
 - **If you press a chord while the sheet is open, the sheet describes it instead of
@@ -1413,8 +1751,8 @@ second: leader, `L`, `L`, `L`.
 - **You can write a key that has two characters either way** on Linux: `ctrl-shift-]`
   and `ctrl-}` are the same key, and so are `ctrl-shift-/` and `ctrl-?`. Keys are shown
   the first way.
-- Separate keys in a sequence with spaces. The word `leader` stands for the leader key.
-  In the direct keymap it stands for `ctrl-space`, whatever `leader` is set to.
+- Separate keys in a sequence with spaces. The word `leader` stands for the leader key,
+  the one `leader` is set to, in either keymap.
 - Your keys are added to the defaults, and yours win where the two are the same. The
   only way to remove a default is to set its key to `none`.
 - The command names are in section 19.
@@ -1455,7 +1793,8 @@ t = "new-tab"
 - You can't change the leader pressed twice, or Escape after the leader.
 - `isc config` prints both tables in full, with every command that has no key shown as a
   line to uncomment. A file made from that output lists the commands of the version that
-  printed it. A command added by a later version has no key until you add a line for it.
+  printed it. A command added by a later version has no key until you add a line for it; the sheet of
+  keys marks each one your table leaves out.
 - A command or key that can't be read is reported in the top bar, which names the table.
 
 ### Keys that are fixed
@@ -1482,11 +1821,26 @@ on the right: the accent colour when it doesn't end anything, red when it does.
 
 ### The palette
 
-Press `Ctrl+Shift+P`, or leader `Space`. The palette lists, in this order: panes that
-need you; every command with its key; projects; the other panes; themes.
+Press `Ctrl+Shift+P`, or leader `Space`. With nothing typed, the palette lists
+everything under headings, in this order: **Needs you**, the panes that need you;
+**Recent**, the last five commands and settings you chose here; **Commands**;
+**Settings**; **Projects**; **Panes**; **Themes**.
 
-- Typing narrows the list by any of the words you type, in any order.
+- Each row starts with an icon: a pane's program, or its state mark if it needs you; a
+  folder for a project; a cog for a setting; a palette for a theme.
+- A command shows its keys at the end of its row, as key caps. A setting shows its
+  value. A pane shows its project, and what it says if it needs you.
+- **Typing narrows the list** by any of the words you type, in any order, and the
+  headings go. The best fit comes first: a word at the start of a name beats one at
+  the start of a later word, which beats one inside a word. Of two that fit alike, the
+  one you chose more recently comes first.
+- You can type what kind of thing you want as a word: `pane`, `project`, `setting`,
+  `theme`.
 - Enter runs the command, goes to the project or pane, or chooses the theme.
+- **Enter on a setting opens it on the settings sheet**, with its list open if it has
+  one. The palette never changes a setting to a value you haven't seen.
+- What you chose lately is remembered across restarts of the window, in the state
+  directory.
 - The themes listed are the built-in ones, the ones in your own `themes` directory, and
   `ghostty` when Ghostty's configuration names a theme.
 - **Themes are previewed.** Highlight a theme and the whole window shows it straight
@@ -1496,7 +1850,6 @@ need you; every command with its key; projects; the other panes; themes.
   and the top bar says why.
 - Copy, paste, select-all and find aren't listed. They act on a terminal that has the
   keyboard, and the palette has taken the keyboard.
-- The theme is the only setting the palette changes. Change other settings in the file.
 
 ### The overview
 
@@ -1506,14 +1859,20 @@ once" in the palette.
 The overview covers the whole window. It shows each project's name and, under it, each
 of the project's tabs drawn small, in its layout. Tiled panes are where they are in the
 tab, floating panes lie over them, and minimized panes are a row of icons underneath.
+Projects stand side by side for as long as the window has room, so many small projects
+fill the window as a grid. A project with more tabs than fit across has rows of its own.
 
-- A pane shows its icon, its name, and a border in the colour of its state.
+- A pane shows its icon, its name, and a border in the colour of its state. Under the
+  name is the memory its programs hold, once that's a megabyte or more.
 - A pane that's waiting, done or failed also shows what it says about that, so you can
   read an agent's question without going there.
 - A project's name is followed by the number of its panes that need you.
 - The overview opens with the tab in front marked "here". Left and Right go through
-  every tab in order, across projects. Up and Down go to the row above or below, which
-  is the next project's row when the project has one row. All four stop at the ends.
+  every tab in order, across projects. Up and Down go to the nearest tab in the row
+  above or below. All four stop at the ends.
+- Press Tab to show only the tabs that have a pane that needs you, and Tab again to
+  show every tab. A project with no such tab is left out, and if there are none at all
+  the overview says "Nothing needs you."
 - Press Enter, or click a tab, to go there. Escape, or a click anywhere else, closes the
   overview and changes nothing.
 - It doesn't resize anything and doesn't attach to any pane. It's drawn from what the
@@ -1550,7 +1909,10 @@ one you want, then press Enter to type its path into the pane.
 - The directory is where the pane's shell is, not where a program running in the shell
   has gone.
 - The list opens under the cursor's row, or above it when there's no room underneath.
-  Anything `.gitignore` names is listed like anything else.
+- **What git ignores isn't listed.** Inside a git repository the list leaves out
+  everything git is told to ignore, by any `.gitignore`, your own excludes or the
+  repository's. Git itself is asked, once, as the list opens. Outside a repository, or
+  without git, nothing is left out but the directories named above.
 
 ---
 
@@ -1561,6 +1923,18 @@ Settings live in `~/.config/insensical/config.toml`
 overrides both). You don't need to create anything. Without the file, or without the
 directory, the defaults apply.
 
+**The window makes the file the first time it starts**, if there isn't one. That file
+explains every setting and shows its default, and sets none of them: each line that
+shows a setting begins with a `#`, so nothing in it is read. That way the file is there
+to find and to edit, and a default that changes in a later version still reaches you
+for whatever you never chose. Take the `#` from a line to set it, or use the settings
+sheet, which writes its line under the one that shows the default.
+
+- A file that's already there is never written over, whatever is in it.
+- `isc` on its own doesn't make the file; the window does, and so does `isc config set`
+  with the one line it sets.
+- The keymaps aren't in it. `isc config` prints them.
+
 `isc config` prints a complete file. It has every setting at its default, with a note on
 each and the values it can take. A setting with no default appears as a line to
 uncomment. Both keymaps are there too, with every key:
@@ -1568,6 +1942,25 @@ uncomment. Both keymaps are there too, with every key:
 ```sh
 isc config > ~/.config/insensical/config.toml
 ```
+
+To read or change one setting without opening the file:
+
+```sh
+isc config get font-size        # what the file gives it, or its default
+isc config set font-size 13
+isc config set sidebar tabs,panes
+isc config reset font-size      # takes the line out, which leaves the default
+```
+
+- `set` changes that one line and leaves the rest of the file as you wrote it, with
+  its comments and order. If the file doesn't exist, it's made with that one line.
+- A setting the file shows in a comment, such as `# shell = "fish"`, is written under
+  that comment. `reset` then takes only that line out and leaves the comment.
+- In a shell with completions installed, `isc config set` and its neighbours complete
+  the names of the settings, each with what it does.
+- A value the setting can't have is refused, and the message says what it can be.
+- A file that can't be read as TOML isn't written to.
+- These work for the settings in the table in section 19, not for the `[keys]` tables.
 
 Here's an example:
 
@@ -1580,6 +1973,63 @@ keymap = "leader"
 ```
 
 The settings table is in section 19.
+
+### The settings sheet
+
+Press `Ctrl+,` (`⌘,` on macOS), or leader `,`, or choose "Settings" in the palette. A
+sheet opens over the window with every setting on it. Nothing on it is typed as a
+value: a setting is switched, picked or stepped.
+
+- **Sections are down the left**, in a column of their own with the field for finding a
+  setting above them: Appearance, Attention, Terminal, Keys, Agents, and Changed. Each
+  has a tile in its own colour. A number beside a section says how many of its settings
+  your file changes. The sheet opens on the section you last looked at, and its heading
+  is that section's.
+- **A change takes effect at once** and is written to `config.toml`, to that
+  setting's one line. The window behind the sheet stays in view, so you see a theme,
+  a font or a density change as you make it.
+- **A setting your file changes** has a bar at the left edge of its row and a `Reset`
+  button. Reset takes the line out of the file. **Changed** lists all of them.
+- **Type to find a setting** in any section, by its name or what it does. Each row
+  found says which section it's from.
+- A file edited by hand while the sheet is open shows on the sheet as it's saved.
+- Mistakes in the file are listed at the top of the sheet. The settings that could be
+  read still work.
+- The file's path is at the foot. Click it to open the file.
+
+| Control | For | Change it |
+|---|---|---|
+| A switch | on or off | Click it, or Enter |
+| Words side by side | one of a few choices | Click one, or Enter for the next |
+| Ticks side by side | any of a few, such as what the sidebar lists | Click one to tick or untick it, or Enter to go through every combination |
+| `−` number `+` | text size, space between panes | Click `−` or `+`, or `Ctrl+Right` and `Ctrl+Left` |
+| A value with `›` | a theme, a font, a shell | Click, or Enter, for a list in place of the rows. Type to narrow it. Enter chooses, Esc goes back. |
+| Key caps | the leader | Click, or Enter, then press the key. It needs Ctrl, Alt or Cmd held. Esc cancels. |
+
+- A theme is shown on the whole window as you move through the list, before you choose
+  it. Esc puts back the one you had.
+- The font lists hold every font the system has. The shell list holds the shells in
+  `/etc/shells`.
+- **Agents** isn't settings of insensical's. It lists each agent it knows, and whether
+  the agent reports what it's doing: it does, it doesn't yet, its hooks have gone
+  stale (they name an `isc` that's no longer there), or the agent isn't on this
+  system. `Set up…` asks before adding hooks, as in [section 11](#11-agents).
+- **Keys** has the keymap and the leader. The keys themselves are tables in the file:
+  the sheet has buttons for the sheet of every key and for opening the file.
+
+| Key | Does |
+|---|---|
+| `Up`, `Down` | Move between rows |
+| `Enter` | Change the marked setting, or open its list |
+| `Ctrl+Right`, `Ctrl+Left` | Next or previous value; one more or one less |
+| `Ctrl+Backspace` | Reset the marked setting |
+| `Tab`, `Shift+Tab` | Next or previous section |
+| `Esc` | Close the sheet, or leave a list |
+
+A theme for each appearance of the desktop, `{ light = …, dark = … }`, shows as "By
+the desktop's appearance". Picking a theme from the list replaces the pair with that
+one theme; to have a pair again, write it in the file. The `[keys]` tables and a
+theme's own file aren't on the sheet.
 
 ### When a change applies
 
@@ -1612,13 +2062,30 @@ optionally cursor and selection. The UI's colours are derived from them, so any 
 theme styles the whole application. UI text is always shifted in lightness until it's
 readable.
 
+Eight themes come with insensical:
+
+| Name | Looks like | Has |
+|---|---|---|
+| `fjord` | Cool blue-grey, with a sea-green accent | dark |
+| `ember` | Warm brown, with an amber accent | dark |
+| `paper` | Warm off-white, with dark ink | light |
+| `tidepool` | Deep sea-green water, with coral | dark and light |
+| `heather` | A moor at dusk: plum, with a heather-pink accent | dark and light |
+| `lichen` | Moss on stone: olive green, with a lichen-yellow accent | dark and light |
+| `lantern` | An indigo night lit by amber; by day, ink on rice paper | dark and light |
+| `quartz` | Quiet grey with soft colours and a touch of rose | dark and light |
+
+A theme that has both follows the desktop: `theme = "lantern"` is dark when the desktop
+is dark and light when it's light, and changes as the desktop does. It can't be held to
+one side on a desktop of the other.
+
 A theme name is looked up in this order:
 
 | Name | Means |
 |---|---|
 | `ghostty` | The theme named in Ghostty's own configuration for the desktop's current appearance |
 | `ghostty:Name` | The Ghostty theme with that name |
-| anything else | `themes/NAME.toml` beside the settings file, then the built-in `fjord` and `ember` (dark) and `paper` (light) |
+| anything else | `themes/NAME.toml` beside the settings file, then the themes that come with insensical |
 
 - If `theme` isn't set, you get `fjord` when the desktop is dark and `paper` when it's
   light.
@@ -1631,7 +2098,45 @@ A theme name is looked up in this order:
 - When you save a theme file that's in use, it applies within a second.
 - **Only the theme comes from Ghostty.** Its font, font size, font style, padding,
   opacity, blur, cursor style and `command` aren't used.
-- The UI's colours always come from the terminal theme, and nothing is translucent.
+- The UI's colours always come from the terminal theme, except a program's tile, which
+  is in the program's own colours.
+
+### A neutral interface
+
+By default the window around the terminals is worked out from the theme, so a warm theme
+gives a warm sidebar. `interface-style = "neutral"` draws it in greys instead, as light
+or dark as the theme, and leaves the colour to the terminals.
+
+- The sidebar, tabs, headers, borders, sheets and their text become grey.
+- The theme's accent and the colours of the states stay, and so do the terminals.
+- Surfaces a theme file chose under `[interface]` aren't used; its `accent`, `running`,
+  `waiting`, `done` and `failed` are.
+
+### A see-through window
+
+`background-opacity` says how much of what's behind the window its background hides,
+from `0.2` to `1`. At `1`, the default, the window is solid. Below that your desktop
+shows through behind the text:
+
+```toml
+background-opacity = 0.85
+background-blur = true
+```
+
+- Only the background thins. Text, the cells a program gave a colour of its own, tiles,
+  borders, sheets and questions are as solid as ever.
+- The whole window thins alike: the sidebar and the panes are one sheet.
+- A floating pane and a zoomed pane stay solid, since they lie over other panes and
+  would otherwise show those through.
+- `background-blur = true` asks the desktop to blur what shows through. Whether it does
+  is up to the desktop. On Hyprland and other compositors that blur by their own rules,
+  it has no effect: turn blur on for the window there (in Hyprland, `decoration:blur`
+  applies to any window that isn't opaque).
+- On a desktop with no compositor there's nothing to show through, and the window is
+  drawn over black.
+- Both apply as you save, without reopening the window. In the settings sheet the
+  opacity steps by 0.05.
+- Text over a busy picture is harder to read. Nothing corrects for that.
 
 ### A theme file
 
@@ -1653,6 +2158,29 @@ palette = [               # the sixteen named colours: eight normal, then eight 
 
 Whether a theme is light or dark is worked out from its background, unless
 `appearance = "light"` or `"dark"` at the top of the file sets it explicitly.
+
+One file can hold a theme for both. Write each side under `dark` and `light` instead,
+and the desktop's appearance picks between them:
+
+```toml
+name = "Mine"
+
+[dark.terminal]
+foreground = "#d0d4dc"
+background = "#101216"
+palette = [ … ]
+
+[light.terminal]
+foreground = "#2b2a27"
+background = "#f6f3ec"
+palette = [ … ]
+
+[light.interface]         # optional, as [interface] is
+accent = "#1f7a78"
+```
+
+- A file has either `[terminal]`, or both `[dark.terminal]` and `[light.terminal]`.
+  One side alone is an error, and so is mixing the two forms.
 
 - A theme only needs `[terminal]` with `foreground`, `background` and `palette`. You
   can leave out `name`, `appearance`, `cursor`, `selection` and all of `[interface]`. A
@@ -1789,6 +2317,41 @@ pane=$(isc run -- claude -p "fix the failing test")
 isc wait "${pane#pane:}" --timeout 1800 && isc capture "${pane#pane:}" | tail -20
 ```
 
+**Waiting for what a pane prints.** `isc wait PANE --output TEXT [--timeout SECONDS]`
+succeeds when the pane's screen shows `TEXT`:
+
+```sh
+pane=$(isc run -- npm run dev)
+isc wait "${pane#pane:}" --output "ready in" --timeout 60 && xdg-open http://localhost:5173
+```
+
+- It looks at the screen as it is, so it succeeds at once if the text is already there,
+  and doesn't see text that has scrolled off.
+- The text is matched as written, with no patterns. It's found whatever colours it's
+  printed in.
+- It can't be combined with `--until`. It fails if the pane closes first, and exits
+  with 124 if the time runs out.
+
+### Any request, as JSON
+
+Everything the window does is a request to the daemon, and `isc api` sends one:
+
+```sh
+isc api '"State"'                                  # the whole state, as `isc ls --json` gives it
+isc api '{"Mute":{"pane":3,"on":true}}'
+isc api '{"Float":{"pane":3,"rect":{"x":0.5,"y":0.1,"w":0.45,"h":0.8}}}'
+echo '{"Zoom":{"tab":2,"on":true}}' | isc api
+```
+
+- The request is one JSON value: a name alone for a request that takes nothing, or an
+  object with the name as its key. The answer is printed as JSON: `"Done"`,
+  `{"Pane":7}`, `{"State":{…}}`, `{"Text":"…"}`.
+- `isc api '"?"'` fails and lists the name of every request. What each takes is as the
+  commands in this manual describe; `isc ls --json` shows the shapes of panes, tabs and
+  rectangles.
+- The requests can change between versions. The commands are the steadier way to
+  script; `isc api` is for what they don't cover.
+
 ### Events
 
 `isc events` prints what happens, one JSON object per line. Each has an `event` and
@@ -1825,9 +2388,10 @@ to it. Press `Ctrl+]` to leave.
 ### Other commands
 
 - `isc config` prints a default settings file. `isc completions SHELL` prints
-  completions for `bash`, `zsh`, `fish`, `elvish` or `powershell`. Neither touches the
-  daemon. `just install-local` and the packages install the completions for bash, zsh
-  and fish.
+  completions for `bash`, `zsh` or `fish`. Neither touches the
+  daemon. `just install-local`, `just install-mac` and the packages install the
+  completions for bash, zsh and fish. On a Mac they're also inside the application, in
+  `Contents/Resources/completions`. To put them somewhere yourself:
 
   ```sh
   isc completions fish > ~/.config/fish/completions/isc.fish
@@ -2051,7 +2615,6 @@ run any command or open the window, which starts a new one.
 |---|---|---|
 | A red message in the top bar | A setting couldn't be used; the message names the file and line | Fix the line; it applies within a second |
 | All settings seem ignored | One unreadable line voids the whole file | As above |
-| Icons are boxes or missing | The font isn't a Nerd Font | Set `font-family` to a Nerd Font |
 | Text smaller or larger than expected | `font-size` is in points | 12 points is 16 pixels on Linux |
 | Text thinner than in another terminal | There's no font weight setting | Nothing; the regular face is always used |
 | `theme = "ghostty"` is reported as an error | Ghostty isn't installed | Use a built-in theme or a theme file |
@@ -2064,10 +2627,11 @@ run any command or open the window, which starts a new one.
 | A different shell, prompt or completion style than in another terminal | Panes run `$SHELL`; the other terminal was set to run something else | Set `shell = "…"` |
 | Commands not found in panes that exist in other terminals | The daemon was started from a launcher with a short `PATH` | Set `PATH` in the shell's start-up files, or stop the daemon with `isc kill-server` and start it from a terminal |
 | A new variable in a shell profile is missing in panes | The daemon keeps the environment it was started with | The same |
-| Programs over `ssh` complain about an unknown terminal | The other machine has no `xterm-ghostty` description | Set `TERM` there, or install the description |
+| Programs over `ssh` complain about an unknown terminal | The other machine has no `xterm-ghostty` description | `infocmp -x xterm-ghostty \| ssh host tic -x -`, or `term = "xterm-256color"` in the settings |
 | A pane shows the generic terminal icon | It has printed nothing and been sent nothing, or its program isn't in the list | Nothing |
 | A pasted block waits at the foot of the pane | It has several lines and the program didn't ask for marked pastes | Press Enter to paste it, or Escape to drop it |
-| Accents typed as two keys, or an input method, do not work | Not supported | Nothing |
+| An input method does nothing | It's off by default | Set `input-method = true` |
+| On a Mac, Alt+B and Alt+F do nothing in a shell, or type `∫` and `ƒ` | Option types the keyboard layout's character | Set `option-as-alt = true` |
 | Search misses text that is on screen | The text wraps across two rows | Search for a part that's on one row |
 | A pane does not fit its window | Another window or `isc attach` resized it | Use one window; leave the attach |
 | `` Ctrl+` `` does not reach a program | That key brings up the scratch pane | Set the key to `none` in `[keys]` |
@@ -2076,7 +2640,7 @@ run any command or open the window, which starts a new one.
 
 | What is seen | Why | What to do |
 |---|---|---|
-| A pane never shows `done` | The command ran for under 30 seconds and reported nothing | Use `isc status` from a hook, or a program that reports progress |
+| A pane never shows `done` | The command ran for under 30 seconds and reported nothing | Lower `long-command`, use `isc status` from a hook, or a program that reports progress |
 | A failed command shows `done` | The shell doesn't mark its commands | Use fish 4, or the `isc shell-integration` line for bash or zsh |
 | A pane stuck in a state | A hook reported it and nothing has reported since | `isc status explain`, `isc status idle` |
 | A Gemini CLI pane stays `running` after a failed or cancelled turn | Gemini CLI has no event for either | The next prompt clears it; or run `isc status idle` |
@@ -2085,6 +2649,8 @@ run any command or open the window, which starts a new one.
 | The bell marks a pane but no notification arrives | The bell never notifies | Nothing |
 | A clicked notification selects the pane but the window stays behind | Wayland; see section 12 | Bring the window forward yourself |
 | Notifications have no application name or icon | The desktop entry isn't installed | Install |
+| The tray's icon is blank | insensical's icons aren't installed | Install |
+| There's no icon in the tray | The desktop has no tray for status notifier items, or `tray` is off | On GNOME, add the AppIndicator extension |
 | The leader does nothing | The desktop took `Ctrl+Space` | Pick another `leader` |
 
 ---
@@ -2094,8 +2660,8 @@ run any command or open the window, which starts a new one.
 ### Keys
 
 In the macOS column, the keys for tabs, splits, panes, zoom, float, the sheet of keys,
-a new project, the path picker and the lock have been pressed on a Mac. The rest are
-written and have never been run. "—" means there's no default key: the command is in the
+a new project, the path picker, the lock, the settings, the overview and quit have been
+pressed on a Mac. The rest are written and have never been run. "—" means there's no default key: the command is in the
 palette, and you can bind it in `[keys]`. The Command column is the name to use in
 `[keys]`. A capital letter after the leader means the letter with Shift, written
 `shift-h` in `[keys]`.
@@ -2128,17 +2694,23 @@ palette, and you can bind it in `[keys]`. The Command column is the name to use 
 | Restore the pane minimized last | `restore` | `Ctrl+Shift+R` | `⌘⇧M` | `r` |
 | Go to the pane that most needs you | `next-attention` | `Ctrl+Shift+A` | `⌘⇧A` | `a` |
 | Command palette | `palette` | `Ctrl+Shift+P` | `⌘⇧P` | `Space` |
+| Put this project to sleep, or wake it | `sleep-project` | none | none | none |
+| Name this pane | `name-pane` | none | none | none |
+| Name this tab | `name-tab` | none | none | none |
 | Show every key | `keys` | `Ctrl+Shift+/`; `Ctrl+F1` | `⌘?` | `?` |
+| Settings | `settings` | `Ctrl+,` | `⌘,` | `,` |
 | See every tab of every project | `overview` | `Ctrl+Shift+Space` | `⌘⇧O` | `w` |
 | Find a file and type its path | `pick-path` | `Ctrl+Shift+I` | `⌘⇧I` | `/` |
 | Restart insensical, to move to a new version | `restart` | `Ctrl+Alt+Shift+R` | `⌘⌃⇧R` | `U` |
-| Quit the window; what is running carries on | `quit` | — | `⌘Q` | — |
+| Quit the window; what is running carries on. On macOS with insensical in the menu bar, put its windows away and leave it there | `quit` | — | `⌘Q` | — |
 | Give the leader's key to the program | | | | the leader |
 | Take the leader back | | | | `Esc` |
 | Copy the selection | `copy` | `Ctrl+Shift+C` | `⌘C` | same chord |
 | Paste | `paste` | `Ctrl+Shift+V` | `⌘V` | same chord |
 | Paste what was last selected | `paste-selection` | `Shift+Insert`, middle button | — | same chord |
 | Find text in the pane | `search` | `Ctrl+Shift+F` | `⌘F` | same chord |
+| Scroll to the command before | `previous-prompt` | `Ctrl+Shift+Up` | `⌘↑` | same chord |
+| Scroll to the command after | `next-prompt` | `Ctrl+Shift+Down` | `⌘↓` | same chord |
 | Give every key to the program, or take them back | `lock` | `Ctrl+Alt+Shift+L` | `⌘⌃⇧L` | same chord |
 | Open a web address | | `Ctrl`+click | `⌘`+click | |
 
@@ -2167,10 +2739,15 @@ Settings go in `config.toml`. Every key is optional.
 
 | Key | Meaning | Default |
 |---|---|---|
-| `theme` | A theme name, or one for each appearance of the desktop: `{ light = "paper", dark = "fjord" }`. A name can be a built-in theme (`fjord`, `ember`, `paper`), a file in `themes`, `ghostty`, or `ghostty:Name`. | `fjord` when the desktop is dark, `paper` when it's light |
-| `font-family` | The font for terminals. The interface's icons come from it, so it needs to be a Nerd Font. | `JetBrainsMono Nerd Font` |
+| `theme` | A theme name, or one for each appearance of the desktop: `{ light = "paper", dark = "fjord" }`. A name can be a theme that comes with insensical (see [Themes](#themes)), a file in `themes`, `ghostty`, or `ghostty:Name`. | `fjord` when the desktop is dark, `paper` when it's light |
+| `font-family` | The font for terminals. It doesn't have to be a Nerd Font: icons it lacks come from the icon font that's part of insensical. | `JetBrainsMono Nerd Font` |
 | `interface-font` | The font for the interface around the terminals: tabs, sidebar, headers, panels | the font the system uses for its own interface |
-| `font-size` | Terminal text size in points, 6 to 72. A point is 1⅓ pixels on Linux and one pixel on macOS. Interface text doesn't follow it. | `12` |
+| `interface-style` | `themed`: the window is in the theme's colours. `neutral`: it's in greys around the terminals, with the theme's accent and state colours. | `themed` |
+| `background-opacity` | How much of what's behind the window its background hides, 0.2 to 1. Below 1 the desktop shows through behind the text. | `1` |
+| `background-blur` | Whether the desktop is asked to blur what shows through. Not every desktop does. | `false` |
+| `motion` | Whether sheets, notices and moved panes fade in, the working mark turns and cursors blink. `system` follows the desktop, `on` and `off` say it outright. | `system` |
+| `font-ligatures` | Whether symbols side by side are drawn as the font's ligature for them, such as `->` and `!=` | `true` |
+| `font-size` | Terminal text size in points, 6 to 72. A point is 1⅓ pixels on Linux and one pixel on macOS. Interface text doesn't follow it. | `12`; on macOS `13` |
 | `density` | `comfortable`: each pane is a rounded card with space around it. `compact`: panes sit edge to edge with a hairline between them. | `comfortable` |
 | `pane-gap` | Space between panes in pixels, 0 to 40 | `6`, or `0` when `density` is `compact` |
 | `sidebar` | The levels listed under a project's name: `["tabs", "panes"]`, `["tabs"]`, `["panes"]`, or `[]` for names only | `["tabs", "panes"]` |
@@ -2179,8 +2756,23 @@ Settings go in `config.toml`. Every key is optional.
 | `keymap` | `direct`: each command has its own chord. `leader`: each command is a key you press after the leader, which leaves the chords to the programs in the panes. | `direct` |
 | `leader` | The key you press before a command's key when `keymap` is `leader` | `ctrl-space` |
 | `shell` | What a pane runs when you give it no command, with any arguments: `"fish"`, `"/bin/zsh -l"`. The daemon reads it when a pane starts. | the login shell, `$SHELL` |
+| `input-method` | Whether your system's input method may compose text in a pane, as for Bangla, Chinese or Japanese. What it's composing shows at the cursor; the program gets the finished text. | `false` |
+| `option-as-alt` | On a Mac, whether Option with a key is Alt to the program in the pane, as a shell's Alt+B and Alt+F are, and no longer types the character the keyboard layout gives it. It does nothing elsewhere. | `false` |
+| `open-files-with` | What a file you `Ctrl`+click in a terminal opens in: `system`, an editor by name (`code`, `cursor`, `zed`, `subl`, `idea`, `nvim`, `vim`, `hx`, `nano`), or a command with `{file}` in it. See [Web addresses and paths](#web-addresses-and-paths). | `system` |
+| `term` | What a pane's program is told the terminal is, in `TERM`. `xterm-ghostty` gives programs every feature. `xterm-256color` is known on every machine, which matters over `ssh`, and has fewer. Read by the daemon when a pane starts. | `xterm-ghostty` |
+| `scrollback` | How much history each pane keeps, in megabytes, 1 to 200. Read by the daemon when a pane starts. | `10` |
 | `keep-scrollback` | Whether what panes show is saved to disk when the daemon stops, so it's there above a new shell the next time the daemon starts. Read by the daemon. With `false`, nothing is saved, and anything saved earlier is removed as panes close. | `true` |
 | `clipboard` | Whether a program can put text on the clipboard. `focused`: only the program in the pane you're looking at. `never`: no program. No program can ever read what's on the clipboard. Read by the daemon. | `focused` |
+| `notifications` | Whether you're told when a pane has something for you. Read by the daemon. | `true` |
+| `attention-glow` | Whether a waiting pane takes the waiting colour at its edge and casts a soft light of it into the gaps around it. | `true` |
+| `notify-waiting` | Whether you're told when a pane waits for you, or a program asks for you. Read by the daemon. | `true` |
+| `notify-failed` | Whether you're told when a command or an agent ends badly. Read by the daemon. | `true` |
+| `notify-done` | Whether you're told when a long command or an agent's turn ends well. Read by the daemon. | `true` |
+| `long-command` | How many seconds a command runs before its end is news: the pane is marked done or failed, and you're told if you weren't looking. 1 to 3600. Read by the daemon. | `30` |
+| `sound` | Which notifications make a sound. `needs-you`: a pane that waits or failed. `all`: those, and a softer sound for a finish. `off`: none. | `needs-you` |
+| `tray` | On Linux, whether insensical has an icon in your desktop's tray, marked while a pane needs you, with a menu of those panes. Read by the daemon. It does nothing on a Mac. | `true` |
+| `menu-bar` | On a Mac, whether insensical has an item in the menu bar that counts and lists the panes that need you. It does nothing elsewhere. | `true` |
+| `dock-badge` | On a Mac, whether the number of panes that need you is on insensical's Dock icon. It does nothing elsewhere. | `true` |
 | `[keys]` | Keys and the command each one runs, or `none`, in either keymap | empty |
 | `[keys.direct]` | The whole direct keymap, written out. When present, it replaces the defaults. | the keys in the table above |
 | `[keys.leader]` | The whole leader keymap, written out. Each key is the one you press after the leader. When present, it replaces the defaults. | the keys in the table above |
@@ -2240,9 +2832,18 @@ the keyboard. Every command accepts `--socket PATH`.
 | `isc integrate [claude\|codex\|gemini\|opencode\|pi] [--remove] [--yes]` | Adds an agent's hooks, after showing you the change and asking. With no agent named, it offers each agent found on this system. `--remove` takes the hooks out. `--yes` skips the question. |
 | `isc integrate [AGENT] --status` | Changes nothing. Prints, as JSON, for each agent: whether it's found, whether it already reports, the file its hooks go in, and what's left for you to do afterwards. |
 | `isc wait PANE [--until STATE]… [--timeout SECONDS]` | Blocks until the pane reaches a state: `idle`, `running`, `waiting`, `done`, `failed` or `closed`. Without `--until`, the states are `done`, `failed`, `waiting` or `closed`. Prints the state reached. The exit status is 124 when the time runs out. |
+| `isc wait PANE --output TEXT [--timeout SECONDS]` | Blocks until the pane's screen shows the text. Exits with 124 if the time runs out. |
 | `isc events` | Prints what happens, one JSON object per line, until interrupted |
+| `isc api [REQUEST]` | Sends the daemon one request as JSON, from the argument or standard input, and prints the answer as JSON |
+| `isc project sleep NAME` | Ends every program in the project and keeps its tabs, panes and what they showed. Doesn't ask. |
+| `isc project wake NAME` | Puts a shell in each pane of a sleeping project, in the pane's directory |
+| `isc project mute NAME [--off]` | Stops every pane of the project from sending notifications, including panes opened in it later. `--off` lets them again. |
+| `isc usage [--json]` | Prints what the programs in each pane are using: memory, processor time and how many processes, with a total for each project |
 | `isc config` | Prints a settings file with every setting at its default and every key of both keymaps |
-| `isc completions bash\|zsh\|fish\|elvish\|powershell` | Prints what that shell needs to complete `isc` commands, including the panes, tabs and projects that exist |
+| `isc config get NAME` | Prints what a setting is: what the file gives it, or its default |
+| `isc config set NAME VALUE` | Gives a setting a value in the settings file, changing only that line |
+| `isc config reset NAME` | Takes a setting out of the settings file, which leaves its default |
+| `isc completions bash\|zsh\|fish` | Prints what that shell needs to complete `isc` commands, including the panes, tabs and projects that exist |
 | `isc shell-integration bash\|zsh\|fish` | Prints what that shell needs to tell its pane where each command starts and ends, and its exit status. fish 4 and later doesn't need it. |
 | `isc daemon` | Runs the daemon in the foreground |
 | `isc kill-server` | Stops the daemon and every program it runs, and returns once the daemon is gone. The layout comes back the next time it starts. It also works on a daemon of another version. |
@@ -2251,7 +2852,9 @@ the keyboard. Every command accepts `--socket PATH`.
 
 ### Files and directories
 
-The macOS column is written and has never been run.
+On a Mac, the settings, the saved layout, the window's size, the terminal's description
+and the socket have been found where the macOS column says. The other rows are
+written and have never been run.
 
 | What | Linux | macOS |
 |---|---|---|
@@ -2260,6 +2863,9 @@ The macOS column is written and has never been run.
 | Saved layout | `~/.local/state/insensical/state.json` (`$XDG_STATE_HOME`) | `~/Library/Application Support/insensical/state.json` |
 | What each pane showed when the daemon stopped | `~/.local/state/insensical/screens/<pane number>` | `~/Library/Application Support/insensical/screens/<pane number>` |
 | Agents declined | `~/.local/state/insensical/agents-declined` | `~/Library/Application Support/insensical/agents-declined` |
+| The window's size, and whether its tabs were hidden | `~/.local/state/insensical/window` | `~/Library/Application Support/insensical/window` |
+| What was chosen lately in the palette | `~/.local/state/insensical/palette-recent` | `~/Library/Application Support/insensical/palette-recent` |
+| The terminal's description, when the daemon had to compile its own | `~/.local/state/insensical/terminfo/` | `~/Library/Application Support/insensical/terminfo/` |
 | Socket | `$XDG_RUNTIME_DIR/insensical/daemon.sock` | `$TMPDIR/insensical/daemon.sock` |
 
 `INSENSICAL_CONFIG_DIR` replaces the settings directory. `INSENSICAL_STATE_DIR` replaces
@@ -2285,14 +2891,15 @@ to. It writes nothing else outside the directories above:
 | `INSENSICAL_PANE` | `isc` | Set inside every pane to its number, so commands run there know which pane they're in. |
 | `INSENSICAL_STATE_DIR` | daemon, window | Where the layout, what panes showed and the declined agents are kept. |
 | `INSENSICAL_CONFIG_DIR` | window, daemon | Where settings and themes are read from. |
-| `INSENSICAL_NOTIFICATIONS` | daemon | `clients` makes the daemon leave desktop notifications to its windows. |
+| `INSENSICAL_NOTIFICATIONS` | daemon | `clients` makes the daemon leave desktop notifications to its windows, and put no icon in the tray. |
 | `INSENSICAL_ISC` | window, `isc` | The `isc` binary to start the daemon from. When set, it's used before the `isc` beside the program and the one on `PATH`. |
 | `SHELL` | daemon | What a pane runs when there's no command and no `shell` setting. `/bin/sh` if unset. |
 | `TERMINFO`, `HOME` | daemon | Searched for Ghostty's terminal description. |
+| `TERMINFO_DIRS` | daemon | Kept, after the daemon's own directory, when it points a pane at the description it compiled. |
 | `XDG_CONFIG_HOME` | window, daemon, `isc` | Where the settings directory is, instead of `~/.config`. Ghostty's and opencode's directories are also looked for here. |
 | `XDG_STATE_HOME` | daemon, window | Where the state directory is, instead of `~/.local/state`. Linux only. |
 | `XDG_RUNTIME_DIR` | everything | Where the socket's directory is, on Linux. |
-| `TMPDIR` | everything | Where the socket's directory is, on macOS (written, never run). |
+| `TMPDIR` | everything | Where the socket's directory is, on macOS. |
 | `PATH` | daemon, window, `isc` | Every pane inherits the daemon's. The window's is searched for `isc` and for the program that `shell` names. `isc integrate` searches its own for agents. |
 | `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `GEMINI_CLI_HOME`, `PI_CODING_AGENT_DIR` | `isc integrate` | Where each agent keeps its settings, instead of its default directory. |
 | `GHOSTTY_SOURCE_DIR` | the build | A local Ghostty checkout to build from, instead of downloading. |

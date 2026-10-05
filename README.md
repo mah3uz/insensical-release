@@ -32,8 +32,7 @@ directory on your `PATH`. The desktop entry, the icon, a user unit and completio
 **macOS 13 and later, on Apple silicon**, with Homebrew:
 
 ```sh
-brew tap mah3uz/insensical https://github.com/mah3uz/insensical-release
-brew install --cask insensical
+brew install --cask mah3uz/tap/insensical
 ```
 
 or open `insensical-*-aarch64-apple-darwin.dmg` and drag the application to
