@@ -5,6 +5,379 @@ its release notes.
 
 ## Unreleased
 
+## 0.3.0 - 2026-10-10 23:20 +06:00
+
+### Upgrading from 0.2.0
+
+This version's window and server speak a newer protocol than 0.2.0's. After installing
+it, restart the server from the window, or with `isc restart-server`. What runs in your
+panes carries on.
+
+**On a Mac, restart the server from the window, or quit insensical before you restart
+it from a terminal.** 0.2.0 stays in the menu bar when its window is closed. If you
+then run `isc restart-server` in another terminal and open a window again, that
+window is still 0.2.0's and asks to restart the server. Don't: it would stop the
+server and everything in your panes, and hang for some seconds each time, without
+ever opening. Quit insensical from the menu bar's item, or with `⌥⌘Q`, and open it
+again. From this version on, such a window opens the new application and leaves the
+server alone.
+
+If you use opencode or pi, run `isc integrate` again. Their scripts are new: the ones
+you have lose a message that begins with a hyphen, as a list does, and offer a session
+named like an option as part of the command that resumes it.
+
+Some things you're used to behave differently:
+
+- **A path a program printed is underlined only while you hold `Ctrl`** (`⌘` on a Mac).
+  That's when it's looked for on the disk. A web address is still underlined under
+  the pointer.
+- **`Ctrl`+click on a path opens fewer files.** With `open-files-with` left at
+  `system`, a file opens only if opening just shows it: text, source, a picture or a
+  PDF, which can't be run, begins as its name says, and can't be replaced by someone
+  else. Everything else is shown in your file manager: a directory, a `.csv` or
+  `.tsv`, a Markdown file that begins with HTML, a file under a shared directory such
+  as `/tmp`. The note beside the pointer says which the click will do. With an editor
+  chosen in `open-files-with`, any file still opens in it.
+- **A pane made narrower rewraps its lines even when a program has switched line
+  wrapping off.** A full-screen program's screen is still cut at the new edge, and the
+  program draws it again.
+- **In a pane started with a command**, such as `isc run -- claude` or
+  `isc run -- bash`, what an agent reported stands until its next report or until the
+  program ends. A command that ends inside it no longer clears it.
+- **A command offered at a prompt after a restart is quoted another way.**
+  `--flag=value` comes back as `'--flag=value'`, which bash, zsh and fish read alike.
+- **`isc capture --vt` prints text, colours and styles only.** It printed the pane's
+  palette, title, links and modes too, which changed the terminal you read it in.
+- **`isc`, with nothing after it, opens the interface in a terminal** when a person
+  runs it at one. In a script, in a pipe and inside one of insensical's own panes it
+  lists the commands.
+- **What the server refuses is said.** Ask for a new tab in a project that's asleep,
+  say, and a notice headed "It could not be done" gives the server's own words. The
+  window said nothing.
+
+### Added
+
+- **The whole interface in a terminal.** `isc`, with nothing after it, runs insensical
+  in the terminal you run it in, as a terminal program: your projects down the side,
+  tabs along the top, each pane in a box, a line at the foot that says what your keys
+  are doing, and the palette, the overview, the settings sheet, the sheet of keys and
+  every question. It's for a machine with no desktop and for one you reach with
+  `ssh host -t isc`. It's one more client of the same server, so what you do in it
+  shows in a window at once. Commands follow `Ctrl+Space`, whose list of keys stays for
+  as long as you read it, and `Ctrl+Space` then `D` leaves with everything still
+  running. It uses your theme and your keys, and a `[tui]` table in the settings says
+  what a terminal should do differently: `theme = "terminal"` there gives it your
+  terminal's own colours. Copying goes to your own terminal's clipboard, where the
+  terminal takes one from a program (Terminal on a Mac doesn't), and on a
+  machine with no desktop notifications reach your terminal too. It needs a Nerd Font
+  for its icons. Pictures aren't shown in it, and paths aren't opened from it.
+- **`isc` by itself, for a machine with no desktop.** Each release has
+  `isc-x86_64-linux`: one file that needs nothing installed and runs on any Linux
+  distribution. It's the daemon, the command line and the interface in a terminal.
+- **Renaming and closing a project, and sizing the panes for this window, are
+  commands.** "Rename this project", "Close this project and everything in it" and
+  "Size the panes for this window, over any other that shows them" are in the palette
+  and on the sheet of keys, in the window and in a terminal. They're `rename-project`,
+  `close-project` and `lead` in `[keys]`, and have no default key. Before, the window
+  had them only as buttons on a project's row and on a pane's "Sized elsewhere" mark.
+- **Pictures in the terminal.** A program can show a picture in a pane by the Kitty
+  graphics protocol, as `kitty +kitten icat`, `chafa`, `timg` and `viu` do. It scrolls
+  with the text, is drawn at the size the program asked, and is still there when you
+  come back to the tab. Sixel isn't supported, and pictures don't survive the daemon
+  stopping or moving to a new version.
+- **Drag a pane anywhere.** A pane dragged by its header could only swap places with
+  another. Now, let go near a side of another pane and it takes that half, so two panes
+  side by side can become one above the other. Let go at the tab's edge and it becomes
+  a column or row beside everything; let go on a tab and it moves to that tab. The panes
+  glide into the arrangement you'd get while you hold it, the carried pane says what
+  letting go would do, and Escape puts it back. `isc put` does the same from the command
+  line.
+- **An icon for each project.** A project has a tile beside its name in the sidebar, the
+  top bar and the overview: the first letter of its name on a colour of its own, until
+  you choose. Pressing the tile on a project's sidebar row picks a colour and a mark, or
+  takes a square SVG of yours, unless it shows a picture from another file.
+  `isc project icon` does the same.
+- **Two windows on one pane.** A pane is the size that fits the window you used last,
+  or `isc attach` if that was last. The other window shows it at that size with a
+  "Sized elsewhere" mark in its header, and you can move over what doesn't fit with
+  Shift or Alt and the wheel. Before, each window resized the pane for the other.
+- **Dragging in the sidebar.** A project's row dragged onto another puts the projects in
+  order, and a tab's row dragged onto another tab of its project puts the tabs in order,
+  as dragging a tab along the top already did. `isc project move NAME INDEX` does the
+  first from the command line.
+- **A tab by its number.** `Alt+1` to `Alt+9` go to the project's first to ninth tab
+  (`⌘1` to `⌘9` on a Mac, `1` to `9` after the leader). They're the commands `tab-1` to
+  `tab-9`. A program in a pane no longer gets those chords: set one to `none` in `[keys]`
+  to give it back.
+- **Icons for your own programs.** An `[icons]` table in the settings file gives a
+  program a tile: `gitu = "git"`, or `deploy = { mark = "docker", colour = "#ff8800" }`.
+  It applies as you save.
+- **Tab goes into a directory in the file finder.** With a directory marked, Tab lists
+  only what's in it. Shift+Tab, or Backspace with nothing typed, comes back out.
+
+### Changed
+
+- On the settings sheet, the seconds a command runs before it counts as long step by
+  five, since by ones there are thousands of presses between its ends.
+- A wrong value for a theme, a key or an icon in the settings file is said in plain
+  words.
+- A tab's deck of program tiles is spread wider, and each card has a pale edge and a
+  shadow, so the cards behind the front one can be told apart on a dark sidebar.
+- A window uses less memory for a pane with a long history: its own copy of the history
+  is packed away once the pane has been quiet for two seconds, as the daemon's already
+  was. One pane with its 10 MB of history took 17 MB of the window's memory and now
+  takes 9 MB.
+
+### Fixed
+
+#### The terminal's screen and scrollback
+
+- A pane could go blank, or drop out of the window, after you made it narrower, and
+  stay that way. It happened when a full-screen program in it, or one that had run in
+  it earlier, had drawn a wide character (an emoji, or Chinese, Japanese or Korean
+  text) where the pane's new edge fell. The pane now shows as it should.
+- A very large pane (300 columns by 160 rows, say) with a full-screen program that
+  scrolls in it, a pager for one, could go blank while the window asked for it over
+  and over. The window is now sent the pane drawn afresh. Until the program clears its
+  screen or ends, a window that opens on the pane gets it without its links and without
+  the shell's screen and history behind the program.
+- A pane with a history longer than 8 MB whose program kept printing could never be
+  shown over a slow connection: the window attached, was cut loose, and attached
+  again, without end.
+- A pane the window couldn't open stayed blank for good. It now says "Not shown yet"
+  and is tried again by itself.
+- After a restart, a pane's new shell could inherit what the old program had switched
+  on: mouse reporting typed at the prompt, another way of reading keys, line-drawing
+  characters, margins. What's kept of a screen is now only what it showed.
+- Search missed a word that the terminal's width had broken across two rows. It's now
+  found, and selected across the break.
+- The two half-round Powerline characters are drawn as shapes like the triangles are,
+  so a rounded badge a program prints fills its cell at any size.
+
+#### Links and files
+
+- `Ctrl`+click on a path a program printed could start something: a directory that is a
+  Mac application, a `.jar`, a web page, a `.DESKTOP` file, a web page named `notes.md`
+  on a desktop that chooses what opens a file by what's in it. A click now opens a
+  file only where opening just shows it, and shows the rest in your file manager. On
+  Linux your desktop is asked what kind of file it is as you click, and a file changed
+  or swapped between the note and the click is shown, not opened.
+- `Ctrl`+click follows only what the note said. If a program changed where its words
+  lead as you clicked, or while the note was away, nothing opens and the note says
+  where they lead now. A program isn't told that the pointer is on its link while you
+  hold `Ctrl`.
+- The note that says where a web address leads could be made to show another site: it
+  was cut at its end, and kept invisible and direction-changing characters. It now names
+  the machine first, and an address with such characters isn't a link. Nor is one with
+  nothing where the machine's name belongs, such as `https:///name@host/`, which a
+  browser reads the next name out of. A name with letters outside ASCII is shown as
+  the network is asked for it (`xn--…`).
+- A `file://` link that names another machine opened the file of the same path on yours.
+  It's now ignored.
+- An address or a path that the terminal's width broke onto the next row was followed
+  only to the end of its row, which opened half of it. It's now read whole from either
+  row, and both parts are underlined.
+- Moving the pointer over a path a program printed looked it up on the disk each time
+  the pane was drawn, which could freeze the window on a dead network mount. A path is
+  now looked up once, and not on a file system known to be a network or automounted
+  one, or kept by a program through FUSE.
+- Opening the file finder in a repository could run a program the repository names:
+  one in its own Git settings, or the one that fetches a part of it kept elsewhere.
+  Neither runs now. Git is given three seconds to say what's ignored; after that the
+  files are listed without it.
+- A file chosen in the finder is typed so that fish reads it as bash and zsh do, and a
+  name that begins with a dash is typed as `./-name`. A name that holds a line end,
+  another control character, or an invisible or direction-changing one isn't listed.
+
+#### Pasting and the clipboard
+
+- The question about a held paste didn't show what would be pasted, counted lines ending
+  in a carriage return as one, and gave the wrong reason for text holding the
+  end-of-paste mark. It now shows the text line by line, with hidden characters made
+  visible, and says why it waits.
+- A path typed by the file finder, and text an input method gives in one piece with a
+  line end in it, skipped the checks a paste gets. They're now checked the same way.
+- A program could fill your clipboard from a window that was on another workspace or
+  had closed, since the window said it had left the front only when it was next drawn.
+  It now says so as it leaves, and a closed window is gone from the server at once:
+  its pane could stay that window's size, and count as looked at, until the server
+  next had something to send.
+- The window takes text for the clipboard only from the pane it said you're looking
+  at, and no more than a megabyte, whatever the server sends. Control characters are
+  left out of it, so a terminal you paste into has nothing in it to obey, and at most
+  three texts are put there at once and one a second after that.
+
+#### Notifications and status
+
+- A command could print the marks that say a command ended and so clear an agent's
+  `waiting`, or a wait for a password, and take down its notification. Marks count now
+  only when the pane's own shell had the terminal, and progress reports and
+  notifications from a command still running end neither.
+- A "paused" progress report, which a `cat` of a file can print, left its pane
+  `waiting` for good. It now ends with the command, or when you look at the pane.
+- A file shown with `cat` that held a shell-integration mark no longer stops a pane
+  from telling you when long commands end, in a shell that marks none of its own.
+- A report dated in the future silenced every later report from its pane, so an
+  agent's request for permission never showed. A date is now held to the daemon's
+  clock, and putting the clock back no longer drops reports either.
+- `isc restart-server` forgot what each pane's state rested on: afterwards a program's
+  output could clear an agent's `waiting`, and a bell's mark stayed however often you
+  looked.
+- A pane opened after a restart could be given the number of a pane closed before it,
+  and a hook or program left running from the closed pane then reported on the new one.
+  The highest number given is now kept with the saved layout, and numbering goes on
+  from it.
+- A notification on the desktop could carry a link or a picture from a program's
+  text, in its title or under it, where the desktop reads markup. The text is now
+  shown as text, also when the notification service hadn't answered as insensical
+  started, or was started or replaced since.
+- A server could have the application start a sound for every notification, and put
+  any number of them on your desktop. The application now puts at most five there at
+  once and two a second after that, and starts no sound within 300 ms of the last.
+  What's held back is told when there's room, the last from each pane.
+- A clicked notification, or a pane picked in the tray, left a window on another
+  workspace where it was: the window acted on it only when it was next drawn, and a
+  window out of sight isn't drawn. It now asks to come forward at once.
+- Clicking a notification with no window open selected the pane and showed nothing. A
+  window now opens on the pane, as from the tray.
+- Picking from the tray just after a window opened could open a second window.
+- **Quit insensical…** chosen from the tray with no window open, where no window then
+  came, put its question to the next window you opened, however much later. The
+  question is dropped after ten seconds.
+- Some invisible and direction-changing characters, and others drawn as nothing or as
+  a blank, got through in titles, notes, names and notifications, where they made two
+  names look the same. The daemon, `isc` and links now go by one list of them. A
+  program's own name, and a project named after its directory, are made plain the
+  same way: they were taken as they came, control characters included.
+
+#### The server and saved state
+
+- A window from before an update, meeting a server that had already moved to the new
+  version, offered to restart the server. Doing so stopped the server and everything
+  in its panes, started the same server again, and held the window for five seconds,
+  as often as it was pressed. It happened on a Mac, where the application stays in the
+  menu bar with no window while the server is moved from a terminal. Such a window now
+  says that it's the one from before, leaves the server alone, and opens the installed
+  application in its place.
+- A server you reach on another machine could stop your window, write over its memory
+  or fill it: with a screen that claimed more room than it had, a layout nested
+  without end, a terminal of a size none has, a floating pane wider than its tab, or
+  output without end. What a server sends is now checked before it's used.
+- The window and `isc` connect only to a socket in a directory that's yours and closed
+  to others, answered by a program of yours, and say what's wrong when it isn't. A
+  variable such as `XDG_CONFIG_HOME` or `XDG_RUNTIME_DIR` set to nothing no longer has
+  the settings or the socket looked for in the directory you happen to be in.
+- The saved layout and its directory could be read by other users of the machine. They,
+  the window's own state files and everything else the daemon keeps are now yours
+  alone to read, and a directory left open by an earlier version is closed when the
+  daemon starts. Changing a setting keeps `config.toml` as private as you made it.
+- A saved layout that can't be read is set aside as `state.json.unreadable`, where it
+  was written over at the next save. One that holds a number too large ever to have
+  been given counts as unreadable: it could make two panes share a number.
+- A tab can no longer be split so deep that the layout couldn't be read back after a
+  restart, and a pane started with a command or a directory of megabytes, which left
+  the layout too large to send for good, is refused: 256 KB of them together is the
+  most.
+- A command offered at a prompt after a restart was quoted for bash and zsh, and fish
+  could read a word holding `\'` as further commands, run by your Enter. Each word is
+  now typed in the one form all three read alike. A saved offer that holds a line end
+  isn't typed at all.
+- A program that changed its title, rang its bell or reported progress without pause
+  could slow every window and fill the daemon's memory, most of all with a window or
+  `isc events` that had stopped reading. The daemon now takes such changes at a pace
+  of its own and always ends with the last, and keeps one layout waiting for a client
+  rather than every one.
+- A client that stopped reading could fill the server's memory: with what it was sent
+  unasked, with the answers to requests it went on making, or with the histories of
+  many panes it attached to. Its connection is now closed once 8 MB of the first or
+  of the second waits, and the histories that wait for one client are 256 MiB and one
+  pane's at most.
+- A program that asked the terminal questions and never read the answers could hold
+  back what you typed, Ctrl-C included, and fill the daemon's memory. What you type now
+  goes first, and unread answers are limited.
+- The daemon, and everything running in it, ended when it ran out of file descriptors
+  as a client connected. The connection now waits.
+- A pane sized far beyond any screen, by a client, could end the daemon.
+- A pane left open after its program ended stayed as it was when its project was put to
+  sleep, and had no shell when the project woke. It now sleeps and wakes like any pane.
+
+#### `isc` and agents
+
+- A directory whose name holds escape sequences could act on your terminal when `isc ls`,
+  `isc usage`, `isc restart-server` or a shell's completions printed it: write to the
+  clipboard, or rewrite the lines above a question. Such characters are now printed the
+  way `\u{1b}` is here, and `isc ls --json`, `isc api` and `isc events` write them as
+  JSON's escape for them, which reads back as the same text.
+- Completing `--project` in bash put a project's name on the command line as shell
+  words, so a project called `$(id)` was run. A name that isn't one plain word is now
+  offered by its number.
+- A number given for a project could pick a project whose name was that number instead
+  of the project with that number. A number is now always the project's own.
+- With `COMPLETE` set in the environment for some other reason, every `isc` command,
+  hooks included, answered as a shell completion and did nothing. Completions now ask
+  through `ISC_COMPLETE`; the ones you have installed go on working.
+- `isc ls` said nothing of a project being asleep. Its line now ends in `asleep`.
+- `isc wait --timeout inf` crashed. It's now refused, with why.
+- An agent's last message that began with a hyphen, as a list does, was read as an
+  option, and the pane never said the agent had finished, failed or asked. This affected
+  opencode and pi, and `isc status -m` and `isc notify` called by hand.
+- A session named like an option, such as `--dangerously-skip-permissions`, became
+  part of the resume command offered at a prompt. Such a name is no longer offered.
+- A hook told more than a megabyte, such as everything a tool printed, reported nothing.
+- `isc integrate` wrote the path of `isc` into an agent's hooks unquoted, so a path with a
+  space left the agent silent and one with `$(...)` in it was run at every event. It
+  also took any hook ending in `hook claude` for its own, and rewrote or removed it.
+- `isc integrate` could leave an agent's settings half-written, saved its copy of them
+  readable by others when the settings weren't, would write through a link left at
+  the copy's name, and wrote over a change the agent made to its settings while you
+  were being asked. The settings are now replaced in one step with their permissions,
+  and read again after your yes: if they changed, it stops.
+- `isc integrate` took `CLAUDE_CONFIG_DIR=conf`, or another agent's variable holding
+  part of a path, as a place in the directory you were in. Only a whole path counts
+  now. A settings file of more than 16 MB isn't read, an opencode or pi script it
+  can't read is left alone where it was written over, and a settings file or a script
+  that is a pipe no longer keeps it waiting for ever.
+- `just install-local` wrote a broken desktop entry when `PREFIX` held a space.
+
+#### The window and the settings
+
+- A new window opened with every project and tab unfolded in the sidebar, whatever you'd
+  folded away. What you fold is now kept, and the next window opens as you left it.
+- A directory too long for its place lost its end, the part that says where you are. In
+  a pane's header, in the question before a tab or project closes, and where the
+  settings name their file, it now loses its start instead.
+- With `HOME` set to a path ending in `/`, the window wrote no directory from `~`, and
+  with `HOME` set to nothing it wrote every directory from it.
+- On a Mac, a pane kept its shell's name while `sudo` waited in it, since `sudo` runs as
+  root. It's now named for what runs in it.
+- Three notices at once took half the sidebar in a small window. They now take a third
+  of the window's height at most, with a line that counts the rest.
+- In a short window, the palette ran off the bottom, with its foot and its count of what
+  is below out of sight. It now lists as many rows as fit.
+- The sign beside a question sat halfway down a long explanation. It now sits at the
+  top, beside the question.
+- The question for a new project said "Tab: into the marked one" with nothing listed
+  to mark.
+- The file finder said a deep directory from its start and cut its end. It now says the
+  last names that fit: `In …/payments-service/migrations/2026`.
+- In a small window, the sheet of keys squeezed its heading into a column one word
+  wide beside the field. The field now goes under the heading there, and the line at
+  the sheet's foot wraps instead of being cut.
+- The list of what follows the leader cut long command names short. They now wrap, as
+  they do in the sheet of keys.
+- The sheet of keys and a long section of the settings cut their last row at the edge
+  with nothing to say there was more. They now fade there until you reach the end.
+- In the settings, a long explanation was cut short with "…" where the window was
+  narrow. It now runs onto a second line.
+- The settings showed the terminal types as "Xterm ghostty" and "Xterm 256color". They're
+  now written as they go in the file: `xterm-ghostty`, `xterm-256color`.
+- The settings listed themes as they're written in the file, `ember`. They're now
+  listed by name, `Ember`.
+- The settings offered every font on the system for the terminal, proportional ones
+  too. The list now has only fonts whose letters are all one width.
+- A theme name such as `../../x` no longer reads a file outside the themes directory.
+- `long-command = nan` in the settings closed panes as their commands ended.
+
 ## 0.2.0 - 2026-10-06 03:16 +06:00
 
 ### Upgrading from 0.1.0
