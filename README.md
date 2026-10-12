@@ -29,9 +29,11 @@ sudo apt install ./insensical_*_amd64.deb
 `insensical-*-x86_64-unknown-linux-gnu.tar.gz` and put `insensical` and `isc` in the same
 directory on your `PATH`. The desktop entry, the icon, a user unit and completions for bash, zsh and fish are beside them.
 
-**A Linux machine with no desktop**, on x86-64: `isc-x86_64-linux` is `isc` by itself,
-which is the daemon, the command line and the interface in a terminal. It is one file
-that needs nothing installed, on any distribution:
+**Without the window, on any Linux**, on x86-64 or arm64: `isc-x86_64-linux` is `isc` by
+itself, which is the daemon, the command line and the interface in a terminal. It is one
+file that needs nothing installed, on any distribution, and the same `isc` the packages
+above hold. On an ARM machine, write `isc-aarch64-linux` wherever the lines below say
+`isc-x86_64-linux`:
 
 ```sh
 cd "$(mktemp -d)"

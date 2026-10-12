@@ -5,6 +5,494 @@ its release notes.
 
 ## Unreleased
 
+## 0.4.0 - 2026-10-13 05:17 +06:00
+
+This release takes insensical beyond one desk. `isc web` puts your panes in a browser or
+on your phone, where you can read them, answer what waits and be told when something
+needs you, and you can share one project or one terminal with someone else. One window
+shows the machines you've named beside this computer, reached through your own `ssh`,
+and finds the ones on your tailnet. Panes say what they're doing in words, the sidebar
+can show only what's active, and notifications no longer flood. You can also write
+commands and key modes of your own, keep a project's layout in a file, and see pictures
+in more places.
+
+### Upgrading from 0.3.0
+
+This version has a newer protocol (27, which `isc version` prints) and a newer terminal
+engine than 0.3.0's. The window, `isc` and the server all have to be this version, on
+one machine or two, so update both. After installing it, restart the server from the
+window, or with `isc restart-server`. What runs in your panes carries on. Because the
+engine changed, each screen is carried across by redrawing it: you keep the text,
+colours, history and cursor. A full-screen program draws itself again the next time it
+draws.
+
+What you'll meet differently:
+
+- **After the leader, `v` selects with the keyboard and `Shift+S` splits right.** `v` used
+  to split right, and `s` still splits down. `"leader v" = "split-right"` under `[keys]`
+  puts it back.
+- **Your keys tables lie over the defaults.** `[keys.direct]` and `[keys.leader]` no longer
+  replace them, so a key added in a new version works with an older file. Taking a line
+  out brings its default back; to leave a key to the programs in a pane, give it `"none"`.
+- **The sidebar's field only filters.** Enter there no longer makes a project. Use
+  `Ctrl+Shift+N`, the `+` button or the palette.
+- **The count of panes that need you has moved from the bell to the activity button**, and
+  counts only panes that wait or failed. A finish is counted beside it, with a tick.
+- **You're told of a finish 15 seconds after it, and of many panes at once in one
+  notification.** See "Knowing what needs you".
+- **`--host` and `--rights` are `isc`'s own wherever they stand.** `isc send 3 --host` typed
+  `--host` into the pane; now it's the option. Put `--` before text that is one of `isc`'s
+  options: `isc send 3 -- --host`. In `isc notify`, `--test` and `--sinks` are options now
+  and were a title. Other text that begins with a hyphen is still text.
+- **A row of `isc ls` has more after the pane's title**: what a waiting pane waits for and
+  for how long (`wants permission, 2h`), the name a program gives itself, in brackets, and
+  how many things it reports. Everything up to the title is as it was. A script that reads
+  the title as the rest of the line gets those too; `isc ls --json` is for scripts.
+- **A state is put in words a little differently.** "working" stands where "running" did
+  wherever a state is put in words; `isc status running`, a row of `isc ls` and the events
+  are as they were. The words after a state are set off with a dot, where a colon was. A
+  command that failed has the note "exited with 2 after 1m 35s", where it said "failed
+  with". `isc status explain` is worded differently; it's for reading, not for a script.
+- **No words the interface shows carry three dots.** Buttons, palette titles, choices and
+  prompts say what they say and stop: "Restart Server", "Add Remote Host". The button that
+  was "How" with three dots is "How to Install".
+- **In the interface in a terminal, a new project's directory is written from `/` or `~`.**
+  `./api` is a name now, where it was a directory beside where the interface was started.
+- **`isc version` prints the engine as `ghostty-3425025e`.** Its name no longer has the
+  release in it: two releases work together when their protocol and engine are the same,
+  and one that changes neither is installed without restarting the server.
+- **The tarball, the `.deb` and the AUR package carry a statically linked `isc`**, in place
+  of one linked to the system's C library.
+- **On a Mac, keys are shown in signs alone.** See "On a Mac".
+- **A saved layout of more than 4 MB of text, or 4,096 panes, is set aside** as
+  `state.json.unreadable`, and the server starts empty. See "Fixed".
+
+### From a phone or a browser
+
+- **insensical in a browser.** `isc web` serves a page you can open on a phone or in any
+  browser: your panes with their states, to read, scroll back through and type into. It
+  runs only when you start it and listens on this machine only, so you reach it through
+  `ssh -L`, `tailscale serve` or your own proxy; the daemon still listens on no network.
+  Nothing typed blind reaches an agent: the page says **Link lost · trying again** two and
+  a half seconds after it last heard from your machine, and what you type arrives within
+  that or never. `Ctrl`-click (`⌘`-click on a Mac) opens a web address in a new tab; on a
+  phone a tap shows a sheet with the whole address, **Open** and **Copy**. After you update
+  insensical, `isc web` starts itself again as the installed version on the same port, and
+  a page left open says a newer one is ready. See "In a browser" in the manual.
+- **A phone is told, and answers.** The page opens on what needs you: a card for each pane
+  that waits, failed or finished, with the program's own question, how long it has waited
+  and the live foot of its screen, and under it the keys agents ask for and a line you can
+  dictate. Add the page to your phone's home screen and it can notify you when a pane needs
+  you, through the phone's own push service and nothing of ours; a press lands on that
+  pane's card. The title, **Needs you** and the home-screen badge count the panes that wait
+  or failed. An answer pressed while the link is lost isn't sent and isn't kept: the card
+  says **Not sent**.
+- **A browser is paired with a token, and a device can end by itself.** `isc web token add`
+  prints an address and a code to scan. The address pairs one browser, for ten minutes, and
+  that browser stays paired; `--uses N|any` and `--expires 10m|1h|7d|never` say otherwise.
+  `--rights look` makes a device that only looks. `--stays 1h` (or minutes, days, `always`)
+  says how long the device stays paired: then its browsers are signed out and the token
+  leaves the list. `isc web token ls` says how many more browsers an address pairs and
+  "ends in 40m", and `isc web token rm` ends a device and closes what it has open. A device
+  made from the page never outlasts the browser that made it.
+- **A phone's home-screen copy pairs by itself, and the page scans a code.** A code that
+  pairs a device also pairs its home-screen app, once, within fifteen minutes and from the
+  same network address. **Add to Home Screen**, in the page's menu on an iPhone, makes a
+  one-use address for it, good for ten minutes, and a camera button on the pairing page
+  reads a code. **Header looks blurred** moves the header below the edge iOS 26 blurs. A
+  browser pairs its home-screen copy at most three times in ten minutes, and the server
+  posts notifications only to public addresses of a push service on port 443.
+- **`isc web open` opens insensical in your browser on this computer, signed in.** It makes
+  an address that works once, for 10 minutes, and only on this computer. The browser is
+  paired as the device `This computer`, with every right. `--print` prints the address;
+  `--json` prints it with when it ends and opens nothing.
+- **The page has a Settings screen for the computer it's paired with.** A browser whose
+  token may manage finds it in the menu under its letter: this computer, your devices (add
+  one with a code to scan, remove one), who is sent notifications, the alerts when you're
+  away, each with a test, and who is connected, with Disconnect. An alert's address is
+  shown shortened and read-only, with **Change**.
+- **A pane opens at your phone's width.** Its columns and rows are what the screen has room
+  for, and follow a pinch of the letters and the phone's keyboard. A button in the pane's
+  header switches whether the pane has your phone's size; leaving the pane gives the size
+  back. A bar has the keys a phone's keyboard lacks. **Text size** in the page's menu draws
+  terminals from 9 to 28 pixels and is remembered.
+- **At a desk, the page is the sidebar and the tab as it's laid out.** It draws panes in
+  your `font-family` and `font-size`, with the signs of a Nerd Font. Drag the border
+  between two panes to resize them, and a pane by its header onto another to swap the two
+  or put it at one side; a token that may not arrange has neither. Each pane's header has a
+  menu with Find and Copy everything.
+
+### Sharing with someone else
+
+- **Share one project or one terminal with a guest.** An eye on a project's row and in a
+  terminal's header, and "Share this project" and "Share this terminal" in the palette,
+  open one dialog: what they see, whether they look or also type (look unless you change
+  it; typing asks you to agree to a warning first), and when it ends (a day unless you
+  change it). It makes a link and a QR code that work once. What's shared carries a small
+  sign, the same button lists who it's shared with, and `End` signs a guest out. From a
+  terminal it's `isc web token add --name sam --only project:api --stays 1d`, or `--only
+  pane:12`, with `--rights look,type` to let them type; on the page it's **What it sees**
+  under **Add a Device**. A guest gets no notifications and no Settings. The share is to
+  the project's number, so renaming it doesn't move it. A guest who can type in a shell has
+  your account from that shell: the command says so. `isc web token ls`, `isc clients` and
+  the Server page say what each guest sees.
+- **A guest's page shows what you shared and no sign of anything else.** A bar says "You're
+  a guest on desk. You can look at api." and when it ends, and under it is only that
+  project or terminal: no "Needs you", no "Everything", no Settings, no bell, no "Fit to
+  this screen". When you close what you shared, remove the device or its time is up, their
+  page says so and stops.
+- **Share with someone who isn't on your network.** In the Share dialog, "Where they are"
+  has "Anywhere on the internet": the guest can only look, the share ends in a week at
+  most, and the dialog says what it opens before you press `Open a Public Link`. While one
+  is open an amber sign in the window says so, and the Server page has a `Public link` row
+  with `Close`; ending the last public guest closes it too. From a terminal, add `--public`
+  to the guest's `isc web token add`, then `isc web public on`. The address is your own
+  Tailscale Funnel's: nothing of insensical's listens on the internet, and your own devices
+  don't work there. `isc web public off` removes those devices and always closes the
+  address, and fails if Tailscale won't close it. `isc web public status` says how it
+  stands by what Tailscale says; `--json` gives it as data, as does `door` in `isc web
+  status --json`. `isc web` takes `--guest-name` and `--guest-port` for it.
+
+### Other machines and your tailnet
+
+- **Another machine's daemon, from this one, through your own `ssh`.** Name the machine
+  once, `isc host add build me@build.example.com`, and put `--host build` before any
+  command: `isc --host build ls`, or `isc --host build` alone for the whole interface in
+  your terminal. Your ssh configuration, keys, agent and jump hosts apply, and the daemon
+  there opens nothing to the network. It needs the same version of insensical on both.
+  When the machine stops answering, the interface says so on a card over dimmed panes and
+  tries again by itself, up to every thirty seconds, or at once when you press a key. A
+  command that ends something acts on another machine only when you say `--host`: with
+  only `INSENSICAL_HOST` set, `isc kill-server`, `close`, `tab close`, `project close` and
+  `project sleep` are refused.
+- **Other machines in the window.** One window shows this computer's projects and those of
+  every machine you've named, each under its name in the sidebar. A pane on another machine
+  carries the machine's chip in its colour. Going to the pane that needs you, the filter,
+  the overview, the palette and the counts span machines, and a window opened from the tray
+  comes to where you last were. Only you change the machine in front: another machine can
+  say a pane needs you, and can't raise the window or take the keyboard. The window never
+  stops to wait for a machine, and if this computer's server stops, the others carry on. In
+  the interface in a terminal, "Go to a machine" in the palette lists them.
+- **Add a machine, and put insensical on it, from the window.** "Add" at the foot of the
+  sidebar, "Add a machine" in the palette and `Add Remote Host` in the settings open one
+  dialog. Under its Address field are two tabs, `Tailscale` and `SSH config`, each listing
+  its machines; a tailnet machine shows its system and whether it's on. The machine you
+  choose is met in four lines. If insensical isn't there, one button puts it into
+  `~/.local/bin`, after saying what it will write; a server running there is restarted only
+  on a second yes. A machine with another version says so and offers this one. `isc host
+  check` is that meeting with how long a round trip takes, `isc host put` puts this `isc`
+  on a Linux machine, and `isc host restart NAME` restarts the server there; use it instead
+  of `ssh NAME isc restart-server`, which often can't find the server. `isc host set` and
+  `isc host add` give a machine a colour, an icon and a mark that it's one to be careful
+  on. Where `ssh` goes is written in letters, digits and `. - _ + @ : % [ ]`. Renaming a
+  machine keeps its link, and a settings file saved with a mistake leaves your machines as
+  they were.
+- **A machine of your tailnet is reached at its address, whatever its name becomes.** `isc
+  host add`, and a choice from the `Tailscale` tab, keep the machine's node. Each time it's
+  dialled, Tailscale is asked where that node is and `ssh` goes to its address, with the
+  host key filed under the name you typed. A machine Tailscale says is off is said to be
+  off at once. `--no-node` keeps a machine as typed, machines you already have are dialled
+  as before, and `isc host set NAME --ssh WHERE` looks for a node. `INSENSICAL_TAILSCALE`
+  names the `tailscale` to run, as `INSENSICAL_SSH` does for `ssh`.
+- **Where `ssh` has a question, you're told which, and can answer it.** A host `ssh` hasn't
+  met, a key that changed, a key or password wanted, a sign-in Tailscale wants, a user its
+  rules refuse, a machine that's off: each has its own words and one thing to do. `Answer`,
+  in the dialog, the sidebar and Remote Hosts, opens a tab on this computer where `ssh`
+  asks you itself, and the machine is met again when that ends well. `isc host answer NAME`
+  does it at your terminal, and `a` in "Go to a machine" in the interface in a terminal. A
+  key that changed is never answered for you.
+- **What belongs to the other machine is asked of it.** The file finder lists that
+  machine's files, a new project's directory is a directory there and `~` is your home
+  there. `isc --host build integrate` sets up the agents there, and `isc --host build
+  config` changes the settings there; the settings sheet does both for the computer you
+  choose. A path you click in a pane there opens in an editor in a pane there, or is
+  copied. A pane's history comes a part at a time: the screen and the newest half megabyte
+  at once, and four megabytes more each time you scroll to the top. The daemon holds 256
+  MiB of history waiting to be fetched at most.
+- **A machine marked careful says so, and nothing typed blind is delivered.** A careful
+  machine has a filled chip on its panes, and a paste of more than one line there asks
+  first; the interface in a terminal says `careful` beside its name and asks too. The mark
+  comes off only when the settings file is read and says so. When a machine's link is lost
+  its panes keep their last screen, dimmed, and say so, four seconds after the machine last
+  sent anything. A key pressed there is refused, and what you typed just before arrives
+  within two and a half seconds or never, so nothing turns up at an agent when the network
+  returns.
+- **Typing on a far machine is drawn at once.** When the round trip takes 70 milliseconds
+  or more, the letters you type show as you type them, a little fainter, until the program
+  shows them. Nothing is drawn until the program has shown two letters you typed, so a
+  password is never drawn. `type-ahead = "off"` turns it off. The page `isc web` serves
+  does the same.
+- **A paired device can be let through to your other machines.** `isc web token add --far`,
+  or `isc web token set NAME --far`, lets its browser be carried from this computer to the
+  machines of `isc host ls`, over your own `ssh`, with the rights it has here. It's all of
+  them or none, only for a device that may type, and never for a guest. On the page each
+  machine is a heading over its projects, and its terminals join the list, **Needs you**
+  and the counts. A machine that can't be reached says so within ten seconds and comes back
+  by itself, and one machine can't pass for another. The `ssh` it runs forwards nothing and
+  ends with `isc web`.
+- **Your phone is told about your other machines too.** A device with `--far` that has
+  notifications on hears when a pane waits, fails or finishes on any of them, with the
+  machine's name first. Each machine decides for itself what's worth telling, and you're
+  never told that a machine went out of reach or came back. It keeps one `ssh` open to each
+  machine meanwhile: about 15 KB a minute each when nothing happens. `isc web push ls`
+  marks the devices that hear them, and `isc web push test --at NAME` sends a test as from
+  one.
+
+### Knowing what needs you
+
+- **A program can say what it's doing in its own terminal, and its pane shows it.**
+  insensical reads the Program Status Protocol (OSC 7501): `idle`, `working`, `blocked`,
+  `done` or `error`, with a line of words. It needs no hook and nothing installed, and it's
+  heard over `ssh` and from inside a container. Claude Code 2.1.295 speaks it unasked. A
+  program is shown by the name it gives itself, so Claude Code, which runs as `node`, has
+  its own tile. An agent that has insensical's hooks as well isn't heard twice, and `isc
+  status explain` says which was believed. A program that reports several things at once
+  has its pane show the most urgent, with a count such as "3 tasks · 1 waiting". A program
+  that asks whether it's heard is told which states and kinds are read (revision 0.4).
+- **A row says what its pane is doing, in words, and for how long it has needed you.**
+  Under a pane's name: "wants permission", "asks a question", "needs you to sign in",
+  "waiting", "failed" or "done", then the program's own words, on two lines at most and
+  whole under the pointer. Beside its mark: `now`, `2m`, `1h`, `3d`, bold once a pane has
+  waited ten minutes. The header, the overview, the palette, notifications, the tray's
+  menu, `isc ls` and the interface in a terminal say the same. How long a pane has waited
+  is kept when the server moves to a new version and not when it stops. `isc ls --json` and
+  `isc api '"State"'` have `kind`, `app`, `tasks` and `since` on each pane and `at` on the
+  state; `isc events` has `kind` and `app` on its `opened` and `status` lines, and a new
+  `kind` event when what a pane waits for changes.
+- **The sidebar can show only activity.** A button at its head (`Ctrl+Shift+Y`, or
+  `activity` in the palette) leaves just the agents and the panes with something to say,
+  each with its state in words and how long, what needs you first. The list is kept quiet:
+  a row doesn't flicker as an agent pauses, nothing moves under your pointer, and what
+  finished goes a few seconds after you've looked at it. `Ctrl+Shift+J` and `Ctrl+Alt+/`
+  walk it (`next-activity`, `previous-activity`), and `activity-idle = false` leaves out
+  agents at rest. The interface in a terminal has it by the same rules (`Ctrl+Space` then
+  `Y`; `}`, `{` and `A` walk it; `[tui]` can set `activity-idle` apart), and so has the
+  browser's page, with a switch your browser remembers.
+- **The same number of panes need you wherever it's shown.** A pane needs you when it waits
+  or failed. The button, a machine's heading, a project's row, the tray, the menu bar and
+  the interface in a terminal no longer count panes that finished: a finish is told of
+  beside the count, with a tick. The key that goes to the next pane goes to the ones that
+  need you first, then to the ones that finished.
+- **A long command at a shell is activity too.** With shell integration, a command that has
+  run for 10 seconds is listed while it runs, with what you typed and for how long, and
+  ends done or failed like any pane. `isc ls --json` has `running_since` and `running`.
+- **You're told of a finish once it has stood, and never of a pause.** An agent that waits
+  on background work ends its turn and wakes by itself, and each time used to be a
+  notification. Now a finish is told of after the pane has stayed done for 15 seconds, and
+  a pane that has paused is waited on for longer than its pauses, up to ten minutes: you
+  get one notification at the end, with its last words. The row still shows `done` at once,
+  a pane that waits or failed is told of as quickly as before, and a pane's first pause
+  longer than 15 seconds is still told of.
+- **Many panes that stop at once are one notification.** Ten agents that reach a usage
+  limit in the same seconds are one, `10 panes failed`, with their words under it. A pane
+  that fails the same way again says nothing more until it says something else, ten minutes
+  pass or you've looked at it. One pane alone is told of a second after it changes.
+- **The daemon can tell you when nobody is attached.** Set `notify-command` to a program,
+  or `notify-url` to a web address, and the daemon runs the one and posts to the other:
+  enough for ntfy by itself, and for anything else through a script. They're sent only
+  while you're away unless you say `always`, under the same mutes and limits. A topic that
+  needs signing in takes `notify-url-token`, or `notify-url-user` with
+  `notify-url-password`; they're shown masked and never sent over plain `http://` to
+  another machine. `isc config set --stdin NAME` reads a value from standard input. `isc
+  notify --test` tries them and `isc notify --sinks` says how the last one went. `https` is
+  built into `isc`: it needs a processor from about 2014 or later, or on ARM one with the
+  AES and SHA-2 extensions, which a Raspberry Pi 4 lacks.
+- **A pane stuck in `running` or `waiting` can be cleared in one step.** What a program
+  said it was doing ends with the program. Where insensical can't see a program go, such as
+  on the far side of `ssh`, the pane goes on saying it: `isc status clear`, or "Forget what
+  this pane's program said it was doing" in the palette, puts the pane at rest. insensical
+  never ends a state for having been silent.
+
+### Projects, panes and the overview
+
+- **A project can be written in a file and opened in one go.** Put a `.insensical.toml` in
+  a project's directory and `isc project open` makes its tabs, splits, floating and
+  minimized panes, each running its program in its directory. Two panes side by side is one
+  line, `columns = ["nvim", "cargo watch -x test"]`, and a list inside a list stacks.
+  Commit the file and everyone who clones the repository opens the same project. `isc
+  project save` writes the project in front as such a file. A file that starts programs is
+  listed and asked about the first time, and whenever it has changed; a mistake is reported
+  with its line and nothing is made. The window opens them too, with "Just the directory"
+  for a plain project, and the palette has "Open a project file" and "Save this project as
+  a file".
+- **An agent's team opens as panes here.** Some agents start helpers in tmux panes, and
+  only inside tmux. With `tmux-shim` on (`isc config set tmux-shim true`, or "Answer as
+  tmux" in the settings), a program in a pane finds a `tmux` that insensical answers: its
+  helpers open beside it in its own tab, as panes you can move, name and be told about.
+  It's off unless you turn it on, and while it's on `tmux` in a pane isn't the real one.
+  The manual's section 11 has the commands and the limits.
+- **The overview shows what's on every pane.** Each pane has its screen, small and live, so
+  you can tell an editor from a build from a waiting prompt. A pane that needs you has its
+  question over the picture, and the strip along the foot shows the last lines of one pane
+  at full size. One pane has a ring, which is where Enter goes; Space moves it. The screens
+  are live only while the overview is open, redraw four times a second at most, and never
+  resize a pane.
+- **A name is changed where it's written.** The pencil on a project, tab or pane, and the
+  palette's naming commands, turn the name itself into a field. Enter or a click elsewhere
+  keeps it, Escape leaves it.
+- **A new project can be made in a directory that isn't there yet**, on this computer or
+  another. The card says which path it will make, and one more Enter makes it. `isc project
+  new DIR --make` does the same.
+- **Switching tabs no longer flashes empty panes.** The tab you left stays on screen until
+  the new tab's panes have their screens, for 150 milliseconds at most.
+- **A server with very many panes starts much faster on Linux.** With a thousand panes,
+  starting the server again took 20 seconds or more and each new pane 18 ms. They now take
+  about a second and 3 ms.
+
+### The terminal and pictures
+
+- **Select and copy with the keyboard.** `Ctrl+Shift+X` (`⇧⌘X` on a Mac), the leader and
+  then `v`, or "Select and copy with the keyboard" in the palette, puts a cursor of your
+  own in the pane. Move it with `h` `j` `k` `l`, `w` `b`, `0` `$`, `g` `G` and the Page
+  keys, through the screen and the history; `v` selects, `V` whole lines, `/` searches, and
+  `y` or Enter copies and leaves. `p` selects the path or address on the line, `o` the
+  whole output of a command, `c` the command line. `Space` puts a letter on every path,
+  address and commit in view, and typing it copies that one. Nothing you press reaches the
+  program, and a strip in the pane says what the keys do. It works in `isc` at a terminal
+  and in a pane on another machine, and not in a browser. A copy's note says how much:
+  "Copied 14 lines".
+- **Pictures show in more places, and stay.** Pictures a program places with Unicode
+  placeholder characters are drawn, so Yazi and other file managers show their previews.
+  The interface in a terminal shows what a program draws with the Kitty graphics protocol,
+  where your terminal shows such pictures itself, cut at the pane's edge and taken away
+  while a list, a question or a floating pane lies over them. The pictures in view come
+  back after the server stops and starts, and stay when it moves to a new version with the
+  same terminal engine.
+- **The terminal engine is a newer Ghostty**, of 4 October 2026.
+- **`isc wait --output` finds text that was printed before you asked** and has scrolled off
+  the screen since. Text the pane's width broke across two lines still isn't found.
+- A full reset of the terminal, as `reset` does, removes the progress a program reported.
+
+### Commands, modes and `isc`
+
+- **Commands of your own.** Under `[commands]` in the settings, give a name a list of
+  steps: commands that exist, a program to run in a new tab, split or float, and text to
+  type into the pane in front. Bind it to a key, find it in the palette, or run it with
+  `isc do NAME`. A step that fails stops the rest and says which it was. A command that's
+  written wrongly is reported and left out.
+- **Modes, and a resize mode.** A mode is a set of plain keys that run commands until you
+  press Escape. Resize mode comes ready: leader, `Shift+R`, then the arrows or `H` `J` `K`
+  `L` as often as you like. A key that isn't the mode's turns it off and is typed. Write
+  your own under `[modes]`; each is turned on by a command called `NAME-mode`.
+- **`isc api` says what you can ask.** With no request it lists every request; `isc api
+  NAME` says what one holds, with an example and what answers it; `--json` gives either as
+  data. It needs no daemon.
+- **`isc clients` lists who is connected, and `isc disconnect` puts one off.** Each client
+  has its kind, machine, version, rights, process and pane, and what it only says of itself
+  is marked as claimed. `isc disconnect N` needs the right to manage; the client can
+  connect again, says you disconnected it and waits for you, and a paired browser stays
+  paired. After a client changes something, `isc events` prints a `did` line that names the
+  request and the client.
+- **`--rights` asks the daemon for fewer rights**: `isc --rights look ls` can look and
+  nothing else. The rights are look, type, arrange and manage. Only a client that can type
+  counts as you: a pane open in one that only looks still notifies you. Without `manage`,
+  `notify-url` is shown as its scheme and host and `notify-command` as its program's name.
+
+### The interface in a terminal
+
+- **More of the window's commands are in its palette, in the window's order.** "Choose this
+  project's icon" (`project-icon`) lists the colours and marks a terminal can show, and
+  keeps a drawing of yours unless you pick a mark or the folder. "Move this pane to another
+  tab" (`move-to-tab`) lists the tabs. "Move this project up the list" and "down"
+  (`move-project-up`, `move-project-down`) order the projects, as dragging a row does. The
+  themes are listed, `terminal` among them.
+- **It says when the server has gone away**, on a card over the list and the panes, and
+  carries on by itself when a server runs on that socket again.
+
+### The settings sheet
+
+- **The settings sheet is a panel of cards, with a page for each thing you set.** It floats
+  over the window with the pages at one side, a search field, and arrows back and forward.
+  A setting your file changes has a dot after its name and an arrow that resets it. The
+  pages are Server, Interface, Themes, Terminal, Shortcuts, Remote Hosts, Notifications,
+  Agents and Changed. **Server** has this computer's server with `Restart Server`;
+  **Access from your other devices**, with a switch that starts `isc web`, `Open in
+  Browser`, a switch for Tailscale, the devices paired with `Add a Device` and a code to
+  scan, how long each stays paired, and a test notification; and **Connected**, with
+  `Disconnect` on each connection. **Remote Hosts** lists each machine with its state in
+  words, changes where `ssh` goes, renames one in its row, and offers to update insensical
+  there. **Notifications** holds what tells you, and how you're told when away, with a test
+  whose result is a sentence. The computer the pages are about is chosen at the top right
+  (`Alt+M` steps it). The Tailscale switch turns off only a mapping it made, and says so
+  when your tailnet hasn't turned Serve on. `isc web stop` also stops the window starting
+  it again.
+
+### Installing
+
+- **insensical has a new icon.** A rounded teal pane with two cursors for eyes, on a
+  dark tile. It's the icon in your launcher, the tray and the Dock, and it's easy to tell at
+  any size. In the tray an amber dot joins it on the pane's corner while a pane needs you.
+- **`isc` by itself for arm64 Linux.** Each release has `isc-aarch64-linux` beside
+  `isc-x86_64-linux`, for a Graviton or Ampere server or a Raspberry Pi with a 64-bit
+  system, and the install line picks the one for its machine. The window is for x86-64
+  only on Linux.
+- **The install line takes a version and can be run by a script.**
+  `curl -fsSL https://insensical.com/install.sh | ISC_VERSION=0.3.1 sh` installs that
+  release. With `ISC_QUIET=1`, or where there's no terminal, it asks nothing, restarts
+  nothing and never waits for a password. With `ISC_DIR` set, it makes the directory and
+  needs no `sudo`.
+
+### On a Mac
+
+- **Keys are shown in signs alone**, in the order its menus use: `⇧⌘N` where it read
+  `⌘+Shift+N`, with `⌃`, `⇧`, `⌥`, and `↩`, `⌫`, `⇥` and arrows. That's in tooltips, the
+  palette, the sheet of keys, the settings sheet, and `isc` at a terminal on a Mac.
+- **Tailscale is found from a window opened from the Dock**, which has only the system's
+  `PATH`: where Homebrew and the Tailscale application keep it is looked in too.
+- **`isc` run through a link finds the copy of itself for Linux that the application
+  carries**, to put on a machine that has none.
+- A shell script is shown by its own name, as on Linux, where it was shown as `sh`. A
+  script run in a pane's shell's place, as an agent's wrapper is by `exec`, was taken for a
+  shell at its prompt, and what the agent reported there was dropped.
+
+### Fixed
+
+- **A picture too large for its pane is shown whole.** A tall or large picture drawn by the
+  Kitty graphics protocol used to have its top scrolled away or its side cut. It's now
+  drawn smaller, in its own shape; a wide picture made smaller has empty rows under it.
+  `isc tui` does the same, in whole cells.
+- **Ctrl-C works in a pane whatever started the server.** A server started by something
+  that ignores the interrupt or hang-up signal passed that on to every program in its panes.
+- **A daemon no longer dies with the session that first started it**, such as a terminal
+  tab or an `ssh` session. On Linux with systemd it runs in a scope of its own.
+- **One mistyped setting no longer undoes the daemon's others.** Only that setting falls
+  back, a file that's broken TOML leaves the last good settings in force, and you're told
+  what was wrong, in a notification and in `isc notify --sinks`.
+- **`isc attach` ends when the program in the pane does**, and gives the terminal back.
+  `Ctrl+]` leaves also when a program has put your terminal into a keyboard mode that sends
+  it as a longer sequence. The terminal's title says "Ctrl+] to leave", and `Ctrl+C` three
+  times in two seconds shows a line that says so.
+- A pane that waits for your permission goes on saying so when another tool the agent was
+  running finishes, and says running again once you've refused and it starts its next tool.
+- An agent that stops on its usage limit says "Usage limit reached", not `rate_limit`.
+- A file in a folder that your group can write to is shown in your file manager instead of
+  opened, even when the group is your own. `chmod g-w` on the folder opens them again.
+- A program that asks to set the primary selection (OSC 52 with `p` or `s`) no longer
+  replaces what's on your clipboard.
+- Panes, commands and names can't add up to more than the server can send to a window: 4
+  MB of text and 4,096 panes. Past that a new pane or a rename is refused, and says why.
+- A pane's number is never given to another pane, however the server ended. After a crash
+  the next number can be up to 256 higher than the last.
+- A client the server cut off for falling behind connects again and says that's what
+  happened, and one that sees the server move to a new version says so while it waits.
+- A quiet pane you look at, or read with `isc capture`, no longer costs the server its
+  whole history unpacked in memory: 12 MB for a full history, where 2 MB is what it takes.
+- In a pane of more than about 46,000 cells, a full-screen program that scrolled from its
+  first line could leave the pane without the shell's screen and history behind it.
+- An icon a program prints right before a letter or another icon no longer lies under it.
+- In the overview, Up and Down go to the nearest card in the row above or below, as it's
+  drawn, and Enter on a sleeping project wakes it and goes to it.
+- A file you put in `icons` yourself is never deleted.
+- A theme marked in the settings' list stays on screen while you look at it, also when the
+  settings file is read again just then.
+- Two programs changing the settings file at the same moment no longer lose a change.
+- Tab in a shell no longer hangs when the daemon doesn't answer: after a third of a second,
+  panes, tabs and projects aren't offered and the commands still are.
+- When a daemon's answer can't be read, `isc` says so and why. It used to call any such
+  daemon too old to answer.
+- The pencil on a pane's row no longer hides the last letters of what the pane's program
+  says it's doing.
+
 ## 0.3.0 - 2026-10-10 23:20 +06:00
 
 ### Upgrading from 0.2.0
@@ -71,9 +559,16 @@ Some things you're used to behave differently:
   terminal takes one from a program (Terminal on a Mac doesn't), and on a
   machine with no desktop notifications reach your terminal too. It needs a Nerd Font
   for its icons. Pictures aren't shown in it, and paths aren't opened from it.
-- **`isc` by itself, for a machine with no desktop.** Each release has
+- **`isc` by itself: insensical with no window**, on a desktop or a machine that has
+  none. Each release has
   `isc-x86_64-linux`: one file that needs nothing installed and runs on any Linux
   distribution. It's the daemon, the command line and the interface in a terminal.
+- **One line installs `isc` by itself**, insensical with no window, on any Linux on
+  x86-64: `curl -fsSL https://insensical.com/install.sh | sh`. It checks the download
+  against its checksum, installs to `/usr/local/bin` (asking for your password if it
+  needs it, or to `ISC_DIR` if you set it), and offers to restart a server that's
+  already running, which ends nothing in your panes. Run it again to update. It came
+  just after the release, with the website.
 - **Renaming and closing a project, and sizing the panes for this window, are
   commands.** "Rename this project", "Close this project and everything in it" and
   "Size the panes for this window, over any other that shows them" are in the palette
@@ -470,7 +965,7 @@ Homebrew now installs insensical from `mah3uz/tap`. If you ran
   the window can do can be scripted.
 - **Input methods, if you turn them on.** `input-method = true` lets your system's
   input method compose text in a pane, for Bangla, Chinese, Japanese and the rest. It's
-  off by default, as it hasn't been tried with a real one yet.
+  off by default.
 - **Files open in your editor, at the line.** `Ctrl`+click `src/main.rs:12:5` and it
   opens there in the editor `open-files-with` names; a terminal editor opens in a pane
   beside the one you clicked in.
@@ -668,8 +1163,7 @@ terminal.
   already write to their terminal and from their hooks.
 - **A count of the panes that need you**, and one key to go to the most urgent.
 - **Hooks for Claude Code, Codex, Gemini CLI, opencode and pi**, set up when you say so,
-  from the window or with `isc`. Those for Codex, Gemini CLI, opencode and pi are written
-  from the agents' documentation and have not been run under them.
+  from the window or with `isc`.
 - **Desktop notifications** when a pane starts waiting, finishes or fails, unless you are
   looking at it. They arrive with no window open.
 
