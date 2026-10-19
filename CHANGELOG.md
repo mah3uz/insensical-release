@@ -5,6 +5,23 @@ its release notes.
 
 ## Unreleased
 
+## 0.6.0 - 2026-10-20 00:59 +06:00
+
+- **From this release on, insensical can update itself.** 0.5.0 can't, so to get this
+  release, update the way you installed 0.5.0.
+- **`install.sh` checks the release's signature** when `minisign` is installed.
+- **Remote hosts that run an older insensical say so as they connect**, on their card and in one notice: "2 remote hosts run 0.5.0" with Update Them, which brings each to this computer's version in turn, and Not Now. A host a package owns shows its command with a copy button.
+- **Update There and `isc host put` work on a Mac, and with a package or Homebrew copy.** A machine whose `isc` can update itself is asked to go to this computer's version and downloads it itself; one that a package owns gets the command to run there. `isc upgrade --check --json` prints what a program needs to know.
+- **Tab completion matches what a command takes.** `--host`, `--socket` and `--rights` are offered only on commands that take them, and `isc hub device rm`, `set` and `pair-again`, `isc hub machine rm`, `ban`, `unban`, `isc do` and the project, swap and `--tab` arguments complete the devices, machines, commands, panes, tabs and projects there are.
+- **A hub with machines joined to it can't join another hub**, which would leave them dialling a hub that no longer listens. `isc hub join` refuses, and the Join a Hub button is off with a line that says to remove them first.
+- **insensical checks once a day for a new release** and `isc version` says when there is one. It sends only a request to GitHub that names your version and platform. `check-for-updates = false` stops the daily look; Check Now still works.
+- **The window says when a new release is out**: "insensical 0.6.0 is out" with What's New, Update and Skip. Settings > Hub shows the version with Check Now and Update, or How to Update with the command to copy for a package or Homebrew, and the switch for the daily check.
+- **The settings sheet has a close button**: the X at its top right closes it, as `Esc` does.
+- **`isc upgrade` installs a new version** over the copy you're running, once it's checked
+  against the release's signed record. `--check` says what there is; for a copy from a
+  package or Homebrew, it prints the command that updates it, and a copy no release ships
+  says it was built from source and is built again the same way.
+
 ## 0.5.0 - 2026-10-19 21:16 +06:00
 
 ### Upgrading from 0.4.0

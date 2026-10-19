@@ -98,7 +98,8 @@ curl -fsSL https://insensical.com/install.sh | sh
 ```
 
 It downloads `isc-x86_64-linux` (`isc-aarch64-linux` on ARM) and its checksum from the
-latest release, and installs the file only if they agree. Run the same line to update.
+latest release, and installs the file only if they agree. If `minisign` is installed, it
+also checks the release's signature and stops if it's wrong. Run the same line to update.
 
 | Set | Effect |
 |---|---|
@@ -455,9 +456,10 @@ machine" in the palette and "Add Remote Host" in the settings sheet do the same.
   ends well the machine is met again. The button is also under the machine's name in the
   sidebar and in Remote Hosts. A changed host key has no `Answer`: its words say what to
   find out first.
-- **If insensical is missing or older, one button puts it there**, like "Put insensical
-  0.3.0 on atlas". It writes `~/.local/bin/isc`, no sudo, only when you press it, and does
-  what `isc host put` does.
+- **If insensical is missing or older, one button brings it there**, like "Put insensical
+  0.3.0 on atlas". It does what `isc host put` does, only when you press it. Where a package
+  or Homebrew owns insensical there, the dialog gives you the command to run on that
+  machine instead.
 
 **In the sidebar,** each machine is a heading over its projects once you've added one:
 "This computer" first, then the others in your settings' order.
@@ -2854,7 +2856,8 @@ seconds) by five.
 - **Pages are down the left**, under the search field: **Hub**, then Interface and Themes,
   then Terminal, Shortcuts and Remote Hosts, then Notifications and Agents. On a Mac, Menu
   bar and Dock follows Themes. The sheet opens on the page you last looked at. Arrows by the
-  page's name go back and forward through pages you've visited. `Esc` closes the sheet.
+  page's name go back and forward through pages you've visited. `Esc` or the X at its top
+  right closes the sheet.
 - **A change applies at once** and is written to that setting's one line in `config.toml`.
 - **Type to find a setting** by name or what it does. Results are listed under their page.
 - **To reset a setting** your file changes, put the pointer on its row and press the small
@@ -2891,7 +2894,10 @@ The pages:
 - **Hub** is the first page, for this computer's server and who can reach it. Four things
   live here; the hub sections have the details.
   - **Server and Connected**: the server's state, version and the paths of its socket and
-    settings file, each with a copy button, and `Restart Server`, which asks first. Under
+    settings file, each with a copy button, and `Restart Server`, which asks first. The
+    Version row has `Check Now`, and `Update` when a new release is out, with the switch
+    **Check for updates automatically** under it. See [A new version installed
+    underneath](#a-new-version-installed-underneath). Under
     **Connected** is everything looking at this computer's terminals, with what each can do
     and for how long. `Disconnect` ends one; for a named browser or phone, `Disconnect and
     Remove Device` also ends its pairing.
@@ -2937,8 +2943,14 @@ The pages:
   `Enter` keeps it, `Esc` leaves it) and `Forget`, which asks once and changes nothing on
   that computer.
   - A card starts open if it's your only one, just added, or needs you; otherwise folded.
-  - When a check finds insensical missing or older there, a row offers `Update There` or
-    `Restart Its Server`. Where `ssh` has a question, the row has an `Answer` button.
+  - A host with an older insensical says so as soon as it connects, such as "insensical
+    0.5.0 there · this computer has 0.6.0", with `Update There`, which brings it to this
+    computer's version. When a check finds insensical missing there, or its server older, a
+    row offers `Update There` or `Restart Its Server`. Where a package or Homebrew owns
+    insensical there, the row says so and shows the command to run on that machine, with a
+    copy button. Where insensical there was built from source, the row says to build the
+    new version there the same way. A host with a newer insensical says to update this
+    computer. Where `ssh` has a question, the row has an `Answer` button.
   - `Add Remote Host` opens a dialog with the machines of your tailnet and the names in your
     ssh configuration under two tabs; anything you type is given to ssh.
 - **Notifications** has three cards: **Being told** (notifications at all, the tray's icon),
@@ -3581,7 +3593,7 @@ You need two things:
 - **`ssh` to that machine asks nothing.** insensical runs `ssh` where nobody can answer,
   so use a key (loaded in your agent if it has a passphrase) and connect once by hand to
   accept the host's key. If `ssh build true` prints nothing and asks nothing, you're set.
-- **`isc` is there, in the same version as here.** On Linux, `isc host put` puts it there
+- **`isc` is there, in the same version as here.** `isc host put` brings it there
   (see "Putting insensical on a machine" below). Or install it there yourself with the
   one-line install, which takes a version: see [Installing](#installing). `~/.local/bin`,
   `/usr/local/bin` and Homebrew's `bin` are looked in even when a shell started by `ssh`
@@ -3604,7 +3616,7 @@ The second word is whatever you'd give `ssh`: a host, `user@host`, or a `Host` f
 | `isc host ls [--json]` | Lists the machines you've named, with where `ssh` goes and what's set on each |
 | `isc host set NAME` | Changes a named machine. `--color`, `--icon`, `--careful` set; `--no-color`, `--no-icon`, `--no-careful` clear; `--ssh` changes where `ssh` goes; `--name NEW` renames. Only what you give changes |
 | `isc host rm NAME` | Forgets a machine. Nothing changes on it |
-| `isc host put NAME` | Puts this version of `isc` on a Linux machine: see below |
+| `isc host put NAME` | Brings this version of `isc` to a machine: see below |
 | `isc host restart NAME` | Restarts the server there: see "What it doesn't do" |
 | `isc host answer NAME` | Lets `ssh` ask you what it has to ask: see "When `ssh` has a question" |
 
@@ -3646,9 +3658,19 @@ build = { ssh = "me@build.example.com", color = "teal", icon = "server", careful
 - A machine of your tailnet that `isc host add` found there also keeps its node: `build =
   { ssh = "me@build", node = "nABC123CNTRL" }`. See "A machine of your tailnet" below.
 
-**Putting insensical on a machine.** If a Linux machine has no `isc`, or an older one,
-`isc host put build` puts this version there. It works on x86-64 and arm64 Linux; on a Mac
-it gives you the line to run there yourself.
+**Putting insensical on a machine.** If a machine has no `isc`, or an older one,
+`isc host put build` brings it to this version, never to a newer one: the two must match
+exactly. It says which way it went.
+
+- **An `isc` there that can update itself is asked to.** It runs `isc upgrade --version`
+  with this version, so the machine downloads that release itself and checks its signature.
+  That works on a Mac too. If the machine can't reach GitHub, a Linux machine gets a copy
+  of `isc` from here instead, and you're told.
+- **An `isc` that a package or Homebrew owns** isn't touched. You get the command that
+  updates it, to run there.
+- **A machine with no `isc`, or one from before `isc upgrade --check --json`,** gets a copy
+  of `isc` in `~/.local/bin`, no sudo. That works on x86-64 and arm64 Linux. On a Mac you're
+  given the line to run there yourself.
 
 - A server already running there is left running, on the older version. You're told what a
   restart would come to. `--restart-server` does it, as does a yes to a second question at a
@@ -4721,6 +4743,8 @@ certificate must be one a public authority signed, as Tailscale's are.
 Good to know:
 
 - Three wrong tries close the invite.
+- A hub with machines joined to it can't join another hub. Remove them first with `isc hub
+  machine rm NAME`, or **Remove** on the Hub page.
 - `isc hub join` checks that the server at that address has the key the line names, and
   stops with nothing changed if it doesn't.
 - It starts `isc hub` on the joined machine if it isn't running. If that fails, the join
@@ -5020,6 +5044,9 @@ two panes meet.
 - Press a tab, a project or a dock pill to go there, and the `+` after the tabs to open a
   tab.
 - Press a notice to go to its pane, or its cross to drop it.
+- When a new release is out, a notice says so. Press it to update, read what changed or
+  skip that version, which isn't offered again. In the settings, `c` on "Check for new
+  versions" looks now, and says when it last looked.
 - Drag a project's row over another's to move it in the list.
 - Drag a floating pane by the top of its box, and its bottom, right side or corner to
   resize it.
@@ -5112,7 +5139,7 @@ The settings sheet lists every setting that takes effect here and is set without
 `activity-idle`, `interface-style`, `motion`, `attention-glow`, `keymap`, `notifications`
 and the three `notify-` switches, `long-command`, `sound`, `notify-command-when`,
 `notify-url-when`, `notify-url-body`, `tray`, `scrollback`, `term`, `type-ahead`,
-`clipboard`, `keep-scrollback`, `tmux-shim`, `agents-at-once`, `agents-deep`, and under
+`clipboard`, `keep-scrollback`, `tmux-shim`, `check-for-updates`, `agents-at-once`, `agents-deep`, and under
 "This terminal", `colours` and `mouse`. `leader`, `shell`, `notify-command`, `notify-url`
 and your own keys are set in the file.
 
@@ -5142,9 +5169,10 @@ and your own keys are set in the file.
 |---|---|
 | `isc config` | Prints a default settings file. |
 | `isc completions SHELL` | Prints completions for `bash`, `zsh` or `fish`. |
-| `isc version` | Prints this version and the running daemon's, and whether they can talk to each other. |
+| `isc version` | Prints this version and the running daemon's, and whether they can talk to each other. When a newer release is out, it says so in one more line. |
 | `isc kill-server` | Stops the daemon and every program it runs, and returns once the daemon is gone. |
 | `isc restart-server [--yes]` | Moves the daemon to this version with everything still running. If no daemon is running, it starts one. If you answer no, everything stays as it is and the command exits with status 1. |
+| `isc upgrade [--version X] [--check [--json]] [--yes]` | Installs the latest release over the copy you're running, after asking. `--check` only says what there is. If a package or Homebrew installed it, it prints the command that updates it instead. See [A new version installed underneath](#a-new-version-installed-underneath). |
 
 **Shell completions.** The packages install
 them for bash, zsh and fish. On a Mac they're also inside the application, in
@@ -5158,8 +5186,14 @@ isc completions bash > ~/.local/share/bash-completion/completions/isc
 
 Pressing Tab then offers commands and their options, and the session's live panes, tabs
 and projects wherever a command takes one, plus the states `isc status` takes and the
-sides `isc focus` takes. A project whose name a shell wouldn't read as one plain word, or
-that another project shares, is offered by its number.
+sides `isc focus` takes. It also offers the devices and machines your hub has (for `isc
+hub device rm`, `isc hub machine rm`, `ban` and `unban`), the names under `[hosts]`, and
+the commands `isc do` runs. A project whose name a shell wouldn't read as one plain word,
+or that another project shares, is offered by its number. A device or machine named that
+way isn't offered.
+
+The options `--host`, `--socket` and `--rights` are offered only on commands that take
+them: `isc upgrade` and `isc host` take none of them, and `isc daemon` takes only `--socket`.
 
 Asking never starts the daemon. If none is running, you still get commands and options. It
 asks the daemon at the default socket or `$INSENSICAL_SOCKET`, not one given with
@@ -5224,6 +5258,42 @@ to it, run `isc kill-server`, mend the file, and put it back as `state.json`.
 
 ### A new version installed underneath
 
+insensical looks for a new release once a day. The daemon asks GitHub, a minute after it
+starts and then about every 24 hours, and tells every window and `isc version` what it
+found. The request names only your version and your platform. Nothing else about you or
+your machine is sent. If you're offline, it does nothing and says nothing. To turn the
+daily look off, switch off **Check for updates automatically** on Settings > Hub, or set
+`check-for-updates = false`. Then insensical asks only when you press Check Now or run an
+update yourself.
+
+When a new release is out, the window's notice says "insensical 0.6.0 is out", with three
+buttons. It's never a desktop notification.
+
+- **What's New** opens the release notes in your browser.
+- **Update** installs it, as `isc upgrade` does, and then the notice says to restart. If a
+  package or Homebrew installed insensical, the button says **How to Update** and shows the
+  command to run, with a copy button. Nothing is installed for you. A copy no release
+  ships, such as a Linux window on arm64 or an Intel Mac, was built from source: How to
+  Update says "This copy was built from source. Build the new version the same way."
+- **Skip** hides that version in every window. You're told again when a newer one is out.
+
+Settings > Hub says the same in its **Version** row: the version you run, then when the
+daemon last checked, or the version that's out with What's New. **Check Now** looks at
+once, even with the daily look off. **Update** or **How to Update** works as in the
+notice. If a check or an update fails, the row says why in red.
+
+`isc version` prints one more line when a newer release is out, such as `insensical 0.6.0
+is available`, with what's new. If a package or Homebrew installed insensical, it also
+prints the command that updates it, and for a copy built from source, that it's built
+again the same way. No other `isc` command prints this. You can also watch the
+releases' Atom feed on GitHub.
+
+`isc upgrade` fetches the latest release and installs it over the copy you're running. It
+checks the download against the release's signed record first, and replaces nothing if
+they differ. If a package or Homebrew installed insensical, it prints the command that
+updates it instead. `isc upgrade --check` only says what there is. It never restarts the
+daemon: you move to the new version as below.
+
 Installing replaces files and nothing else. Your daemon and window keep working. The top
 bar says "insensical was updated. Restart to use the new version." `isc version` and `isc
 ls` say the same.
@@ -5267,6 +5337,19 @@ Across a move:
 Restarting won't give you a fresh daemon, for instance after it started with the wrong
 environment. For that, run `isc kill-server`, which ends every program, then run any
 command or open the window.
+
+**Remote hosts** run exactly your version. When hosts you're connected to run an older
+one, the notice says so, such as "2 remote hosts run 0.5.0", with **Update Them** (**Update
+It** for one) and **Not Now**.
+
+- **Update Them** updates each host in turn to this computer's version, never the latest.
+  The notice says how far it's got, such as "Updating agents, 1 of 2", and then how it
+  went. If a host's server would need a restart, its card asks you first.
+- A host where a package or Homebrew installed insensical isn't touched. The notice gives
+  the command to run there, with **Copy**.
+- **Not Now** hides the notice until this computer has a new version.
+
+This computer's own update or restart notice comes first.
 
 ### When the daemon goes away under an open window
 
@@ -5509,6 +5592,7 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `term` | The `TERM` a pane's program is told. `xterm-ghostty` gives programs every feature. `xterm-256color` is known on every machine, which matters over `ssh`, and has fewer. | `xterm-ghostty` |
 | `scrollback` | History each pane keeps, in megabytes, 1 to 200. | `10` |
 | `keep-scrollback` | Whether what panes show is saved when the daemon stops, so it's above a new shell next time. With `false`, nothing is saved and earlier files are removed as panes close. | `true` |
+| `check-for-updates` | Whether the daemon asks GitHub once a day for a new release. The request names only your version and platform. With `false`, it asks only when you press Check Now or update yourself. See [A new version installed underneath](#a-new-version-installed-underneath). | `true` |
 | `agents-at-once` | How many agents one agent can have open at once, started with `isc agent start`, 1 to 64 (section 11). | `8` |
 | `agents-deep` | How deep agents can start agents, 1 to 8. | `2` |
 | `tmux-shim` | Whether a program in a pane finds a `tmux` that insensical answers, so an agent that opens helpers in tmux panes opens them as panes here (section 11). While on, `tmux` in a pane isn't the real one. | `false` |
@@ -5648,7 +5732,7 @@ Run these in any terminal. Placeholders and options:
 | `isc host rm NAME` | Forgets a machine's name |
 | `isc host check NAME` | Meets the machine and prints four lines: reached and round trip, a working insensical version, server running, and what's open. A failing line says what to do. It changes nothing there. |
 | `isc host restart NAME [--yes]` | Restarts the server on a machine running an older version than its installed `isc`. It says what that comes to and asks; `--yes` doesn't. A server that can move keeps what runs in its panes. |
-| `isc host put NAME` | Puts this version's `isc` in `~/.local/bin` on a Linux machine over `ssh`, with no sudo. It says what it would write and asks; `--yes` doesn't. A server running there is left alone unless you say `--restart-server` or answer yes to a second question. |
+| `isc host put NAME` | Brings this version's `isc` to a machine over `ssh`, never a newer one. An `isc` there that can update itself runs `isc upgrade --version` for this version; if it can't reach GitHub, a Linux machine is sent a copy in `~/.local/bin` instead, with no sudo. One that a package or Homebrew owns is left alone, and you get the command to run there; one built from source is left alone too, and you're told to build the new version there the same way. It says what it would do and asks; `--yes` doesn't. A server running there is left alone unless you say `--restart-server` or answer yes to a second question. |
 | `isc proxy` | What `isc --host` runs on the other machine, through `ssh`. You don't run it yourself. |
 | `isc hub [--port N] [--listen ADDR] [--tls-cert FILE --tls-key FILE] [--name NAME]… [--guest-port N] [--guest-name NAME]…` | Serves insensical to a browser, on this machine only unless given a certificate. `--name` is another name browsers reach it by. `--guest-port` (7434) and `--guest-name` are the port and names of the door a public address leads to. See [In a browser](#in-a-browser) |
 | `isc hub setup` | Walks you through reaching this computer from a browser or phone: hub or joined machine, how you'll reach a hub, starting by itself, and adding a device with its code. It ends on the equivalent commands. |
@@ -5672,7 +5756,8 @@ Run these in any terminal. Placeholders and options:
 | `isc daemon` | Runs the daemon in the foreground |
 | `isc kill-server` | Stops the daemon and every program it runs, and returns once it's gone. The layout comes back the next time it starts. Also works on a daemon of another version. |
 | `isc restart-server [--yes]` | Moves the running daemon to this version while the programs in its panes keep running. It asks first; `--yes` skips the question. |
-| `isc version` | Prints this version and the running daemon's, with the protocol and terminal engine of each, the daemon's process number, and whether they can talk to each other |
+| `isc upgrade [--version X] [--check [--json]] [--yes]` | Downloads the latest release's signed record and this machine's file, checks the file against the record, and puts it in place of yours: `isc` alone, or `insensical` and `isc` from the tarball together. It asks first; `--yes` doesn't, and with no terminal and no `--yes` nothing is installed. Where the directory needs a password, it uses `sudo`. `--version` installs that release, older or not; without it, an older one is never installed. `--check` says what there is and installs nothing; with `--json` it prints one object, `{"running": "0.6.0", "latest": "0.6.1" or null, "update": ""}`, where `update` is empty if this copy can replace itself and otherwise says who updates it. A copy from a package or Homebrew isn't replaced: it prints the command that updates it. A copy no release ships, such as a Linux window on arm64 or an Intel Mac, was built from source: it says "This copy was built from source. Build the new version the same way." It exits with status 1 when there's a newer version and nothing was installed. The running daemon keeps running. |
+| `isc version` | Prints this version and the running daemon's, with the protocol and terminal engine of each, the daemon's process number, and whether they can talk to each other. When the daemon knows of a newer release, one more line says so and what's new |
 
 ### Files and directories
 
