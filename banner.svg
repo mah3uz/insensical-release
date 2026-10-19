@@ -57,11 +57,11 @@
   <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#logo-isc-ground)" stroke="#d8f4ff" stroke-opacity=".65" stroke-width="5"/>
 
   <g filter="url(#logo-lift)">
-    <rect x="112" y="112" width="288" height="288" rx="64" fill="url(#logo-metal)" stroke="#effaff" stroke-width="5"/>
-    <rect x="137" y="137" width="238" height="238" rx="45" fill="url(#logo-screen)" stroke="#668ac5" stroke-width="5"/>
-    <path d="m204 215 51 41-51 41" fill="none" stroke="#baf4f1" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M279 297h48" fill="none" stroke="#ffd783" stroke-width="20" stroke-linecap="round"/>
-    <path d="M164 159h98" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="6" stroke-linecap="round"/>
+    <rect x="81" y="81" width="350" height="350" rx="77.8" fill="url(#logo-metal)" stroke="#effaff" stroke-width="6.1"/>
+    <rect x="111.4" y="111.4" width="289.2" height="289.2" rx="54.7" fill="url(#logo-screen)" stroke="#668ac5" stroke-width="6.1"/>
+    <path d="m192.8 206.2 62 49.8-62 49.8" fill="none" stroke="#baf4f1" stroke-width="24.3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M284 305.8h58.3" fill="none" stroke="#ffd783" stroke-width="24.3" stroke-linecap="round"/>
+    <path d="M144.2 138.1h119.1" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="7.3" stroke-linecap="round"/>
   </g>
 
   <g clip-path="url(#logo-tile-clip)">

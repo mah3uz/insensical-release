@@ -5,6 +5,294 @@ its release notes.
 
 ## Unreleased
 
+## 0.5.0 - 2026-10-19 21:16 +06:00
+
+### Upgrading from 0.4.0
+
+What you'll meet differently, and what to do:
+
+- **A device paired with the hub reaches every machine joined to it**, with what it may do
+  on the hub and no code from that machine. Removing a device, or changing what it may do,
+  holds on every joined machine at once.
+- **A joined machine no longer pairs your own devices.** There, `isc hub device add` pairs
+  only a guest kept to one project or terminal, and that guest's notifications are the only
+  ones it keeps. Its Hub page has no Add a Device, and the window's sidebar says the Hub is
+  joined where it said Running.
+- **Joined machines are on your page by themselves.** A page paired with the hub lists
+  every machine joined to it, connected or not, ready to open. There is no Add a Joined
+  Machine and no machine code, and nothing to forget.
+- **`isc web` is now `isc hub`**, with the same commands under it. The systemd unit is
+  `insensical-hub.service`, and the Server page of Settings is Hub.
+- **The hub's files moved** to `~/.local/share/insensical/hub` (on a Mac, `~/Library/Application
+  Support/insensical/hub`), out of the settings folder. Pair your devices and join your
+  machines again after this version; `config.toml` stays where it was.
+- **Cookies, `isc web login`, `--trust-proxy` and `/enrol` are gone**, and `--local-visits`
+  is refused. A phone or browser paired before pairs again with a code (see "Devices pair
+  by a code").
+- **`isc web token` is now `isc hub device`** (`add`, `ls`, `rm`, `set`). JSON output says
+  device where it said token: `isc hub status --json` gives `devices`, and `isc hub push ls
+  --json` and `push test --json` give `device`.
+- **`isc hub device add --json` and `isc hub open --json` give the code** in `code`, as a
+  link, beside the address. The QR code in Add a Device holds that link.
+- **Interface colours changed.** The window is grey by default, and `isc tui` keeps the
+  theme's colours. See "The window".
+- **The agent limits are `agents-at-once` and `agents-deep`**, under Agents in the settings.
+- **Settings has no Changed page.** A setting you've changed is on its own page, where the
+  arrow beside it resets it.
+- **`isc ls` gives each pane a shorter line**: number, state, program, directory, name or
+  title and what its state is about, with `floating` or `minimized` only where it is. The
+  size is left out; `isc ls --json` still has it.
+- **`isc capture` prints only the end of a pane**, and `--trim` is gone. `isc wait --output`
+  takes a regular expression, and a new project's name follows `--new-project` itself. See
+  "Agents".
+
+### The hub and your devices
+
+- **Run a hub and join other computers to it.** `isc hub invite NAME` on the hub prints a
+  line, and `isc hub join` on the other computer takes it. A joined computer listens on
+  nothing, your devices reach it through the hub, and the hub can't read what passes.
+- **Join a Hub is always on the Hub page** of the window and `isc tui`, on any computer
+  that joined no hub. `isc hub join` and Join a Hub start `isc hub` if it isn't running.
+  A joined computer whose `isc hub` has stopped says "Not connected: isc hub isn't
+  running" and has a `Start` button.
+- **Manage joined computers from the window, `isc tui` or the command line.** On a hub,
+  **Machines** lists each computer with when it joined, removes one after asking, and
+  **Invite a Machine** gives the line to paste. `isc hub machine ls` and `rm`, `ban`,
+  `unban`, `leave` and `rekey` do the same, and `isc hub device rm --with-approved`
+  removes the devices one added.
+- **A joined machine offers only what a joined machine does.** Its Hub page says "Joined to
+  the hub at" and the hub's name, with Leave and its devices, and no switch, link,
+  Tailscale or public address. `isc hub open`, `invite`, `machine`, `ban`, `unban`,
+  `tailscale on` and `public on` are refused there, with a line saying to run them on the
+  hub.
+- **Joined machines are listed apart from remote hosts.** Each says how long it has been
+  connected ("Connected for 2h") and whether it is now. `isc hub machine ls --json` gives
+  `connected`, and `isc hub status --json` on a joined computer gives `joined`.
+- **Devices pair by a code and are known by their key.** Open the code's link, paste it,
+  scan it or type its twelve groups of five on the pairing screen. The browser keeps a key
+  of its own and stays paired until you forget it or remove its device.
+- **Typing a code on a phone is forgiving.** The field groups letters as you type and
+  counts them ("48 of 60"), and a refusal keeps what you typed and says what's wrong.
+  **Scan the Code** comes first, and **Pair** fills in once the code is whole.
+- **Approve a phone from one that's paired.** **Approve a Device**, in the page's
+  settings, lets in a new device that shows its own code, with no more than you may do and
+  at most three an hour. Both screens show the same three groups of letters, and you turn
+  on **The same as on the device** before **Approve** works.
+- **A device that may manage a computer can add another device**, giving it no more than it
+  has, at most three an hour. The computer says who added it, and a device whose end you
+  change later is held to the new end at once.
+- **A home-screen app on an iPhone stays paired** and opens at the page itself. One that
+  isn't paired yet says it pairs apart from Safari, with no error.
+- **Pair a device again without removing it.** `isc hub device pair-again NAME`, or **Pair
+  Again** on a device in the window, `isc tui` (`p`) and the page, makes a new one-use
+  code. The device keeps its name, icon, colour and rights, and the old browser works
+  until the new one pairs.
+- **Devices have an icon and a colour.** A device shows as a phone, tablet, laptop, desktop
+  or browser on a tile of one of ten colours. Both are guessed until you choose, in Add a
+  Device or with `--icon` and `--color` (`--no-icon` and `--no-color` take them away).
+- **Add a Device is clearer.** It shows the code typed as well as to scan, says when it's
+  used, closed or run out, and says in red when the code would lead a phone to an address
+  it can't reach. Each device lists the key of each browser and who added it, and the code
+  is drawn larger in a terminal with room.
+- **Reach every machine joined to your hub from one page.** Each machine is a heading in the
+  list, with "not joined" beside one that isn't connected. A page at a Tailscale name whose
+  link drops says Tailscale on the device may be off.
+- **A computer joined to your hub notifies your phone.** Turn notifications on in a device
+  paired with the hub, and a pane that waits, fails or finishes on any joined computer
+  reaches it, with that computer's name first. Press one to open that pane. **Tell this
+  device** covers every joined machine, and a guest hears of none.
+- **A joined computer can't crowd out the hub.** Its devices get a share of the hub's list
+  of its own, its notifications are posted in turn, and a computer whose share is full is
+  named by `isc hub status`, `isc hub machine ls` and the Hub page.
+- **Removing a device takes hold at once.** A removed device can do nothing more from its
+  page. A change asked from a page is made only if it arrives while the page is shown, and
+  one held back and delivered later is refused. `isc hub ban ID` also bans a device paired
+  only with the hub's own computer.
+- **A device keeps a limited number of sessions.** One known by its key holds 16 sessions
+  and 32 connections at once; one given one project, or made for the public address, holds
+  2 and 8.
+- **If the hub can't read `members.json`**, it goes on with what it read last and changes
+  nothing until it can, rather than lifting every ban. `isc hub open` no longer puts the
+  address on the command line of the program that opens your browser.
+- **`isc hub setup` walks you through reaching this computer** from a browser or a phone,
+  in a terminal. It asks whether this computer is the hub or joins one, how you'll reach a
+  hub, whether to start it after a restart and whether to add a device, then ends on the
+  address and the plain commands that do the same. A name typed with `http://` is refused.
+- **`isc hub device add` opens a form in a terminal** when you give no `--name`, and ends
+  on the code to scan. With `--name`, `--json` or no terminal it works as before.
+- **`isc hub autostart on` makes the hub start by itself, on a server too.** It sets up a
+  service for your user, moves the running hub into it and enables lingering, saying each
+  step. `off` removes only a service it wrote, and `status` says whether it's on. On a Mac,
+  opening insensical starts the hub again.
+- **`isc hub tailscale on` does what the Tailscale switch does** from the command line. It
+  prints the address and whether the hub comes back after a restart. `off` and `status`
+  go with it, and `isc hub status` says when Tailscale serves a different port than the
+  hub's, which used to show up as a 502.
+- **`isc hub status` no longer says now and then that the hub isn't running** while it is,
+  and `tailscale on` no longer starts a second one.
+- **The hub moves to a newly installed version** whenever your daemon has. Restart the
+  server after installing and the next browser gets the new page.
+- **A hub and the computers joined to it stay idle** when nobody is using them, and a phone
+  that opens the page gets its first screen at once.
+- **What you type to another machine goes only while it answers**, within a second and a
+  half. A slow line no longer lets keys land seconds after the screen they answered.
+- **The hub raises its limit on open files** as the daemon does, so many devices don't run
+  it out on a Mac.
+
+### Allow and Deny
+
+- **Insensical asks you before a program in a pane changes who can reach this computer.**
+  `isc hub device add`, `isc hub device set --far`, `isc hub open` and the device step of
+  `isc hub setup` ask first, in the window or `isc tui`. Nothing changes unless you press
+  **Allow**; Enter denies, and so does leaving it for two minutes.
+- **It asks even when the program leaves out `INSENSICAL_PANE`** or names another socket,
+  and on a Mac too. If it can't reach insensical to ask, the command says so and is
+  refused.
+- **With no window open, you're told on the desktop.** A notification and a mark on the
+  tray icon or menu bar appear, and a click opens a window with the question.
+
+### Agents
+
+- **`isc upload PANE FILE` gives an agent your files.** Each is kept in the pane's
+  directory, in `.insensical-uploads` (which git ignores), and its path is typed at the
+  cursor. A file is 50 MB at most.
+- **Agents start and talk to other agents.** `isc agent start codex "Review the diff"`
+  opens Codex in a new tab with that task, and `isc agent wait` returns `done` and its
+  reply, or `waiting` and its question. `isc agent tell`, `reply` and `answer` carry the
+  next prompt, the last reply and a permission answer, and `--quiet` asks a small question
+  with no pane. It works between Claude Code, Codex and Gemini CLI; `isc guide agents`
+  teaches it.
+- **Agent limits keep it in check.** One agent starts 8 at most, going 2 levels deep, both
+  set under Agents in the settings. A message is 64 KB at most, and `isc agent wait`
+  waits 30 minutes unless you give `--timeout`.
+- **`isc agent start` checks first.** It refuses an agent whose hooks aren't set up and
+  asks you to set them up. It starts agents found in `~/.local/bin` or `/opt/homebrew/bin`
+  even when the daemon began from the Dock, and leaves your keyboard where it is; `--front`
+  brings the agent forward.
+- **A started agent that hasn't heard from its hooks says `no word yet`.** After 30 seconds
+  its pane waits for you, saying what's likely (untrusted hooks in Codex, an untrusted
+  folder in Claude Code), and `isc agent wait` fails. After you set up Codex, **Open Codex
+  to trust them** opens a tab where `/hooks` trusts them.
+- **Started agents are listed under the agent that started them** in the sidebar, joined by
+  a line. In the activity list a started agent's row says `waiting · from Claude`, and its
+  starter's says `working · 3 started`. A permission question says what the tool would act
+  on, as `Needs permission: Bash · git push origin main`.
+- **A message goes in only while the agent still runs in its pane.** After it has quit, a
+  message is refused rather than typed at the shell.
+- **Coding agents can use insensical.** Ask in your own words, and the agent opens tabs and
+  panes, runs things beside it, reads what a pane shows and types into one you named.
+  `isc integrate` and the top bar's "Set up" give each agent a skill and a note beside its
+  hooks, `isc integrate --status` says what's current, outdated or missing, and `isc guide`
+  prints what the agent is taught. Agents set up before are offered the new parts.
+- **`isc tui` offers to set up the agents it finds**, as the window does, with "Set up 2
+  agents" at the end of the sidebar. The question lists every file it changes before
+  `Enter` sets them up, and `N` says never.
+- **A pane can keep agents out.** Choose Keep agents out of this pane in the palette, or
+  run `isc protect PANE`. A program in another pane can then neither read it, wait on it
+  nor type into it, and is told so with exit status 4. Its header and sidebar row show a
+  crossed-out robot, and only you let agents in again.
+- **Keeping agents out is hard to get round.** A terminal a program opens from a pane is in
+  that pane, `setsid` doesn't take it out, and a program can't answer its own pane's
+  prompt or notify in the name of a pane that keeps agents out. The manual says what still
+  gets past it.
+- **`isc capture` prints just the end of a pane**, at most 4 KB, and says how much was left
+  out. `--last` prints the latest command's output and how it ended, `--screen` what's in
+  view, `--tail N`, `--grep PATTERN` and `--context N` cut it further, `--since TOKEN`
+  prints only what's new, and `--all` prints everything. `isc history PANE` lists the
+  commands run in a pane, with when, how long and how each ended.
+- **`isc wait` and `isc ask` wait for the right thing.** `isc wait --prompt` waits for the
+  command at a shell to end and exits with its status, `--quiet SECONDS` for a pane to go
+  silent, and `--address` for an address to show. `isc ask PANE TEXT` types a line, waits
+  for the answer and prints only it. A pane that's printing isn't typed into unless you say
+  `--anyway`.
+- **`isc run` and `isc split` do more.** They take `--name`, `--background`, `--wait` (print
+  the end of the output and exit with the command's status), `--keep` and `--json`. A pane
+  opened from another remembers it, `isc ls` shows `opened by pane:3`, and `isc close
+  --opened` closes what the pane you run it in opened, leaving a pane you've used.
+- **`isc ls` can filter.** `--program NAME`, `--state STATE`, `--opened` and `--here` list
+  only matching panes. Wherever a command takes a pane or a tab, its name works as well as
+  its number; a name that fits several lists them and exits with status 3.
+- **More agents are known.** Cursor CLI, Copilot CLI and Hermes now report what they're
+  doing, and `isc integrate` finds them. Cursor CLI can't say when it's waiting, and Hermes
+  needs `hermes plugins enable insensical` afterwards.
+- **About six hundred programs have their own icon**, up from about two hundred: agents,
+  databases, clouds, build tools, languages and everyday apps. The manual's "Tile" table
+  names the main ones.
+- **Windows with many agents stay light.** The window repaints only an agent's turning mark
+  while it works, and the activity list no longer slows with hundreds of panes.
+
+### The window and `isc tui`
+
+- **The app icon is a raised terminal chip on a glossy blue tile**, and on a Mac the menu bar
+  shows the chip in its own colours.
+- **The window is grey by default**, near-black on a dark desktop and near-white on a light
+  one. `interface-style = "terminal"` (the switch Follow terminal theme) gives you the
+  theme's colours again. The window asks your desktop to blur what's behind it; turn that
+  off with `background-blur = false`.
+- **Settings are calmer.** Names are brighter, cards stand further apart, and a setting has
+  a few quiet words under its name only where the name doesn't say it all. Each remote host
+  is one card that folds to its first row, and healthy hosts start folded where you have
+  several.
+- **The settings' icons are drawn for their tiles**, and machines have icons of the same
+  make: server, laptop, desktop, mini PC, NAS, board, phone, container or cloud. A project
+  can take one of thirteen marks (`isc project icon --mark`), and `isc host set --icon`
+  takes the new machine icons.
+- **Dialogs over the settings sheet are calmer and keep the keys.** `Tab` goes round the
+  dialog's own controls, `Space` and `Enter` press only its buttons, and closing it gives
+  the keys back. Cancel is grey, and only the button Return presses is filled.
+- **`isc tui`'s settings are calmer.** A switch is one row with its knob at the end it's
+  turned to, a two-value setting marks the one in force with a filled dot, and what a
+  setting does is said under its row. Wide enough, the headings are listed down the left.
+- **`isc tui`'s settings have three pages**: **Settings**, **Remote Hosts** and **Hub**.
+  `1`, `2` and `3` go to a page. Hub does what the window's does, and Remote Hosts adds,
+  renames and forgets a machine and answers what `ssh` asks of it.
+- **The window speaks to screen readers.** Buttons, tabs, the sidebar, switches, choices,
+  menus, sheets and questions have names and states, and a notice is read out as it
+  arrives. `Tab` and `Shift+Tab` stay inside a sheet, and the settings' sections turn with
+  `Ctrl+Tab` and `Ctrl+Shift+Tab`. `motion = "system"` follows the desktop's
+  reduced-motion setting.
+- **Nothing steps to its next value on a press.** A choice of two shows both words and you
+  click one, a choice of more opens a menu under it, and on and off is a switch. A number
+  has − and +. In `isc tui` the arrows, Home and End move in a list, Enter chooses, and
+  Esc closes it.
+- **Menus look and work alike.** The `+` menu and dropdown settings open the same solid
+  menu, walked with the arrows, Home and End, Enter and Escape, or a letter. A tall menu
+  scrolls and keeps your row in view. A machine's colour and icon, a new device's rights
+  and a share's end are chosen from a dropdown.
+- **The top bar and the sidebar are tidier.** With tabs along the top, the bar says where
+  you are and is 4 pixels shorter, giving the panes more room. Drag the sidebar's right
+  edge to make it 190 to 520 pixels wide, and the next window opens at that width.
+- **Every field is a proper field**, in the window and in `isc tui`. The caret moves by
+  character and word, Shift selects, and typing over a selection replaces it. There is
+  undo and redo, and in the window copy, cut and paste, and double and triple press select
+  a word and a line. A secret shows dots.
+- **The palette's switches say which way they go**, as in Silence this pane's notifications
+  or Let this pane's notifications through. Either way's words find it.
+- **The window has a title, `insensical`.** A common Hyprland rule for empty popups no
+  longer catches it and shows your wallpaper sharp instead of blurred.
+
+### The browser page
+
+- **Home**, the first tab on a phone, shows every project as a card in a section for each
+  machine. A card says what runs there, and a tap opens the pane that needs you, else the
+  one at work, else the one you used last. With nothing waiting, **All quiet** is a line at
+  the top. Home no longer slides sideways on a phone.
+- **Add photos and files to a pane from your phone or browser.** The paperclip in a pane's
+  bar, or its header on a wide screen, opens your photos and files. Each is kept on the
+  pane's machine and its path is typed at the cursor, so an agent there can read it.
+- **This browser**, the page's menu, is laid out as a phone's own settings are. It has
+  one-line rows in groups, **Icon** and **Theme** on pages of their own, and each device
+  on one line in **Settings**, with **Pair Again** and **Remove** on its page. Dialogs with
+  a field open at the top of the screen so the keyboard doesn't cover them.
+- **In the page's list**, a tab's panes hang from it by a thin line and sit further in, so
+  you can tell which pane is whose. A tab that is one pane is listed level with the others.
+- **A notice on a phone** such as "arch-3s06 added" is drawn above the Everything and
+  Activity switch, not over it.
+- **A pane you open while the page is reconnecting** has its bar of keys at once, instead of
+  hiding it until you open the pane again.
+- **A paired phone or browser isn't asked to pair again** when the hub just can't be reached.
+  The page says "Can't reach" and tries again by itself.
+
 ## 0.4.0 - 2026-10-13 05:17 +06:00
 
 This release takes insensical beyond one desk. `isc web` puts your panes in a browser or
