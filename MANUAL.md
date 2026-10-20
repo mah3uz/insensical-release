@@ -192,7 +192,7 @@ says the server cannot be reached.
 ### The icon
 
 The icon is a raised terminal chip with a prompt on a glossy
-blue tile. A launcher shows it from the desktop entry. A taskbar or switcher shows it for
+blue tile; at 16 to 32 px, in a tray or a notification, it is the chip alone. A launcher shows it from the desktop entry. A taskbar or switcher shows it for
 a window only if the desktop can match the window to that entry, so the window names
 itself `insensical`.
 
@@ -342,8 +342,8 @@ These let you reach your machines from one place.
 - One of your machines is your **hub**: where `isc hub` runs, reachable by your devices
   on your network, your tailnet or the internet.
 - Your other **machines** join it: `isc hub invite` on the hub makes a line, and
-  `isc hub join` on the other machine takes it. A joined machine listens on nothing. Its
-  `isc hub` dials the hub, and your devices reach it there.
+  `isc hub join` on the other machine takes it. A joined machine doesn't listen on the
+  network. Its `isc hub` dials the hub, and your devices reach it there.
 - A **device** pairs with the hub once, by a code, and is known by its key from then on.
   It reaches every joined machine with no further code, and its page lists them.
 - What a device and a machine say to each other is sealed for the two of them. The hub
@@ -413,8 +413,8 @@ zoom, the leader's panel, the restart question) don't.
 
 ### What the window does not remember
 
-The window remembers its size, whether tabs were hidden, the sidebar's width, and which
-projects and tabs you folded. It doesn't remember its position, and a new window always
+The window remembers its size, whether tabs were hidden, the sidebar's width, which
+projects you unfolded and which tabs you folded. It doesn't remember its position, and a new window always
 opens with its keys unlocked.
 
 ### Two windows
@@ -470,7 +470,8 @@ machine" in the palette and "Add Remote Host" in the settings sheet do the same.
   beyond. Point at it for the figure. It's struck through and red while the machine is out
   of reach, and pointing says why.
 - **A machine with another version of insensical says so under its heading**, as in "atlas
-  has insensical 0.2.1, and this computer has 0.3.0". "Update it" offers to put this version
+  has insensical 0.2.1, and this computer has 0.3.0", and a notice tells you once for each
+  version there, in case the heading is folded. "Update it" offers to put this version
   there. If the machine has the newer one, update this computer, then press "Try again".
 - The filter, going to the pane that needs you, "Next project" and "Previous project" all
   cover every machine. The overview groups projects under each machine, and the palette says
@@ -924,8 +925,10 @@ header, notifications and `isc ls`.
   default keys). Where the name isn't written on screen, such as a one-pane tab with no
   name, a small card asks.
 
-**Folding.** The mark at the start of a project or tab row hides what's under it. The next
-window opens with them folded. While the filter has text, matches show even inside
+**Folding.** The mark at the start of a project or tab row hides what's under it. Every
+project starts folded, one you add later too, so a long list reads by name first. Unfold
+the ones you work in: the next window opens with them unfolded, and tabs you folded stay
+folded. While the filter has text, matches show even inside
 something folded.
 
 **Filtering.** Type in the field to narrow the tree to projects, tabs and panes whose
@@ -1842,11 +1845,14 @@ crossed-out robot.
 - `isc ls` in another pane still lists it, ending in `keeps agents out`, with its title,
   tasks and running command left out.
 - You aren't refused anything: the window, `isc tui` and `isc` in a terminal outside
-  insensical work as ever. `isc` run in another pane is refused, whoever typed it. A
-  terminal you open from a pane is in that pane too.
+  insensical work as ever. `isc` run in another pane is refused, whoever typed it, and
+  so are `isc --host` and `isc tui --host` run in a pane, on the other machine, once
+  you've let agents on other machines in. A terminal you open from a pane is in that pane too.
 - Only you let agents in again: `isc protect --off` run in a pane is refused.
 - It holds back an agent that follows what it's told. It isn't a wall: a program that
-  runs as you, or that leaves the pane altogether, can't be told from you.
+  runs as you can't always be told from you. One that leaves the pane, such as tmux or
+  `setsid` at a shell, counts as you, and so does `isc --host` run in a pane without
+  `INSENSICAL_PANE`.
 
 > [!WARNING]
 > Letting an agent run `isc` lets it do anything you can. `isc run`, `isc split` and
@@ -1865,7 +1871,7 @@ Both need their hooks set up.
 |---|---|
 | `isc agent start AGENT TASK` | Opens the agent in a new tab, leaving your keyboard alone; `--front` brings it forward. `--name NAME` refuses while a pane of that name is there. |
 | `isc agent wait` | Waits for a turn to end. `--timeout` sets how long; it exits with status 124 when it runs out. |
-| `isc agent tell PANE "MESSAGE"` | Pastes a message as the agent's next prompt. While the agent works, it goes in when the turn ends. |
+| `isc agent tell PANE "MESSAGE"` | Pastes a message as the agent's next prompt. While the agent works, it goes in when the turn ends; if a program the agent started has the terminal then, such as a pager, it goes in ahead of the next message you tell it, or when the next turn ends. |
 | `isc agent reply PANE` | Prints the last whole reply again. |
 | `isc agent answer PANE yes`, `no` or words | Answers a permission prompt. Words refuse it and go in as the next prompt. |
 | `--quiet` on `start` | Runs the agent's one-question mode (`claude -p`, `codex exec`, `gemini -p`) with no pane and prints only its answer. |
@@ -1884,11 +1890,21 @@ Both need their hooks set up.
   opened: its agent's questions are yours.
 - A started agent can ask its starter something by ending its turn with the question. The
   starter's `isc agent wait` returns at once, and it answers with `isc agent tell`.
-- Only an agent's own hooks say which agent it is and what it replied.
+- Only an agent's own hooks, or the plugin that `isc integrate` writes for opencode, pi and
+  Hermes, say which agent it is, so `tell` and `answer` work with those too. pi and Hermes
+  also pass on what they replied, so `isc agent reply` and `wait` show it. opencode doesn't:
+  its end-of-turn event carries no text.
 
 So a mistake can't run away, one agent can have 8 agents open at once, and agents started
 by agents go 2 levels deep. Change them under Agents in the settings sheet, or with
 `agents-at-once` and `agents-deep` in `config.toml`.
+
+**Agents on other machines are kept out.** An agent that runs `isc --host` or `isc tui
+--host` from a pane on another machine is refused here, and told how to let it in: turn on
+"Can agents on other machines use this computer?" under Agents in the settings sheet, or
+run `isc config set agents-from-other-machines true`. It takes effect at once. It's about
+agents only: you at a terminal of your own on another machine, the window, `isc hub` and
+agents on this computer aren't affected.
 
 ### Setting up from the window
 
@@ -2795,7 +2811,7 @@ isc config reset font-size      # takes the line out, which leaves the default
 - These work for the settings in the table in section 19, not for the `[keys]` tables.
 
 **Some settings are the daemon's, and the rest are the interface's.** The daemon's are
-`shell`, `agents-at-once`, `agents-deep`, `term`, `scrollback`, `keep-scrollback`,
+`shell`, `agents-at-once`, `agents-deep`, `agents-from-other-machines`, `term`, `scrollback`, `keep-scrollback`,
 `tmux-shim`, `clipboard`, `notifications`, `notify-waiting`, `notify-failed`, `notify-done`,
 `sound`, `long-command`, `tray`, `notify-command`, `notify-command-when`, `notify-url`,
 `notify-url-when`, `notify-url-body`, `notify-url-headers`, `notify-url-token`,
@@ -2898,11 +2914,15 @@ The pages:
     Version row has `Check Now`, and `Update` when a new release is out, with the switch
     **Check for updates automatically** under it. See [A new version installed
     underneath](#a-new-version-installed-underneath). Under
-    **Connected** is everything looking at this computer's terminals, with what each can do
-    and for how long. `Disconnect` ends one; for a named browser or phone, `Disconnect and
-    Remove Device` also ends its pairing.
+    **Connected** is every window, browser, `isc tui` and the hub's notifications looking
+    at this computer's terminals, with what each can do and for how long. `Disconnect` ends
+    one, with all its connections; for a named browser or phone, `Disconnect and Remove
+    Device` also ends its pairing.
   - **Access from your other devices**: the switch **Open in a browser or on your phone**
-    starts and stops `isc hub` for this computer. While it's on you can open a browser
+    runs `isc hub start` and `isc hub stop` for this computer, and says what keeps it
+    running: systemd, insensical when it opens, or a terminal. While it's on,
+    `Restart Hub` runs `isc hub restart`. If the hub runs an older version than the one
+    installed, the row says so and `Restart Hub` stands out. While it's on you can open a browser
     here with `Open in Browser`, copy a sign-in link for another, and turn on **Reach it
     from anywhere on your tailnet**. **Notifications on your devices** counts the devices
     that asked for them, and `Send a Test` tries each. See [Reaching isc hub from another
@@ -2917,10 +2937,12 @@ The pages:
     a Machine`. **Join a hub** (on any computer that joined none) has `Join a Hub`, where
     you paste the invite line. See [Joining another machine to your
     hub](#joining-another-machine-to-your-hub).
-  - A computer that joined a hub shows **Joined to the hub at** in place of the switch:
-    the hub's name, whether it's connected, `Start` if `isc hub` isn't running, and
-    `Leave`. It has no browser link, Tailscale row, Joined machines or Add a Device, since
-    your devices reach it through the hub.
+  - A computer that joined a hub has the same switch and `Restart Hub`, then **Joined to
+    the hub at** with the hub's name, whether it's connected, and `Leave`. **Your devices
+    are managed on** the hub: you add and remove them in Settings > Hub there. It has no
+    browser link, Tailscale row, notifications row, Joined machines or Add a Device, since
+    your devices reach it through the hub. **Guests** lists the guests it shared something
+    with; devices paired here before it joined aren't listed, since they can't reach it.
 - **Interface** has four cards: **Panes** (density, space between panes, pane header),
   **Tabs and sidebar** (where the tabs are, what the sidebar lists), **Terminal text**
   (terminal font, text size, ligatures) and **Window** (interface font, motion). The
@@ -2970,7 +2992,8 @@ The pages:
     `notify-command-when`. Giving an ntfy topic also sets `notify-url-body` to `text`.
     `notify-url-headers` is set only with `isc config set`.
 - **Agents** starts with how many agents one agent may start and how many levels deep, each
-  a number between − and +. Under them is each agent it knows and whether it reports what
+  a number between − and +, and a switch for whether agents on other machines can use this
+  computer. Under them is each agent it knows and whether it reports what
   it's doing: it does, it doesn't, its hooks are stale (they name an `isc` that's gone), or
   the agent isn't on this system. `Set up` asks before adding hooks, as in
   [section 11](#11-agents).
@@ -3515,30 +3538,36 @@ otherwise. Looking, typing and refused requests aren't reported.
 
 ### Who is connected
 
-`isc clients` shows everything connected to the daemon, so you can see who can do what.
+`isc clients` shows who is connected to the daemon, so you can see who can do what.
 
 ```
-client:12  window  on desk  0.3.0  look,type,arrange,manage  pid 4121  looking at pane:3  for 512s
-client:19  program  on desk  0.3.0  look,type,arrange,manage  pid 9120  in pane:7  for 0s
+session:12  desk · App  0.7.0  look,type,arrange,manage  6 connections  pid 4121  looking at pane:3  for 512s
+session:31  kitchen tablet · Browser  0.7.0  look,type  2 connections  pid 3990  through `isc proxy` (claimed, not verified)  for 40s
 ```
 
-Each line has the client's number, its kind (`window`, `terminal` for the interface in a
-terminal, `command-line`, `program` for a command run inside a pane, `web` or `other`),
-the machine it runs on, its version, its rights, the process at the other end of the
-socket, the pane it's looking at, and how long it's been connected. A window makes a
-connection for each pane it shows, so it has several lines.
+Each line is one session: a window, a browser, `isc tui`, or the hub's notifications.
+A window holds a connection for each pane it shows, one for its notifications and one
+for itself, and they're all one session. A line has the session's number, the machine
+it's on (or a browser's device) and what it is, its version, what its connections can
+do between them, how many there are, the process at the other end of the socket, the
+pane it's looking at, and how long it's been connected.
 
+- A command you run, and a program in a pane, aren't listed. They come and go too often
+  to be worth a line, and nothing is told when they do.
 - A guest's browser, paired with `isc hub device add --only`, shows what it's kept to:
   `only project 4` or `only pane:12`.
-- `isc clients --json` prints all of it, with each client's `scope`: `{"project": 4}`,
-  `{"pane": 12}`, or `null` for a client that sees everything.
+- `isc clients --json` prints all of it, with each session's `scope` (`{"project": 4}`,
+  `{"pane": 12}`, or `null` for one that sees everything) and its `connections`.
 
-**Putting a client off.** `isc disconnect 12` (or `client:12`) cuts that client's
-connection and tells it you ended it. It needs the right to `manage`. With `--host NAME`
-it acts on that machine's server.
+**Putting a session off.** `isc disconnect 12` (or `session:12`) ends every connection of
+that session and tells it you ended it: a window's panes and its notifications go with
+it, and it connects again only when you press Enter in it. It needs the right to
+`manage`, and you can't end your own. With `--host NAME` it acts on that machine's
+server.
 
-- A browser paired through `isc hub` shows as `web`, one line for each connection. Putting
-  those off doesn't unpair it. To keep it out, remove its device with `isc hub device rm`.
+- Each browser is a session of its own, named by its device: two browsers paired as
+  the same device are two lines. Putting one off doesn't unpair it. To keep it out,
+  remove its device with `isc hub device rm`, which ends all its sessions.
 
 **Rights.** A connection has up to four:
 
@@ -3820,7 +3849,7 @@ answer it, and it can notify you when you're away. On a wide screen it's the sid
 the tab in front. Anywhere, you can open a pane, read it, scroll back, and type into it.
 
 It's a separate program that runs only when you ask for it (you start it, join a hub, or
-turn on autostart), and a client of the daemon like the window. The daemon still listens
+turn it on), and a client of the daemon like the window. The daemon still listens
 on nothing but its socket.
 
 ### Starting isc hub
@@ -3843,7 +3872,7 @@ isc hub setup
    hands it to `isc hub join` and nowhere else, so it stays out of your shell history and
    scrollback. A joined computer dials the hub, so there's no Reach step.
 3. **Keep running.** Where systemd runs for your user, choose whether the hub starts after
-   a restart. **Yes** is `isc hub autostart on`.
+   a restart. **Yes** is `isc hub start`.
 4. **Add a device.** **Yes** opens the form that asks what to call your phone and shows
    the code to scan. On a joined computer, the code pairs at the hub's address.
 5. **Done.** It shows the address, who's paired, and the plain commands that do the same
@@ -3861,8 +3890,57 @@ isc hub
 
 It listens at `http://127.0.0.1:7433`, this machine only. `--port 8000` picks another
 port. It runs until `Ctrl`+`C` or `isc hub stop`, which also stops the window starting it
-again. `isc hub status` says whether it's running and where; `--json` adds a `tailscale`
-object with `state`, `address` and `serves_port`.
+again. In a terminal, `isc hub` tells you that `Ctrl`+`C` stops it and that `isc hub
+start` keeps it running in the background, and says so when it stops.
+
+`isc hub status` says whether it's running, where, and what keeps it running (systemd,
+launchd, the window or a terminal). If it's an older version than the installed one, it says so and that
+`isc hub restart` moves it. On a joined machine it names the hub and whether it's
+connected. `--json` adds `owner` (`systemd`, `launchd`, `window` or `terminal`), `version` and
+`installed`, and a `tailscale` object with `state`, `address` and `serves_port`; a joined
+machine's leaves out `door`, `tailscale` and `members`, and `devices` counts its guests.
+A second `isc hub` or `start` that finds one running says where and what keeps it. On a
+Mac, status also says the hub keeps the Mac awake while it's on power.
+
+The hub keeps what you start it with. `--name`, `--port`, `--listen`, `--tls-cert` with
+`--tls-key`, `--guest-port` and `--guest-name` each replace the one it kept, and the next
+`isc hub` uses them, however it's started. What you leave out stays as it was. `--name ''`
+takes the names away, and so does `--guest-name ''`; `--listen ''` and `--tls-cert ''
+--tls-key ''` go back to this machine alone, unencrypted. A value it can't run with is
+refused, and nothing changes.
+
+To turn it on and keep it running:
+
+```
+isc hub start
+```
+
+It takes the same options as `isc hub`. With systemd for your user, it switches
+`insensical-hub.service` on (writing one for the `isc` you ran if none is installed), and
+the hub comes back after you log in. On a Mac, launchd keeps it running: it comes back
+after you log in, and if it ends without `isc hub stop`. Without either, it starts the hub
+on its own in the background, keeps what the hub says when it fails in `hub.log`, and
+starts it again when you open the window. If the hub is already running, `start` says so,
+or, if you gave other options, starts it again with them and then keeps it running. A
+service file `start` wrote for another `isc`, such as a build you've since removed, is
+written again for this one, and one that hides the service installed with insensical is
+taken away. `isc hub stop` stops it now and turns it off: the service is switched off,
+launchd lets it go, and the window doesn't start it again.
+
+To change a setting while it runs, or just to start it again:
+
+```
+isc hub restart --name desk.example.ts.net
+```
+
+It takes the same options. The hub starts again as the installed `isc`, on the port it
+has, and says what changed. The port stays held the whole time, so no connection is
+turned away. Your devices reconnect by themselves. If the hub can't start with what you
+gave, say a port something else holds, it starts again as it was, keeps its settings, and
+`restart` tells you why. `start` on a hub that's off does the same: it starts with the
+settings it kept and writes nothing new. It works however the hub
+was started: in a terminal, by a service or by the window. A hub from before it could
+start itself again is stopped and started again where it was started from.
 
 **Open it in your browser on this computer**
 
@@ -3990,9 +4068,16 @@ Nothing is sent until the code checks, so a typo uses nothing up.
   browsers.
 - **Scan the Code** on the page opens the camera, where the browser may use one.
 - **A home-screen app is a browser of its own.** On an iPhone, the page you add to the
-  home screen doesn't share Safari's pairing. Give it a code of its own, and scan with
-  **Scan the Code** in the app, not the Camera app, which would open Safari and use the code
-  up.
+  home screen doesn't share Safari's pairing, so Safari hands it one: press **Add** where
+  the page offers the home screen, and it becomes a device of its own, named after yours,
+  as in `iPhone · home screen`. It may do what yours may and ends when yours does. Its code
+  works once, for 10 minutes, and counts among the devices added from pages. If nothing
+  paired by then, the device is removed and Safari offers the home screen again. A guest's
+  page doesn't hand over: a guest's app pairs by a link of its own. Your computer
+  tells you it was added, `isc hub device ls` lists it beside yours, and you remove or ban
+  each apart. If the app still asks to pair, give it a code of its own and scan with
+  **Scan the Code** in the app, not the Camera app, which would open Safari and use the
+  code up.
 - **A paired browser opened at a link with a code** says it's already paired. The code
   isn't used and still pairs the device it was meant for.
 
@@ -4019,8 +4104,8 @@ The second code pairs up to two browsers in the next hour. Rights are set on the
 A device with only `look` can read every pane and its history, and can't type, resize or
 change anything. The daemon refuses, so a page somebody wrote themselves gets no further.
 It doesn't count as you looking: a pane open in that browser still notifies you. See [Who
-is connected](#who-is-connected). `isc clients` lists a browser as `web`, under its
-device's name.
+is connected](#who-is-connected). `isc clients` lists a browser under its device's name,
+as in `kitchen tablet · Browser`.
 
 **Make a device that ends by itself.** To pair a co-worker's or client's browser for a
 while without having to remove it:
@@ -4140,7 +4225,8 @@ everything the terminal has shown, including what was printed before you shared 
 renames anything, and never changes a setting.
 
 **What a guest never gets.** Notifications, the Settings screen, the list of devices, and
-making a device. A guest looking at a terminal doesn't mark it seen, so you're still
+making a device, one for their home-screen app included: on an iPhone that app needs a
+link of its own. A guest looking at a terminal doesn't mark it seen, so you're still
 notified.
 
 > [!WARNING]
@@ -4259,11 +4345,14 @@ The second and third give it to a device that's already paired, and take it back
 - **Each machine is a heading over its projects.** This computer is first, then the others
   in the order your settings have them. A device without `--far`, and a guest, see nothing
   about other machines.
-- **A machine is folded until you open it.** Press the arrow on its heading. That's what
-  connects to it, so a machine you never open costs nothing. The browser remembers which you
-  had open.
-- **Home and the counts cover every open machine.** Each card says which machine it's on,
-  and an answer goes to that machine. A folded machine isn't counted.
+- **The page connects to every machine on its own.** What needs you isn't sorted by where
+  it runs, so you don't open a machine to see it. Connecting never starts anything there.
+- **The arrow on a heading only hides its rows.** The machine stays connected and counted,
+  and the browser remembers which you folded.
+- **If a machine's server isn't running**, its heading says so. If the device may arrange,
+  a **Start** button starts the server there. Nothing else does.
+- **Home and the counts cover every machine.** Each card says which machine it's on, and
+  an answer goes to that machine. A machine you can't reach shows its heading and why.
 - **A terminal on another machine has a chip** in its header with the machine's icon and
   name. No chip means this computer. What you type goes only to the terminal you're looking
   at.
@@ -4280,7 +4369,10 @@ The second and third give it to a device that's already paired, and take it back
 - **Needs a password.** `ssh` would ask for a password or passphrase, so nothing retries
   by itself. Fix it as "When the machine can't be reached" says under [Other machines, over
   ssh](#other-machines-over-ssh), then press **Try again** under the machine's heading.
-- **Another version.** Install the same version on both machines, then press **Try again**.
+- **Another version.** The page says once which side is older and stops dialling. Run
+  `isc upgrade` on the older one, then `isc restart-server` there, then press **Try again**.
+- **Not connected, "the insensical running on" your computer "is older".** The daemon there
+  is older than the hub that serves the page. Run `isc restart-server` on that computer.
 - **Closed: it sent what no machine sends.** That machine sent something no insensical
   sends, or listed more than 4,096 terminals, tabs or projects. The page closes it and shows
   nothing of it, so it can't pass for another of your machines. Fold it and open it again to
@@ -4303,8 +4395,12 @@ and the server refuses if they ask. It covers the computer `isc hub` runs on.
   server, a topic, and a token if your server needs one) or another web address. It has a
   switch for only when you're away, a test, and under More options the rest, including a
   command.
-- **Connected now** says what is connected and what it may do. **Disconnect** cuts one
-  off, as `isc disconnect` does. This page's own row has no button.
+- **Connected now** says what is connected and what it may do. Each row names the
+  machine first, then what it is: `arch · App`, `arch · Terminal`. A browser is named by
+  its device, as in `kitchen tablet · Browser`. Commands and programs in panes aren't
+  listed. **Disconnect** ends one with all its connections, as `isc disconnect` does. This
+  page's own row has no button, and neither has **Hub notifications**, which is how the
+  hub tells your phone.
 
 Nothing else of the server's settings can be changed from the page. The page is never
 given a token or password back, only its last few characters, and **Clear** takes it out.
@@ -4373,10 +4469,10 @@ name, and has Tailscale serve it on port 443 of that name, to the devices on you
 It prints the address, such as `https://desk.example.ts.net`. If no device is paired yet,
 it ends with `isc hub device add --name phone`.
 
-It also says what happens after a restart. With `insensical-hub.service` installed and on,
-the service starts again when you log in; without it, nothing starts the hub again unless
-you open the window. Either way it names `isc hub autostart on` to fix that, and never
-changes lingering itself.
+It starts the hub as `isc hub start` does, then says what happens after a restart. With
+`insensical-hub.service` on, the service starts again when you log in, or with the
+computer where lingering is on. On a Mac, launchd starts it again when you log in. Without
+either, the window starts the hub again when you open it.
 
 If Tailscale isn't installed, isn't signed in, or isn't answering, it says which and
 changes nothing. If Tailscale already serves something else on port 443, it says what and
@@ -4398,35 +4494,49 @@ To do it by hand, `tailscale serve 7433` gives the machine an `https` address in
 tailnet. Start `isc hub` with that name, `isc hub --name desk.example.ts.net`, and add the
 device with `--url` and that address.
 
-**Start by itself**
+**Keep it running**
 
 ```
-isc hub autostart on
+isc hub start
 ```
 
-This does what this computer needs for `isc hub` to come back after a restart, and says
-each thing it did. It does only what's missing, in this order:
+This turns the hub on and keeps it running, and says each thing it did. With systemd for
+your user, it does only what's missing, in this order:
 
 1. Writes `insensical-hub.service` to `~/.config/systemd/user/` (or under
    `$XDG_CONFIG_HOME`), running the `isc` you ran. A service a package installed is never
    written over.
-2. Switches the service on and starts it. A server running on its own is restarted from
-   the service with the same names and port.
+2. Switches the service on and starts it. A hub running on its own is restarted from the
+   service with the same settings and port.
 3. If your user's services don't run with nobody logged in, runs `loginctl enable-linger`
    for you. If you aren't allowed to, the service is still on and it tells you to run `sudo
    loginctl enable-linger NAME` to start with the computer.
 
-Run again with everything in place, it changes nothing and says so.
+Run again with everything in place, it changes nothing and says so. The service runs a
+plain `isc hub`: the settings come from the file the hub keeps.
+
+On a Mac, it writes `~/Library/LaunchAgents/com.insensical.hub.plist`, running the `isc`
+you ran, and hands it to launchd. launchd starts the hub now, again each time you log in,
+and again if it ends any way but by `isc hub stop`, such as by crashing. A hub running on
+its own is started again by launchd, with the same settings and port. What the hub says
+goes to `~/Library/Logs/insensical/hub.log`. If the window used to start your hub, the
+next time it does, launchd takes over.
+
+With no one logged in to the Mac's screen, such as over `ssh` before anyone has, there's no
+session for launchd to keep the hub in. Then, as without systemd on Linux, it starts `isc
+hub` on its own in the background and remembers that you asked, so opening the window
+starts it again. What the hub prints on its error line is added to `hub.log`.
 
 | Command | What it does |
 |---|---|
-| `isc hub autostart off` | Switches the service off, and takes it away only if `autostart on` wrote it. A running server goes on running. Lingering is left as it is: `loginctl disable-linger` is yours to run |
-| `isc hub autostart status` | Says whether it starts by itself, and when (at login or with the computer). Ends with 0 only if it does |
+| `isc hub stop` | Stops the hub now and turns it off: the service is switched off, and the window doesn't start it again. A service file is left for the next `start`. On a Mac, launchd lets the hub go and the file in `~/Library/LaunchAgents` is removed. Lingering is left as it is: `loginctl disable-linger` is yours to run |
 
-`--json` always ends with 0 and has `autostart`, `unit` (`ours`, `packaged` or `null`),
-`enabled` and `linger` (`null` when the system doesn't say). This is systemd's: without
-one for your user, such as on a Mac, nothing starts `isc hub` by itself. On a Mac, opening
-insensical starts it again.
+A Mac goes to sleep a few seconds after its display turns off, and a Mac that's asleep
+can't be reached. So while `isc hub` runs and the Mac is on power, it keeps the Mac awake:
+your devices, and the hub it's joined to, still reach it with the display off. The display
+still sleeps. On battery, the Mac sleeps as it always does. Activity Monitor's Energy tab
+and `pmset -g assertions` show it as `isc`. If macOS refuses, `isc hub` says so as it starts
+and runs anyway.
 
 **Headscale, or a proxy of your own.** Point it at `127.0.0.1:7433`, with your own
 certificate. It has to speak TLS to the browser, pass the `Host` and `Origin` headers on
@@ -4482,7 +4592,8 @@ Tap a card to open the place most worth looking at: the pane that needs you, els
 at work, else the pane you used last.
 
 **Everything**, at the bottom, lists every project, tab and pane as the window's sidebar
-does. The switch over its foot narrows it to **Activity**: only panes at work or with
+does. Every project starts folded, one you add later too; unfold the ones you work in and
+your browser keeps them unfolded. The switch over its foot narrows it to **Activity**: only panes at work or with
 something for you, kept quiet by the rules in "Showing only activity" under [The
 sidebar](#the-sidebar). Your browser remembers the choice.
 
@@ -4564,26 +4675,29 @@ Mono`, `Consolas`, `Liberation Mono` and `DejaVu Sans Mono` that it has.
 
 From the home screen the page opens full screen, like an app.
 
-1. On an iPhone or iPad, in Safari, tap the share button, then **Add to Home Screen**. On
-   Android, in Chrome, tap `⋮`, then **Add to Home screen** or **Install app**.
-2. Open the page from the new icon.
+1. On an iPhone or iPad, in Safari, press **Add** where the page offers the home screen.
+   The page loads again with a code in its address. Then tap the share button and **Add to
+   Home Screen**. On Android, in Chrome, tap `⋮`, then **Add to Home screen** or **Install
+   app**.
+2. Open the page from the new icon. On an iPhone it pairs itself by that code, once.
 
-On an iPhone the app has storage of its own, so it pairs once more with a new code: see "A
-home-screen app is a browser of its own" under [In a browser](#in-a-browser).
+On an iPhone the app has storage of its own, so it's a device of its own: see "A
+home-screen app is a browser of its own" under [In a browser](#in-a-browser). Safari never
+uses the code, and keeps it in the address while you look around first. A code nobody
+used ends after 10 minutes, with its device, and Safari offers the home screen again.
 
 **After you update insensical**, the page updates itself the next time you open it, and
 nothing needs clearing. If you're typing when a newer page is ready, **Reload** takes you
 to it.
 
-`isc hub`, which serves the page, follows your daemon to a new version the next time a
-browser connects after you restart the server. It keeps its port, so paired devices and
-the Tailscale mapping carry on. Until it has, the page says **Not connected**; turning
-**Open in a browser or on your phone** off and on in settings does it by hand.
+`isc hub`, which serves the page, follows your daemon to a new version once you've
+restarted the server: the next time a browser connects, or as soon as the server is back
+if the hub was listening to it for notifications. A joined machine always is while it's
+connected to its hub, so it follows with nobody opening a page there. It keeps its port,
+so paired devices and the Tailscale mapping carry on, and a joined machine dials its hub
+again. Until it has, the page says **Not connected**; `isc hub restart` does it by hand.
 
 The phone keeps no copy of the page, so it doesn't open while the server can't be reached.
-
-On iOS 26 and later, if the header of a home-screen app looks blurred, turn on **Header
-Looks Blurred** in the page's menu.
 
 ### Notifications on your phone
 
@@ -4683,6 +4797,11 @@ On Linux a package installs a user unit for it, which nothing turns on:
 systemctl --user enable --now insensical-hub
 ```
 
+`isc hub start` turns it on, writing a unit for you where none is installed. The unit runs
+a plain `isc hub`, which uses the settings the hub keeps. Change them with
+`isc hub restart --name desk.example.ts.net`, not in the unit. On a Mac, `isc hub start`
+has launchd keep it running: see **Keep it running** above.
+
 ### Limits in a browser
 
 - **Machines.** A device made without `--far` shows only the machine `isc hub` runs on.
@@ -4706,8 +4825,8 @@ systemctl --user enable --now insensical-hub
 ### Joining another machine to your hub
 
 Another computer of yours can join the `isc hub` your browser goes to, and your devices
-then reach it at the hub's address. The joined machine listens on nothing: its `isc hub`
-dials the hub. What a device and that machine say to each other is sealed for the two of
+then reach it at the hub's address. The joined machine doesn't listen on the network: its
+`isc hub` dials the hub. What a device and that machine say to each other is sealed for the two of
 them, so the hub carries it and can't read it. The exception is notifications, which the
 hub reads, as it reads its own, to tell your devices.
 
@@ -4733,6 +4852,10 @@ hub reads, as it reads its own, to tell your devices.
    and paste the line. It isn't shown as you paste it, and it's never an argument, so it
    stays out of your shell's history. From a script, give it on standard input.
 
+   Devices you'd paired at that machine's own address are removed, and so are its public
+   links, since a joined machine has no guest door. It says how many: your devices reach it
+   through the hub now. Guests you made there stay.
+
 3. Run `isc hub status` there to see which hub it's joined to and whether it's connected
    (`joined` in `--json`: `address`, `name`, `since`, `connected`).
 
@@ -4753,6 +4876,10 @@ Good to know:
   `ban`, `unban`, `tailscale on` and `public on`. Run them on the hub, or `isc hub leave` to
   make this machine a hub of its own. `status`, `stop`, `leave`, `rekey`, `device` and
   `push` work as ever.
+- `isc hub leave` tells the hub, which takes the machine off its list at once, and its
+  heading goes from your pages. If the hub can't be reached within a few seconds, the
+  machine leaves all the same and prints the command to run on the hub: `isc hub machine
+  rm` and this machine's id.
 
 **Your devices reach it.** A device paired with the hub reaches every joined machine, with
 what it may do on the hub. There's no code to make on the joined machine. Remove a device
@@ -4779,8 +4906,8 @@ list.
 a page paired with the hub, and a pane that waits, fails or finishes on any joined machine
 reaches that device, with the machine's name first in the title. The hub reads these
 notifications to post them. A joined machine sends only its own panes' notifications, not
-those of machines it reaches over `ssh`, and the test notification on its Hub page reaches
-no browser.
+those of machines it reaches over `ssh`. Its Hub page has no notifications row: the hub
+tells your devices.
 
 **Add a device from another device.** A device that may manage a machine can add another
 device by its key, from its page, with no code. The machine decides what the new device
@@ -4818,11 +4945,11 @@ The fourth is refused: add it at the machine with `isc hub device add`.
 | Command | What it does |
 |---|---|
 | `isc hub machine ls` | On the hub, lists the joined machines, whether each is connected now (`connected` in `--json`) and when each last dialled. `full` marks a machine that adds no more devices, which usually means it has turned bad. |
-| `isc hub machine rm studio` | Cuts the machine off at once. It joins again only by a new invite. |
+| `isc hub machine rm studio` | Cuts the machine off at once. It joins again only by a new invite. Its id, as `machine ls` shows it, works too. |
 | `isc hub ban ID` | On the hub, carries nothing more for a device, by its id as `isc hub device ls --json` shows it. Each machine still lists it, and the devices it added aren't banned: run `isc hub device rm NAME --with-approved` on each machine. |
 | `isc hub unban ID` | Lifts a ban. |
-| `isc hub leave` | On a joined machine, leaves the hub. Its `isc hub` listens again as a hub of its own, and each device pairs again at its own address. |
-| `isc hub rekey` | Gives a machine a new key and id, for one whose `hub` folder may have been copied. Each device pairs again. A joined machine leaves its hub too and joins again by a new invite. |
+| `isc hub leave` | On a joined machine, leaves the hub. The hub takes it off its list at once; if the hub can't be reached, it says what to run there. Its `isc hub` listens again as a hub of its own, and each device pairs again at its own address. |
+| `isc hub rekey` | Gives a machine a new key and id, for one whose `hub` folder may have been copied. Each device pairs again. A joined machine leaves its hub too, as `leave` does, and joins again by a new invite. |
 
 **Security.**
 
@@ -5005,7 +5132,9 @@ The mouse works too: click a value to choose it or open its list.
 has it: see [In a browser](#in-a-browser). With another machine shown, it only says "This
 is set on that computer itself."
 
-- **Open in a browser or on your phone** starts and stops `isc hub`, and says the address.
+- **Open in a browser or on your phone** runs `isc hub start` and `isc hub stop`, and says the address.
+- **Restart the hub**, while it runs, runs `isc hub restart`. If the hub runs an older version
+  than the one installed, it says so.
 - **This computer's browser** opens insensical in the browser here, signed in.
 - **Tailscale** says how it stands. `Enter` turns it on or off, or signs in. Under it are
   the two ways in that need no switch: an `ssh -L` line and a proxy of your own.
@@ -5022,9 +5151,10 @@ is set on that computer itself."
   hub](#joining-another-machine-to-your-hub).
 - **On a computer that joined no hub**, **Join a hub** takes the line from another hub's
   Invite a machine and runs `isc hub join`.
-- **On a computer joined to a hub**, **Joined to** names the hub and whether it's
-  connected, **Start isc hub** starts it when it isn't running, and **Leave the hub** leaves
-  it, after asking.
+- **On a computer joined to a hub**, the switch turns `isc hub` on and off, **Joined to**
+  names the hub and whether it's connected, and **Leave the hub** leaves it, after asking.
+  Your devices are managed on the hub, so only guests are listed, and there's no test
+  notification.
 
 The code is drawn black on white whatever your theme, because cameras read nothing else.
 It needs about 49 columns and 25 rows for an address on your tailnet; in a smaller
@@ -5139,7 +5269,7 @@ The settings sheet lists every setting that takes effect here and is set without
 `activity-idle`, `interface-style`, `motion`, `attention-glow`, `keymap`, `notifications`
 and the three `notify-` switches, `long-command`, `sound`, `notify-command-when`,
 `notify-url-when`, `notify-url-body`, `tray`, `scrollback`, `term`, `type-ahead`,
-`clipboard`, `keep-scrollback`, `tmux-shim`, `check-for-updates`, `agents-at-once`, `agents-deep`, and under
+`clipboard`, `keep-scrollback`, `tmux-shim`, `check-for-updates`, `agents-at-once`, `agents-deep`, `agents-from-other-machines`, and under
 "This terminal", `colours` and `mouse`. `leader`, `shell`, `notify-command`, `notify-url`
 and your own keys are set in the file.
 
@@ -5384,7 +5514,7 @@ and the fix.
 | What you see | Why | What to do |
 |---|---|---|
 | "The insensical server cannot be reached" | No daemon is running and none could be started: `isc` isn't beside the application or on `PATH`, or the socket's directory isn't private | Put `isc` beside `insensical`; check the directory's permissions |
-| "insensical was updated", at launch | A new version was installed under a running daemon | Press Enter to restart it. Everything keeps running, unless the daemon is too old to make way. Escape leaves it |
+| "insensical was updated", at launch | A new version was installed under a running daemon | Press Enter to restart it; the card says "Restarting the server" while it works, and the window stays responsive. Everything keeps running, unless the daemon is too old to make way. Escape leaves it |
 | "The server is already the new version, and this window is from before it", at launch | The server moved on while an older application was still running | Press Enter to open the new application, or close the window and open insensical again. Nothing ends |
 | `isc: protocol N does not match the running daemon's M` | The same, from the command line | Run `isc restart-server` |
 | "The server has stopped" in the window | The daemon was stopped or crashed | Press Enter to start it; the layout comes back |
@@ -5595,6 +5725,7 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `check-for-updates` | Whether the daemon asks GitHub once a day for a new release. The request names only your version and platform. With `false`, it asks only when you press Check Now or update yourself. See [A new version installed underneath](#a-new-version-installed-underneath). | `true` |
 | `agents-at-once` | How many agents one agent can have open at once, started with `isc agent start`, 1 to 64 (section 11). | `8` |
 | `agents-deep` | How deep agents can start agents, 1 to 8. | `2` |
+| `agents-from-other-machines` | Whether an agent on another machine, running `isc --host` or `isc tui --host` in a pane there, can use this computer. Off, it's refused and told how to turn this on. You at your own terminal on another machine are never refused (section 11). | `false` |
 | `tmux-shim` | Whether a program in a pane finds a `tmux` that insensical answers, so an agent that opens helpers in tmux panes opens them as panes here (section 11). While on, `tmux` in a pane isn't the real one. | `false` |
 | `clipboard` | Whether a program can put text on the clipboard. `focused`: only the program in the pane you're looking at. `never`: no program. No program can read the clipboard. | `focused` |
 | `notifications` | Whether you're told when a pane has something for you. | `true` |
@@ -5717,8 +5848,8 @@ Run these in any terminal. Placeholders and options:
 | `isc project wake NAME` | Puts a shell in each pane of a sleeping project, in the pane's directory |
 | `isc project mute NAME [--off]` | Stops every pane of the project sending notifications, including panes opened later. `--off` lets them again. |
 | `isc usage [--json]` | Prints what the programs in each pane use: memory, processor time and process count, with a total for each project |
-| `isc clients [--json]` | Lists who is connected to the daemon: each client's kind, machine, version, rights, process, and the pane it's in or looking at |
-| `isc disconnect CLIENT` | Puts another client off the daemon, by the number `isc clients` shows (`7` or `client:7`). Needs the right to `manage`. |
+| `isc clients [--json]` | Lists the windows, browsers, `isc tui` and hub notifications connected to the daemon, one session each: what it is, its machine or device, version, rights, connections, process, and the pane it's looking at |
+| `isc disconnect SESSION` | Ends every connection of another session, by the number `isc clients` shows (`7` or `session:7`). Needs the right to `manage`. |
 | `isc config` | Prints a settings file with every setting at its default and every key of both keymaps |
 | `isc config get NAME` | Prints a setting's value from the file, or its default. With `--host`, from that machine's file. |
 | `isc config set NAME VALUE` | Gives a setting a value, changing only that line. With `--host`, one of the daemon's settings on that machine. `--stdin` in place of `VALUE` reads it from standard input, out of sight of other users. |
@@ -5743,12 +5874,13 @@ Run these in any terminal. Placeholders and options:
 | `isc hub device set NAME --far\|--no-far` | Lets a paired device open your other machines' terminals through this computer, or keeps it to this one |
 | `isc hub push ls [--json]`, `isc hub push test [--at MACHINE] [--json]` | Lists the browsers sent notifications, and which hear your other machines; sends each a test and says how its push service answered. `--at` tests as from that machine. |
 | `isc hub open [--print\|--json]` | Opens insensical in your browser on this computer, signed in as `This computer`, from an address that works once, for ten minutes. `--print` or `--json` prints it and opens nothing. |
-| `isc hub status [--json]`, `isc hub stop` | Says whether `isc hub` is running and where; stops it |
+| `isc hub status [--json]` | Says whether `isc hub` is running, where, what keeps it running and whether it's the installed version |
+| `isc hub start [OPTIONS]`, `isc hub stop` | Turns the hub on and keeps it running, back after a login (a user service, switched on, and lingering) or when the window opens; stops it now and turns it off |
+| `isc hub restart [OPTIONS]` | Starts the running hub again as the installed `isc`, on its port, with the options given kept |
 | `isc hub tailscale on`, `off`, `status [--json]` | Has Tailscale serve `isc hub` to your tailnet at `https://` and this computer's name; takes that mapping away; says whether it's served, and why not |
-| `isc hub autostart on`, `off`, `status [--json]` | Sets this computer up to start `isc hub` by itself (a user service, switched on, and lingering); switches it off, removing only a service it wrote; says whether and when it starts |
 | `isc hub invite NAME [--url BASE] [--json]` | On the hub, prints a line that joins one machine to it, within ten minutes. See [Joining another machine to your hub](#joining-another-machine-to-your-hub) |
-| `isc hub join`, `isc hub leave` | Joins this machine to the hub of a line `invite` printed, read from the terminal or standard input; leaves it, so `isc hub` listens again |
-| `isc hub machine ls [--json]`, `isc hub machine rm NAME` | On the hub, lists the machines joined to it; takes one away at once |
+| `isc hub join`, `isc hub leave` | Joins this machine to the hub of a line `invite` printed, read from the terminal or standard input; leaves it, and the hub forgets it, so `isc hub` listens again |
+| `isc hub machine ls [--json]`, `isc hub machine rm NAME` | On the hub, lists the machines joined to it; takes one away at once, by its name or id |
 | `isc hub ban ID`, `isc hub unban ID` | On the hub, carries nothing more for a device, by its id; lifts that |
 | `isc hub rekey` | Gives this machine a new key and id: each device pairs with it again, and a joined machine joins its hub again |
 | `isc hub public on`, `off`, `status [--json]` | Has Tailscale Funnel open a public address to devices made with `isc hub device add --public`; removes those devices and the address; says whether one is open, where, and for which devices |
@@ -5757,7 +5889,7 @@ Run these in any terminal. Placeholders and options:
 | `isc kill-server` | Stops the daemon and every program it runs, and returns once it's gone. The layout comes back the next time it starts. Also works on a daemon of another version. |
 | `isc restart-server [--yes]` | Moves the running daemon to this version while the programs in its panes keep running. It asks first; `--yes` skips the question. |
 | `isc upgrade [--version X] [--check [--json]] [--yes]` | Downloads the latest release's signed record and this machine's file, checks the file against the record, and puts it in place of yours: `isc` alone, or `insensical` and `isc` from the tarball together. It asks first; `--yes` doesn't, and with no terminal and no `--yes` nothing is installed. Where the directory needs a password, it uses `sudo`. `--version` installs that release, older or not; without it, an older one is never installed. `--check` says what there is and installs nothing; with `--json` it prints one object, `{"running": "0.6.0", "latest": "0.6.1" or null, "update": ""}`, where `update` is empty if this copy can replace itself and otherwise says who updates it. A copy from a package or Homebrew isn't replaced: it prints the command that updates it. A copy no release ships, such as a Linux window on arm64 or an Intel Mac, was built from source: it says "This copy was built from source. Build the new version the same way." It exits with status 1 when there's a newer version and nothing was installed. The running daemon keeps running. |
-| `isc version` | Prints this version and the running daemon's, with the protocol and terminal engine of each, the daemon's process number, and whether they can talk to each other. When the daemon knows of a newer release, one more line says so and what's new |
+| `isc version` | Prints this version and the running daemon's, with the protocol and terminal engine of each, the daemon's process number, and whether they can talk to each other. A copy built from source shows the commit it was built from after its version, as `0.7.0+91c21a3d`, with `-dirty` added if files in it had changes you hadn't committed; a release shows the plain version. The Hub page's Version row and the page's computer settings show it too. While `isc hub` runs, one line gives its version and process number, and says if a newer one is installed. When the daemon knows of a newer release, one more line says so and what's new |
 
 ### Files and directories
 
@@ -5779,10 +5911,12 @@ Run these in any terminal. Placeholders and options:
 | The key `isc hub` signs notifications to browsers with, closed to other users | `~/.local/share/insensical/hub/vapid.key` | `~/Library/Application Support/insensical/hub/vapid.key`  |
 | A hub's machines, the devices they keep and its open invites | `~/.local/share/insensical/hub/members.json` | `~/Library/Application Support/insensical/hub/members.json`  |
 | The hub a joined machine dials, and its key | `~/.local/share/insensical/hub/joined.json` | `~/Library/Application Support/insensical/hub/joined.json`  |
-| Where a running `isc hub` is | `hub.lock`, beside the daemon's socket | the same |
+| What `isc hub` runs with: its names, port, address, certificate and guest door | `~/.local/share/insensical/hub/settings.json` | `~/Library/Application Support/insensical/hub/settings.json`  |
+| Where a running `isc hub` is, its version and the file it was started from | `hub.lock`, beside the daemon's socket | the same |
 | Which port `isc hub public on` pointed the public address at, until `isc hub public off` has closed it | `~/.local/share/insensical/hub/funnel` | `~/Library/Application Support/insensical/hub/funnel` |
-| That the settings sheet's switch left `isc hub` on, and the names it answers to, where no service keeps it started | `~/.local/share/insensical/hub/on` | `~/Library/Application Support/insensical/hub/on`  |
+| That `isc hub start` or the settings sheet's switch left `isc hub` on, where no service keeps it started | `~/.local/share/insensical/hub/on` | `~/Library/Application Support/insensical/hub/on`  |
 | That the settings sheet's Tailscale switch, or `isc hub tailscale on`, made the `tailscale serve` mapping, which is the only one either turns off | `~/.local/share/insensical/hub/serve` | `~/Library/Application Support/insensical/hub/serve`  |
+| What `isc hub` printed on its error line when `isc hub start` or the window started it on its own, added to each time | `~/.local/state/insensical/hub.log` | `~/Library/Application Support/insensical/hub.log` |
 | The window's size, whether its tabs were hidden, and what was folded in the sidebar | `~/.local/state/insensical/window` | `~/Library/Application Support/insensical/window` |
 | What was chosen lately in the palette | `~/.local/state/insensical/palette-recent` | `~/Library/Application Support/insensical/palette-recent` |
 | The terminal's description, when the daemon had to compile its own | `~/.local/state/insensical/terminfo/` | `~/Library/Application Support/insensical/terminfo/` |
@@ -5825,7 +5959,7 @@ and nothing else outside the directories above:
 | `INSENSICAL_HOST` | `isc` | The name of another machine, as `--host` takes it. Every command about a daemon then acts on that machine's, except the ones that end something (`kill-server`, `close`, `tab close`, `project close`, `project sleep`), which want `--host` on their own line. `--socket` given on the command line comes first. The daemon doesn't pass it on to its panes. |
 | `INSENSICAL_SSH` | `isc` | A program to run in place of `ssh` to reach another machine, with the same arguments. |
 | `INSENSICAL_TAILSCALE` | `isc`, the application | A program to run in place of `tailscale`, with the same arguments. When set, no other place is looked in. |
-| `INSENSICAL_SYSTEMCTL`, `INSENSICAL_LOGINCTL` | `isc`, the application | A program to run in place of `systemctl`, or `loginctl`, when `isc hub tailscale`, `isc hub autostart` and the settings sheet start and keep `isc hub` running, with the same arguments. |
+| `INSENSICAL_SYSTEMCTL`, `INSENSICAL_LOGINCTL` | `isc`, the application | A program to run in place of `systemctl`, or `loginctl`, when `isc hub start`, `isc hub tailscale` and the settings sheet start and keep `isc hub` running, with the same arguments. |
 | `INSENSICAL_ISC_X86_64`, `INSENSICAL_ISC_AARCH64` | `isc` | A file on this machine to send as `isc` when insensical is put on another machine with that processor. When set, it's sent in place of the release's file. It has to be an `isc` for Linux in the version you have here. |
 | `SHELL` | daemon | What a pane runs when there's no command and no `shell` setting. `/bin/sh` if unset. |
 | `TERMINFO`, `HOME` | daemon | Searched for Ghostty's terminal description. |

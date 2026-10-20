@@ -5,6 +5,117 @@ its release notes.
 
 ## Unreleased
 
+## 0.7.0 - 2026-10-21 02:30 +06:00
+
+- **Small icons show the terminal chip alone.** The tray, notifications and the browser tab
+  drop the blue tile behind the chip, so its prompt is larger.
+- **Notifications from other machines, and the window's own, show insensical's icon on Linux.**
+- **The window stays responsive while the server is replaced after an update.** The "insensical
+  was updated" card is drawn at once, says "Restarting the server" while it works, and
+  ignores a second press.
+- **A machine of another version stops being redialled, and the page says what to run.**
+  The page names both versions once and says which side needs `isc upgrade` and
+  `isc restart-server`. When the daemon on the hub's own computer is older than the hub, the
+  bar says to run `isc restart-server` there, not to turn the browser switch off and on.
+- **A machine with another version of insensical now sends a notice.** Before, the only
+  word was in its section of the sidebar. The notice says how the versions differ and what
+  to run, once for each version there, however often the machine is dialled again.
+- **The page names each connection by its machine, then what it is.** **Connected now**
+  shows `arch · App`, `arch · Terminal` and, for a browser, its device, as in
+  `kitchen tablet · Browser`. The hub's notifications row has no **Disconnect**, so a
+  click can't stop your phone's notifications. The page's menu no longer shows the
+  **Header Looks Blurred** switch or a line of screen figures.
+- **Who is connected is listed by session.** A window, with a connection for each pane
+  and one for its notifications, is one row in `isc clients`, the window's Connected card
+  and the page, and so is each browser and `isc tui`. Commands and programs in panes
+  aren't listed at all. **Disconnect** and `isc disconnect` end a whole session, so a
+  disconnected window no longer goes on showing notifications, and it connects again
+  only when you press Enter. `isc disconnect` takes the session's number, as
+  `session:12`.
+- **A machine that leaves its hub is gone from it.** `isc hub leave`, and `isc hub rekey` on
+  a joined machine, now tell the hub, which takes the machine off `isc hub machine ls` and
+  your pages at once. Before, the hub kept listing it as not connected. If the hub can't be
+  reached, the machine still leaves and prints the `isc hub machine rm` to run there, which
+  now takes a machine's id as well as its name.
+- **Agents on other machines can't use a computer until you let them.** An agent running
+  `isc --host` or `isc tui --host` in a pane on another machine is now refused, with a
+  message that says how to allow it: turn on "Can agents on other machines use this
+  computer?" under Agents in the settings sheet, or run `isc config set
+  agents-from-other-machines true`. It's off by default. You at a terminal of your own on
+  another machine, the window and `isc hub` aren't affected.
+- **A copy you built from source shows its commit.** `isc version`, the Version row and the
+  page's settings say `0.7.0+91c21a3d`, with `-dirty` if files had uncommitted changes, so it
+  can be told from the release it started from. A release shows the plain version.
+- **`isc hub tailscale on` never takes over another program's Tailscale mapping** because
+  its port was slow to answer: only a port that refuses counts as free.
+- **A message waiting for an agent's turn to end isn't lost** when a program the agent
+  started has the terminal as the turn ends. It goes in ahead of the next message you tell
+  the agent, or when its next turn ends.
+- **Keep agents out holds across machines.** `isc --host` and `isc tui --host` run in a
+  pane could read and type into another machine's panes that keep agents out; they're now
+  refused there, as `isc` in a pane is here.
+- **`isc agent tell` works with opencode, pi and Hermes.** Their plugins reported a pane's
+  state but not which agent it ran, so a message for them was refused. Run `isc integrate`
+  again: `isc integrate --status` shows the old plugin as outdated. pi and Hermes also
+  hand over their reply, for `isc agent reply` and `wait`; opencode has none to hand over.
+- **`isc agent tell` works with Claude Code and Codex.** They run their hooks apart from
+  your pane's shell, and insensical took them for another program's: the pane never learnt
+  which agent it ran, so a message for it was refused, and one waiting for its turn to end
+  never went in.
+- **Projects start folded in the sidebar**, a new one too. Unfold the ones you work in and
+  the window opens with them unfolded next time.
+- **The page connects to every machine you have**, so Home shows all their projects without
+  you unfolding anything. The arrow on a machine's heading only hides its rows. Connecting
+  starts no server on a machine; if one isn't running, its heading says so and offers Start.
+- **A restart never leaves your hub down.** If `isc hub restart` or `isc hub start` is
+  given a port something else holds, the hub goes on as it was, with its settings, and
+  you're told why. Its port stays held while it starts again, so no device is turned away.
+- **`isc hub start` with new options keeps the hub running**, as it does with none. A
+  service file it wrote for another `isc` is written again for this one, or taken away
+  where insensical's own is installed, and the window tells you what starting the hub did.
+- **An iPhone's home-screen app pairs itself.** In Safari, press **Add** where the page
+  offers the home screen, then Share and **Add to Home Screen**: the app opens paired, as
+  a device of its own named after yours, with what yours may do. You're told it was added,
+  and its code works once, for 10 minutes. If nothing paired by then, the device goes and
+  Safari offers the home screen again. A guest's page doesn't hand over.
+- **`isc hub start` turns the hub on and keeps it running; `isc hub stop` turns it off;
+  `isc hub restart` starts it again.** `start` takes the options of `isc hub`. With systemd
+  for your user it switches the service on, writing one if none is installed, and sets the
+  user's services to start with the computer. Without it, it starts the hub in the
+  background, keeps what it says in `hub.log`, and the window starts it again.
+  The window's switch does the same. **`isc hub autostart` is gone**: use
+  `start` and `stop`.
+- **On a Mac, launchd keeps `isc hub` running.** `isc hub start`, and the window's switch,
+  hand it to launchd, which starts it after you log in and again if it crashes, without
+  the window being open. What it says goes to `~/Library/Logs/insensical/hub.log`. `isc hub
+  stop` takes it away. A hub the window started before moves to launchd the next time the
+  window starts it.
+- **`isc hub`, `isc hub status` and `isc version` say what the hub is doing.** In a
+  terminal, `isc hub` says that `Ctrl`+`C` stops it and `isc hub start` keeps it running.
+  `status` names what keeps it running (systemd, launchd, the window or a terminal), the hub a
+  joined machine is joined to, and when the running hub is older than the installed one;
+  `--json` adds `owner`, `version` and `installed`. `isc version` has a line for the hub.
+  A second `isc hub` says where the first is. **Joining a hub removes the devices paired
+  at the machine's own address** and those made for its guest door, since its hub's devices
+  reach it now and a joined machine has no guest door; its guests stay.
+- **On a Mac, `isc hub` keeps the Mac awake while it's on power**, so your devices and the
+  hub it's joined to can still reach it once the display turns off. The display still
+  sleeps, and on battery the Mac sleeps as before.
+- **`isc hub` keeps its settings**: the names, port, address, certificate and guest door
+  you give it are used by every start after, by hand, by a service or by the window.
+  **`isc hub restart --name NAME`** changes one while it runs and starts it again on its port,
+  whoever started it.
+- **The Hub page has Restart Hub, and a joined machine has the hub's switch**, in the
+  window and in `isc tui`. The window says what keeps `isc hub` running, and both say when
+  it runs an older version than the one installed. A joined machine's page says your
+  devices are managed on the hub and lists only its guests. Its Start button and
+  notifications row are gone.
+- **A joined machine's `isc hub` follows an update by itself** once its daemon is restarted,
+  and dials its hub again. Before, only a hub that a browser opened did.
+- **The page keeps what you folded on a machine joined to your hub.** Opened again, its
+  projects and tabs stay folded and the machine stays open, even when the hub tells of
+  it late.
+
 ## 0.6.0 - 2026-10-20 00:59 +06:00
 
 - **From this release on, insensical can update itself.** 0.5.0 can't, so to get this
