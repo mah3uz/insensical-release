@@ -31,36 +31,27 @@ and coding agents and knowing which of them needs you.
 
 insensical lets you run many terminals and agents side by side and see which one needs
 you. A background server, the *daemon*, owns every program. The window (`insensical`) and
-the command line (`isc`) are its clients, so closing the window stops nothing. Open it
-again and everything is still there.
-
-Panes, tabs and splits are real UI elements, and a program's output reaches the window
-untouched.
+the command line (`isc`) are its clients, so closing the window stops nothing.
 
 What you get:
 
 - Programs that keep running with no window open, and through an update.
-- Every project, tab, split, floating pane and minimized pane back after the daemon has
-  been stopped. Each pane returns in its directory, showing what it showed before.
-- Tabs grouped into projects, listed in a sidebar as a tree of projects, tabs and panes.
-- Panes you can float above the layout, minimize to a dock, or drag to rearrange.
+- Your layout back after the daemon has been stopped, each pane in its directory showing
+  what it showed.
+- Tabs grouped into projects, in a sidebar tree.
+- Panes you can float, minimize to a dock, or drag to rearrange.
 - Pictures drawn with the Kitty graphics protocol.
-- A state on every pane: working, waiting for you, done or failed. One key takes you to
-  the most urgent.
-- A notice when a pane starts waiting, finishes or fails, unless you're looking at it:
-  inside the window while it's in front, a desktop notification when it isn't.
+- A state on every pane, and one key to the most urgent.
+- A notice when a pane starts waiting, finishes or fails, in the window or on the desktop.
 - Memory use per project, and sleep for a project you don't need: its programs end, and
-  its panes and what they showed are kept.
-- Every setting on one sheet.
-- Everything the window does, from the command line too.
-- The whole interface in a terminal, with `isc` alone: on your own machine, on one with
-  no desktop, or over `ssh`.
+  its panes are kept.
+- Every setting on one sheet, and everything the window does from the command line too.
+- The whole interface in a terminal, with `isc` alone: locally, with no desktop, or over
+  `ssh`.
 
 ---
 
 ## 2. Getting it running
-
-Here's how to install insensical and start it.
 
 ### Installing
 
@@ -78,18 +69,17 @@ yay -S insensical-bin
 sudo apt install ./insensical_*_amd64.deb
 ```
 
-There's no apt repository. To update, download the new version and install it the same
-way.
+There's no apt repository. To update, install the new `.deb` the same way.
 
 **Other Linux**, on x86-64 with glibc 2.36 or later. Unpack the tarball and put
 `insensical` and `isc` together in a directory on your `PATH`. It also holds the desktop
-entry, the icon, the user unit and completions for bash, zsh and fish. Put them where
-your system looks for them.
+entry, the icon, the user unit and completions for bash, zsh and fish; put them where your
+system looks for them.
 
 The window is built for x86-64 only. On an ARM machine, install `isc` by itself.
 
 **Without the window, on any Linux**, x86-64 or arm64, with or without a desktop. `isc`
-alone is insensical with no window: the daemon, the command line and
+alone is the daemon, the command line and
 [the whole interface in a terminal](#the-whole-interface-in-a-terminal), in one file that
 needs nothing installed. The packages above install the same `isc` beside the window.
 
@@ -99,7 +89,7 @@ curl -fsSL https://insensical.com/install.sh | sh
 
 It downloads `isc-x86_64-linux` (`isc-aarch64-linux` on ARM) and its checksum from the
 latest release, and installs the file only if they agree. If `minisign` is installed, it
-also checks the release's signature and stops if it's wrong. Run the same line to update.
+also checks the signature. Run the same line to update.
 
 | Set | Effect |
 |---|---|
@@ -110,14 +100,12 @@ also checks the release's signature and stops if it's wrong. Run the same line t
 Put the variable before `sh`, as in `curl -fsSL https://insensical.com/install.sh |
 ISC_DIR=~/.local/bin sh`.
 
-- If you already have `isc` on your `PATH`, the new one goes over it there. It won't
-  write over `/usr/bin/isc`, which a package put there: update that with your package
-  manager.
+- An `isc` already on your `PATH` is replaced there, except `/usr/bin/isc`, which a
+  package owns: update that with your package manager.
 - If a daemon is running, it asks whether to restart it, and Enter says yes. Restarting
   ends nothing in your panes. Say no and run `isc restart-server` when it suits you.
 - Completions aren't installed. `isc completions bash`, `zsh` or `fish` prints them.
-- The checksum comes from the same release as the file. It catches a damaged download,
-  not a wrong release.
+- The checksum catches a damaged download, not a wrong release.
 
 The same by hand:
 
@@ -128,11 +116,10 @@ sha256sum -c isc-x86_64-linux.sha256 && install -m755 isc-x86_64-linux ~/.local/
 isc
 ```
 
-That address gives the latest release. On ARM the file is `isc-aarch64-linux`. For one
-release, put `download/v0.3.1` where it says `latest/download`. A machine that can't reach
-the release needs only those two files, copied to it. Replacing the file doesn't stop a
-running daemon; `isc restart-server --yes` moves it to the new version with everything
-still running.
+On ARM the file is `isc-aarch64-linux`. For one release, put `download/v0.3.1` where it
+says `latest/download`. A machine that can't reach the release needs only those two files,
+copied to it. Replacing the file doesn't stop a running daemon; `isc restart-server --yes`
+moves it to the new version with everything still running.
 
 **macOS 13 and later, on Apple silicon.** With Homebrew, which also puts `isc` on the
 `PATH`:
@@ -152,13 +139,25 @@ xattr -dr com.apple.quarantine /Applications/insensical.app
 `isc` is at `/Applications/insensical.app/Contents/MacOS/isc`. There's no build for an
 Intel Mac.
 
-**Starting the daemon at login.** The package installs a user unit but doesn't enable it.
-To enable it, run `systemctl --user enable --now insensical`. You don't have to: the
-first window or command that needs the daemon starts it. Upgrading the package only
-replaces files; the running daemon carries on until you move it (see
-[A new version](#a-new-version-installed-underneath)).
+**Starting at login.** Set **At login** in Settings > Interface. **Open the window** opens
+insensical when you log in; **Start in the tray** (**Start in the menu bar** on a Mac) starts
+it with no window. **Do nothing** turns it off.
 
-**What any uninstall leaves.** Removing insensical takes the two programs, the launcher's entry, the icons and the completions. It leaves:
+On Linux this adds `insensical.desktop` to `~/.config/autostart`, and **Start in the tray**
+opens the window if your desktop shows no tray or `tray` is off. Plain Hyprland, without
+uwsm, ignores that folder: add `exec-once = insensical` to its config.
+
+On a Mac, insensical adds itself to System Settings > General > Login Items. If macOS asks,
+allow it there; the row says when it's waiting or turned off. The menu bar item or the Dock
+icon opens a window.
+
+On a machine with no desktop, run `systemctl --user enable --now insensical` instead. Its
+shells get systemd's environment (see [The daemon's environment](#the-daemons-environment)).
+You don't have to do either: the first window or command that needs the daemon starts it.
+Upgrading the package only replaces files; the running daemon carries on until you move it
+(see [A new version](#a-new-version-installed-underneath)).
+
+**What any uninstall leaves:**
 
 - your settings, in `~/.config/insensical`;
 - the saved layout, what the panes showed, the window's size and your recent palette
@@ -169,34 +168,32 @@ replaces files; the running daemon carries on until you move it (see
   Support/insensical/hub`);
 - hooks added to an agent's own settings. Run `isc integrate AGENT --remove` before `isc`
   is gone;
-- **a daemon that is running.** It carries on with every program in its panes. Run
-  `isc kill-server` first to end it.
+- **a daemon that is running**, with every program in its panes. Run `isc kill-server`
+  first to end it.
 
 Delete the two directories to be rid of everything.
 
 ### What it needs
 
-- **Linux:** x86-64 with glibc 2.36 or later for the window; `isc` alone also runs on arm64. The
-  window needs Wayland or X11 and Vulkan.
+- **Linux:** x86-64 with glibc 2.36 or later for the window; `isc` alone also runs on
+  arm64. The window needs Wayland or X11 and Vulkan.
 - **macOS:** 13.0 or later.
-- **Fonts:** none in particular. The default is `JetBrainsMono Nerd Font`. The window draws
-  its own icons, and an icon font inside the application covers the Nerd Font icons programs
-  print.
+- **Fonts:** none in particular. The default is `JetBrainsMono Nerd Font`. The window
+  draws its own icons and carries an icon font for the Nerd Font icons programs print.
 
 ### The two binaries must be together
 
 The window finds the daemon in this order: the file `$INSENSICAL_ISC` names, the `isc`
-beside the window, then `isc` on `PATH`. If none exists, it can't start a daemon and
-says the server cannot be reached.
+beside the window, then `isc` on `PATH`. If none exists, it says the server cannot be
+reached.
 
 ### The icon
 
-The icon is a raised terminal chip with a prompt on a glossy
-blue tile; at 16 to 32 px, in a tray or a notification, it is the chip alone. A launcher shows it from the desktop entry. A taskbar or switcher shows it for
-a window only if the desktop can match the window to that entry, so the window names
-itself `insensical`.
+At 16 to 32 px, in a tray or a notification, the icon is the terminal chip alone. A
+taskbar or switcher shows it only if the desktop can match the window to the desktop
+entry, so the window names itself `insensical`.
 
-- Run without installing, the window gets a generic icon, as there's no entry to match.
+- Run without installing, the window gets a generic icon.
 - An old `icon-theme.cache` in `~/.local/share/icons/hicolor` can hide the icon. Rebuild
   it with `gtk-update-icon-cache --force --ignore-theme-index ~/.local/share/icons/hicolor`.
   A running launcher or panel may keep the old picture until you restart it.
@@ -214,25 +211,25 @@ whatever started it (see [The daemon's environment](#the-daemons-environment)).
 
 ## 3. A first session
 
-This walks you through the basics. The keys are the Linux defaults; section 19 lists all
-of them, the macOS keys and the leader keymap too.
+The keys here are the Linux defaults; section 19 lists all of them, the macOS keys and the
+leader keymap too.
 
 1. **Open it.** Start `insensical`. You get one project, one tab and one pane running
-   your shell. It's an ordinary terminal.
-2. **Split.** Press `Ctrl+Shift+O` to split the pane to the right, or `Ctrl+Shift+E` to
-   split downwards. The new pane opens in the same directory and takes half the space.
-   `Ctrl+Alt+arrow` moves between panes. Drag a divider to resize.
+   your shell.
+2. **Split.** Press `Ctrl+Shift+O` to split right, or `Ctrl+Shift+E` to split down. The
+   new pane opens in the same directory. `Ctrl+Alt+arrow` moves between panes. Drag a
+   divider to resize.
 3. **Open a tab.** Press `Ctrl+Shift+T`. The shell opens in the project's root, or in the
    current pane's directory if the project has none. `Ctrl+Tab` and `Ctrl+Shift+Tab` go
    to the next and previous tab.
 4. **Open a project.** Press `Ctrl+Shift+N`, leave the name empty, type a directory that
-   exists, such as `~/Projects/quote`, and press Enter. The project is named after the
-   directory. `Ctrl+Alt+PageDown` and `Ctrl+Alt+PageUp` move between projects.
+   exists, such as `~/Projects/quote`, and press Enter. `Ctrl+Alt+PageDown` and
+   `Ctrl+Alt+PageUp` move between projects.
 5. **Float a pane.** `Ctrl+Shift+D` opens a new floating pane. `Ctrl+Shift+G` floats the
    current pane, or puts a floating one back. Drag a float by its header and resize it
    from any edge or corner.
 6. **Minimize a pane.** `Ctrl+Shift+M` puts the pane in the dock at the bottom, still
-   running. Click its chip or press `Ctrl+Shift+R` to bring it back where it was.
+   running. Click its chip or press `Ctrl+Shift+R` to bring it back.
 7. **Find the pane that needs you.** Run `sleep 40` in one pane, then switch to another
    tab. When it ends, the pane becomes `done`: its tab, its sidebar row and the count at
    the top of the sidebar show it, and a desktop notification arrives. Press
@@ -251,8 +248,6 @@ Two things to know from the start:
 
 ## 4. Concepts
 
-These are the words the rest of the manual uses, and how the daemon behaves.
-
 ### Words
 
 | Word | Meaning |
@@ -260,7 +255,7 @@ These are the words the rest of the manual uses, and how the daemon behaves.
 | Project | A named group of tabs with a root directory, usually one codebase. |
 | Tab | One layout of panes inside a project. |
 | Pane | One terminal running one program. |
-| Placement | Where a pane is: *tiled* in the layout, *floating* above it, or *minimized*. A pane moves between the three without restarting its program. |
+| Placement | Where a pane is: *tiled* in the layout, *floating* above it, or *minimized*. A pane moves between the three without restarting. |
 | Dock | The strip at the bottom of the window that holds minimized panes. |
 | State | What a pane is doing: `idle`, `running`, `waiting`, `done`, `failed`, `exited`. |
 | Attention | A pane that needs you: one that's `waiting`, `done` or `failed`. |
@@ -272,19 +267,16 @@ These are the words the rest of the manual uses, and how the daemon behaves.
 ### The daemon
 
 - The first window or `isc` command that needs it starts it. It runs in its own session
-  and outlives whatever started it. You don't need to enable anything at login.
+  and outlives whatever started it.
 - `isc daemon` runs it in the foreground. A second daemon on the same socket refuses to
-  start and says "a daemon is already running". A running daemon holds a lock on
-  `daemon.sock.lock`, beside its socket.
+  start and says "a daemon is already running".
 - It owns the projects, tabs, panes and layout. Anything a window does, a command can
-  do, and each sees the other's changes at once.
-- It does no work while idle.
+  do, and each sees the other's changes at once. It does no work while idle.
 - On Linux with systemd, a daemon started by a window or command runs in a scope of its
   own (`insensical-daemon-…` in `systemctl --user`), so closing the terminal that started
-  it, or ending that session, takes neither it nor your programs. A logout that stops
-  your user manager does, unless lingering is on (`loginctl enable-linger`). On a
-  different socket, `INSENSICAL_SCOPE=1` gives the same scope and `INSENSICAL_SCOPE=0`
-  turns it off.
+  it takes neither it nor your programs. A logout that stops your user manager does,
+  unless lingering is on (`loginctl enable-linger`). On a different socket,
+  `INSENSICAL_SCOPE=1` gives the same scope and `INSENSICAL_SCOPE=0` turns it off.
 - **Stopping it kills your programs.** `isc kill-server` or a termination signal ends
   every program in every pane and keeps the layout for the next start. Moving it to a
   new version stops nothing. Section 17 covers both.
@@ -304,7 +296,7 @@ These are the words the rest of the manual uses, and how the daemon behaves.
 **The socket.**
 
 - Its directory must be owned by you and closed to others (`0700`). The daemon creates it
-  that way. It refuses to start, and says why, if the directory is wider, is a link, or
+  that way and refuses to start, saying why, if the directory is wider, is a link, or
   holds something that isn't a socket where the socket goes.
 - Paths are limited to about 108 bytes on Linux and 104 on macOS. A longer
   `INSENSICAL_SOCKET` fails with "path must be shorter than SUN_LEN".
@@ -315,23 +307,21 @@ These are the words the rest of the manual uses, and how the daemon behaves.
 
 **The daemon has the environment of whatever started it, and every pane inherits it.**
 
-- Started from a launcher, panes get the launcher's `PATH`, not a login shell's. A
+- Started from a launcher, panes get the launcher's `PATH`, not a login shell's, so a
   command other terminals find might not be found.
-- **On macOS, a new pane's shell starts as a login shell**, like the Mac's other
-  terminals, so it reads `/etc/zprofile` and `~/.zprofile`. A `shell` setting runs exactly
+- **On macOS, a new pane's shell starts as a login shell.** A `shell` setting runs exactly
   as written and needs its own `-l`.
 - A variable you change in a shell profile reaches new panes through the shell's own
   start-up files, or after `isc kill-server` and a restart from an environment that has
   it. That kills every program.
-- Moving the daemon to a new version keeps its environment, as it's the same process.
+- Moving the daemon to a new version keeps its environment.
 - `INSENSICAL_HOST` isn't passed on, so `isc` in a pane means that pane's own daemon.
-- Ignored signals aren't passed on. Programs in panes start with Ctrl-C, Ctrl-Z and
-  hang-up meaning what they usually mean.
+  Ignored signals aren't passed on either.
 - **Started by the user unit**, the daemon has systemd's user manager environment, which
-  reads no shell profile. `PATH` is usually short, and variables from `~/.profile` or a
-  shell's start-up file are missing. `systemctl --user show-environment` prints what it
-  has. To add to it, run `systemctl --user import-environment PATH` before the unit
-  starts, or put `Environment=` lines in a drop-in from `systemctl --user edit insensical`.
+  reads no shell profile: `PATH` is usually short, and variables from `~/.profile` are
+  missing. `systemctl --user show-environment` prints what it has. To add to it, run
+  `systemctl --user import-environment PATH` before the unit starts, or put
+  `Environment=` lines in a drop-in from `systemctl --user edit insensical`.
 
 ---
 
@@ -343,20 +333,16 @@ These let you reach your machines from one place.
   on your network, your tailnet or the internet.
 - Your other **machines** join it: `isc hub invite` on the hub makes a line, and
   `isc hub join` on the other machine takes it. A joined machine doesn't listen on the
-  network. Its `isc hub` dials the hub, and your devices reach it there.
+  network; its `isc hub` dials the hub.
 - A **device** pairs with the hub once, by a code, and is known by its key from then on.
   It reaches every joined machine with no further code, and its page lists them.
 - What a device and a machine say to each other is sealed for the two of them. The hub
-  passes it on and can't read it. It vouches for paired devices, and each joined machine
-  lets those in.
-- The daemon still listens on nothing but its socket. `isc hub` is one more client of it,
-  like the window. See [In a browser](#in-a-browser) and
+  passes it on and can't read it.
+- The daemon still listens on nothing but its socket. `isc hub` is one more client of it.
+  See [In a browser](#in-a-browser) and
   [Joining another machine to your hub](#joining-another-machine-to-your-hub).
 
 ## 5. The window
-
-The window is where you see and work in your projects. This section covers what's on
-screen, how the window opens, and how it shows other machines.
 
 ### First launch
 
@@ -365,11 +351,9 @@ screen, how the window opens, and how it shows other machines.
   - Start it in a directory other than your home directory, and that directory becomes the
     project, named after it.
   - Start it from a launcher and it opens in your home directory (on a Mac, `/`). The
-    project has no root and gets a generated two-word name such as `amber-fjord`. Its panes
-    start in your home directory.
+    project has no root and gets a generated two-word name such as `amber-fjord`.
 - With a daemon already running, the window shows what the daemon has.
-- The window opens centred, at the size it had last time, or 1200×800 the first time. It
-  doesn't remember where on the screen it was.
+- The window opens centred, at the size it had last time, or 1200×800 the first time.
 - Each `insensical` process has one window. Two processes give you two windows on the same
   daemon: see [Two windows](#two-windows).
 
@@ -385,17 +369,16 @@ screen, how the window opens, and how it shows other machines.
 - **The tab's area**: tiled panes with dividers, and floating panes above them.
 - **Dock**, at the bottom, only while the tab has minimized panes.
 
-Where this manual says something is "in the top bar", that's where it is with `tabs =
-"top"`. With tabs down the side, the same things are at the top and bottom of the sidebar.
+With tabs down the side, the top bar's things are at the top and bottom of the sidebar.
 
 **Tabs run along the top or down the side, never both.** The `tabs` setting chooses.
 `Ctrl+Shift+B` hides them, and shows them again in the same place.
 
 | `tabs` | What you get |
 |---|---|
-| `"sidebar"` (default) | The sidebar lists every tab of every project, which suits watching work across several projects. No top bar: the count of panes that need you, the floating-panes switch and `+` are at the top of the sidebar, and notices at its bottom. |
-| `"top"` | The top bar shows the current project's tabs only, which suits working in one project. No sidebar. |
-| Hidden | Panes get the whole window. The count and notices are off screen, but `Ctrl+Shift+A` still goes to the pane that needs you and the palette still lists them. The window opens with tabs hidden next time. |
+| `"sidebar"` (default) | The sidebar lists every tab of every project. The count of panes that need you, the floating-panes switch and `+` are at the top of the sidebar, and notices at its bottom. No top bar. |
+| `"top"` | The top bar shows the current project's tabs only. No sidebar. |
+| Hidden | Panes get the whole window. `Ctrl+Shift+A` still goes to the pane that needs you and the palette still lists them. The window opens with tabs hidden next time. |
 
 ### With nothing open
 
@@ -414,28 +397,27 @@ zoom, the leader's panel, the restart question) don't.
 ### What the window does not remember
 
 The window remembers its size, whether tabs were hidden, the sidebar's width, which
-projects you unfolded and which tabs you folded. It doesn't remember its position, and a new window always
-opens with its keys unlocked.
+projects you unfolded and which tabs you folded. It doesn't remember its position, and a
+new window always opens with its keys unlocked.
 
 ### Two windows
 
-A pane has one size, so two windows of different sizes can't both fit it. **A pane is the
-size that fits the window you used last.** The same goes for a window and `isc attach`.
+A pane has one size, so **a pane is the size that fits the window you used last.** The
+same goes for a window and `isc attach`.
 
 - Click or switch to a window and the panes it shows take its size. The other window keeps
   showing them at that size.
 - A pane sized by another window has a "Sized elsewhere" mark in its header. Press it to
   size the pane for this window.
-- The pane shows at its real size. If it's larger than its space you see its foot, where
-  the cursor is. Hold Shift and turn the wheel to move across it, or Alt and the wheel to
-  move up and down.
+- If a pane is larger than its space you see its foot, where the cursor is. Hold Shift and
+  turn the wheel to move across it, or Alt and the wheel to move up and down.
 
 ### Other machines in the window
 
 One window shows this computer's projects and those of every machine you've added. A pane
-on another machine works like any other: type in it, split it, float it. It runs there and
-keeps running if you close the window or the connection drops. It all goes through your
-own `ssh`: see [Other machines, over ssh](#other-machines-over-ssh).
+on another machine works like any other and keeps running if you close the window or the
+connection drops. It all goes through your own `ssh`: see
+[Other machines, over ssh](#other-machines-over-ssh).
 
 **Adding a machine.** Press "Add" at the foot of the sidebar and choose Machine. "Add a
 machine" in the palette and "Add Remote Host" in the settings sheet do the same.
@@ -452,17 +434,16 @@ machine" in the palette and "Add Remote Host" in the settings sheet do the same.
 
 - **If `ssh` has a question, press `Answer`.** That covers a new host, a key or password,
   and a Tailscale sign-in. It opens a tab on this computer running `isc host answer` for
-  that machine, where you answer `ssh` itself; insensical never sees what you type. When it
-  ends well the machine is met again. The button is also under the machine's name in the
-  sidebar and in Remote Hosts. A changed host key has no `Answer`: its words say what to
-  find out first.
+  that machine, where you answer `ssh` itself; insensical never sees what you type. The
+  button is also under the machine's name in the sidebar and in Remote Hosts. A changed
+  host key has no `Answer`: its words say what to find out first.
 - **If insensical is missing or older, one button brings it there**, like "Put insensical
-  0.3.0 on atlas". It does what `isc host put` does, only when you press it. Where a package
-  or Homebrew owns insensical there, the dialog gives you the command to run on that
-  machine instead.
+  0.3.0 on atlas". It does what `isc host put` does. Where a package or Homebrew owns
+  insensical there, the dialog gives you the command to run on that machine instead. A
+  copy built from source sends itself to a Linux machine, even one with the same version.
 
-**In the sidebar,** each machine is a heading over its projects once you've added one:
-"This computer" first, then the others in your settings' order.
+**In the sidebar,** each machine is a heading over its projects: "This computer" first,
+then the others in your settings' order.
 
 - A heading has the machine's tile and name in its colour, the link's mark, and how many
   of its panes need you. Press it to fold the machine.
@@ -470,21 +451,20 @@ machine" in the palette and "Add Remote Host" in the settings sheet do the same.
   beyond. Point at it for the figure. It's struck through and red while the machine is out
   of reach, and pointing says why.
 - **A machine with another version of insensical says so under its heading**, as in "atlas
-  has insensical 0.2.1, and this computer has 0.3.0", and a notice tells you once for each
-  version there, in case the heading is folded. "Update it" offers to put this version
-  there. If the machine has the newer one, update this computer, then press "Try again".
+  has insensical 0.2.1, and this computer has 0.3.0". "Update it" offers to put this
+  version there. If the machine has the newer one, update this computer, then press "Try
+  again".
 - The filter, going to the pane that needs you, "Next project" and "Previous project" all
-  cover every machine. The overview groups projects under each machine, and the palette says
-  which machine a pane is on.
+  cover every machine. The overview groups projects under each machine, and the palette
+  says which machine a pane is on.
 
 **Which machine you're typing into.** A pane on another machine shows the machine's chip
 (tile and name, in its colour) in its header, with a line in that colour along the top. In
-a narrow pane the chip is the tile alone. This computer's panes carry neither. A machine's
-colour comes from its name unless you set one.
+a narrow pane the chip is the tile alone. A machine's colour comes from its name unless
+you set one.
 
 **A machine marked careful has a filled chip, and a paste of more than one line there asks
-first**, whatever the program asked for. See [Pasting](#pasting). Mark the machine you'd
-least like to paste into by mistake.
+first**, whatever the program asked for. See [Pasting](#pasting).
 
 **One machine is in front at a time.** Keys and commands go to the machine whose pane, tab
 or project you last went to.
@@ -492,25 +472,20 @@ or project you last went to.
 - A pane, tab or project stays on the machine that runs it.
 - "New project" asks which machine once there's more than one. `Alt+M` goes to the next,
   and the directories offered are that machine's.
-- What you ask of a machine is never done on another. If it can't be asked, nothing
-  happens and a line says so.
-- Only you change the machine in front. Another machine can tell you a pane needs you, but
-  can't take the keyboard.
+- A request meant for one machine is never done on another. If a machine can't be asked, nothing happens and a line says so. Another machine can
+  tell you a pane needs you, but can't take the keyboard.
 
-**When the link is lost.** A train, a closed lid, a machine that restarts.
+**When the link is lost,**
 
-- The machine's panes keep what they last showed, dimmed, with a line at their foot: "Link
-  to atlas lost · trying again".
-- **Nothing you type there is sent, or kept for later.** The line beats once so you know
-  the key wasn't taken. Commands that act on that machine do the same. Nothing you typed
-  into a dead link turns up at an agent when the network returns.
-- It retries by itself, and coming back to the window retries at once.
-- When it's back, the panes are drawn afresh and say "Connected" for a second. What ran
-  there never noticed.
+- the machine's panes keep what they last showed, dimmed, with a line at their foot: "Link
+  to atlas lost · trying again";
+- **nothing you type there is sent, or kept for later.** The line beats once so you know
+  the key wasn't taken, and commands that act on that machine do the same. Nothing you typed reaches an agent when the network returns;
+- it retries by itself, and coming back to the window retries at once;
+- when it's back, the panes say "Connected" for a second. What ran there never noticed.
 
-**Settings.** The Remote Hosts page of the settings sheet has one card per machine. A
-folded card shows its picture, name, state and `Check`. Press the row to open it. Open, a
-card has:
+**Settings.** The Remote Hosts page of the settings sheet has one card per machine. Press
+a folded card's row to open it. Open, a card has:
 
 | Control | What it does |
 |---|---|
@@ -518,7 +493,7 @@ card has:
 | Icon | On a tile of its colour: server, laptop, desktop, mini PC, NAS, board (a small computer such as a Raspberry Pi), phone, container or cloud |
 | careful | On or off |
 | `Check` | Meets the machine again, as adding it did |
-| Pencil | Renames it in its row: Enter keeps, Escape leaves. Link, folds and place in front stay. |
+| Pencil | Renames it in its row: Enter keeps, Escape leaves |
 | `Forget` | Forgets it. What runs there runs on, and adding it again finds it. |
 
 From the keyboard, Up and Down go between machines and "Add Remote Host", Left and Right
@@ -536,8 +511,8 @@ Limits:
 - The interface in a terminal shows one machine at a time. A careful machine is marked in
   the top row, and a multi-line paste asks first.
 - In "Go to a machine", a machine `ssh` has a question for says `ssh asks` on its row.
-  Press `a` and a tab opens on this computer running `isc host answer` for it. A machine not
-  reached for another reason says why, and `a` does nothing there.
+  Press `a` and a tab opens on this computer running `isc host answer` for it. A machine
+  not reached for another reason says why, and `a` does nothing there.
 
 **When this computer's server stops,** only its part of the window says so: its heading
 gets the struck-through mark and "its server has stopped", and its panes are gone until it
@@ -548,9 +523,9 @@ starts. Other machines carry on. Press the heading for the way to start it again
 - **Fonts.** The UI uses the system's proportional font at 13 pixels, whatever `font-size`
   is. `interface-font` names another. If you name the terminal's font, the UI uses it too.
 - **A program is shown as a tile**: its own mark (Claude's, Neovim's, Docker's and so on)
-  on a small glossy card in the program's colours, so you can find a pane by colour before
-  you read its name. Programs without a mark get a terminal's. Tiles appear in the sidebar,
-  pane header, tab strip, dock, overview and palette.
+  on a small glossy card in the program's colours, so you can find a pane by colour.
+  Programs without a mark get a terminal's. Tiles appear in the sidebar, pane header, tab
+  strip, dock, overview and palette.
 - **A tab is shown as a deck**: the tile of the pane that has or last had the keyboard,
   with up to two more behind it. Floating and minimized panes count.
 - **The foot of the sidebar** has Settings, Show every key, the overview of every tab, and
@@ -579,8 +554,7 @@ starts. Other machines carry on. Press the heading for the way to start it again
 
 ## 6. Projects and the sidebar
 
-Projects keep your work in groups, and the sidebar lets you see all of it and jump to any
-part.
+Projects group your work, and the sidebar lets you see all of it and jump to any part.
 
 ### Projects
 
@@ -588,11 +562,10 @@ A project is a name, an optional root directory, and tabs. It stays until you cl
 even with nothing running, and comes back after the daemon restarts.
 
 **Closing a tab or a project asks first**, because it kills every program in it. The
-window lists the panes that would close, each with its program, directory and state (just
-a count above six). Enter, "Close tab" or "Close project" closes. Escape, "Keep it" or a
-click outside doesn't. A project with nothing running closes without asking. Closing a
-pane doesn't ask, and neither do `isc tab close` or `isc project close`: typing the
-command is your yes.
+window lists the panes that would close (just a count above six). Enter, "Close tab" or
+"Close project" closes. Escape, "Keep it" or a click outside doesn't. A project with
+nothing running closes without asking. Closing a pane doesn't ask, and neither do
+`isc tab close` or `isc project close`.
 
 **Opening one.** Press `Ctrl+Shift+N`, or click the project's name in the top bar. You're
 asked for:
@@ -603,14 +576,12 @@ asked for:
   Type a path beginning with `/` or `~`, or leave it empty for none.
 
 As you type a path, up to six matching directories are listed (hidden ones once you type a
-dot). Up and Down select one, and `Tab` goes into it, so a path takes a few letters and
-`Tab` at each step.
+dot). Up and Down select one, and `Tab` goes into it.
 
-If the path doesn't exist but could, the card shows the whole path it worked out and the
-button reads "Make the directory". Enter asks once more ("Make it and create"), and Enter
-again makes the directory and any missing ones above it, then opens the project in it.
-It's made on the machine the project is for, with permissions 755 less your `umask`. If it
-can't be made, the card says why and nothing is made.
+If the path doesn't exist but could, the button reads "Make the directory". Enter asks
+once more ("Make it and create"), and Enter again makes it, and any missing ones above it,
+on the machine the project is for (permissions 755 less your `umask`), then opens the
+project. If it can't be made, the card says why and nothing is made.
 
 `Tab` in the name field moves to the directory field, and `Shift+Tab` moves back. Enter or
 "Create" makes the project and opens a shell in it. Escape, "Cancel" or a click outside
@@ -627,11 +598,10 @@ isc project new [DIR] [--name NAME] [--make]
 isc run --new-project
 ```
 
-`--make` creates a `DIR` that isn't there, with the ones above it, on the machine the
-command is for. To open a project with all its tabs and panes at once, see [A project in a
+A `DIR` that isn't there is refused, and nothing opens. `--make` creates it first, with
+the ones above it, on the machine the command is for. On this machine, `.` or a name like
+`app` means from the directory you're in. On another machine, give it from `/` or `~`. To open a project with all its tabs and panes at once, see [A project in a
 file](#a-project-in-a-file).
-
-**Where new panes open.**
 
 | New | Opens in |
 |---|---|
@@ -639,16 +609,15 @@ file](#a-project-in-a-file).
 | Split | The directory of the pane it splits |
 | Floating pane | The focused pane's directory |
 
-A project's name doesn't follow its panes: a project named `insensical` stays that if its
-shells move to `~/Projects/quote`. Tab and pane rows show where they really are.
+A project's name doesn't follow its panes. Tab and pane rows show where they really are.
 
 **Renaming.** Press the pencil on the project's sidebar row, run `isc project rename OLD
-NEW`, or choose "Rename this project" in the palette. The name becomes a selected field:
-Enter keeps it, Escape leaves the old name, and an empty name isn't allowed. If the row
-isn't on screen, a small card asks instead.
+NEW`, or choose "Rename this project" in the palette. Enter keeps the name, Escape leaves
+the old one, and an empty name isn't allowed. If the row isn't on screen, a small card
+asks.
 
-**A project's icon.** Every project has a tile beside its name. By default it's the first
-letter of the name on a colour that comes from the name. To choose, press the tile on the
+**A project's icon.** Every project has a tile beside its name: by default the first letter
+of the name on a colour that comes from the name. To choose, press the tile on the
 project's sidebar row. Each pick applies at once.
 
 - One of ten colours, or "By name" for the one it had.
@@ -657,17 +626,14 @@ project's sidebar row. Each pick applies at once.
   `docs`, `mobile`, `package`, `rocket`, `lab`, `server`, `design`, `chart` and `shield`.
   After them are the marks programs are shown by.
 - **"Your SVG"** takes a `.svg` file of yours, 256 KB at most, drawn whole in a square.
-  The daemon keeps a copy in `~/.config/insensical/icons/`, so you can move or delete the
-  original.
+  A copy is kept in `~/.config/insensical/icons/`. A drawing with an `<image>` in it, or
+  a gzip-packed one, isn't taken.
 - "Reset" goes back to the letter and the name's colour.
-
-A drawing with an `<image>` in it, or a gzip-packed one, isn't taken.
 
 From the command line, `isc project icon NAME --mark rust --colour '#ff8800'` or `--svg
 logo.svg`. What you leave out is left unchanged, so `isc project icon NAME` alone resets
 it. The file is read where you run the command, so `isc --host build project icon api
---svg logo.svg` takes a `logo.svg` from this machine. The icon is kept with the layout,
-and every window shows it.
+--svg logo.svg` takes a `logo.svg` from this machine.
 
 | To | Do |
 |---|---|
@@ -677,7 +643,7 @@ and every window shows it.
 
 On the command line, a project is its name, or its number as `isc ls` prints it (`4` or
 `project:4`). Two projects can share a name; the name then means the first listed, and the
-number tells them apart. A number always means that project, never one named that.
+number tells them apart. A number always means that project.
 
 ### A project in a file
 
@@ -691,8 +657,6 @@ isc project open                      # the .insensical.toml in this directory
 isc project open ~/code/shop          # the one in that directory
 isc project open ~/layouts/shop.toml  # a file by name, kept anywhere
 ```
-
-It prints the project as `project:N` and goes to it.
 
 It prints the project as `project:N` and goes to it.
 
@@ -773,9 +737,9 @@ skipped.
 | | `everywhere = true` | It shows over whichever tab of the project is in front |
 
 **A command is words, not a shell line.** `run = "cargo watch -x test"` starts `cargo`
-with three arguments, and quotes keep a word whole. Nothing else means anything: no `&&`,
-no `$HOME`, no `~`. For those, write `run = ["sh", "-c", "make && ./serve"]`. A pane
-closes when its program ends, as with `isc run`.
+with three arguments, and quotes keep a word whole. There's no `&&`, `$HOME` or `~`. For
+those, write `run = ["sh", "-c", "make && ./serve"]`. A pane closes when its program ends,
+as with `isc run`.
 
 **It asks before it starts someone else's programs.** The first time you open a file,
 `isc` lists every program it would start, with each directory, and asks. Only `y` starts
@@ -788,8 +752,7 @@ them.
   opens shells isn't asked about.
 
 **Opening it twice doesn't make two.** If a project with the file's name and root is
-already open, `isc project open` goes to it and changes nothing. `--again` opens a second
-one.
+already open, `isc project open` goes to it. `--again` opens a second one.
 
 **A mistake makes nothing.** The whole file is checked first. A misspelt key, a wrong kind
 of value, broken TOML or a missing `dir` is reported with its line, and no tab is made:
@@ -798,8 +761,6 @@ of value, broken TOML or a missing `dir` is reported with its line, and no tab i
 isc: /home/me/shop/.insensical.toml, line 5: a pane has no `sise`. It has `run`, `dir`,
 `name`, `front`, `minimized`, `size`. Nothing was opened
 ```
-
-If the daemon refuses something partway, what was made is closed again and you're told why.
 
 **Saving one.** Arrange a project the way you like it, then:
 
@@ -811,8 +772,7 @@ isc project save -            # or prints it
 
 It writes the project in front: tabs, panes, split sizes, floating and minimized panes,
 names, and which tab and pane are in front. A file saved in the project's own directory
-names no `root`, so it works for whoever has the directory. It won't overwrite a file
-without `--force`.
+names no `root`. It won't overwrite a file without `--force`.
 
 - Each pane is saved with the command it was started with. A pane started as a shell is
   saved as a shell, and if it's running something, `isc project save` tells you which pane
@@ -831,8 +791,7 @@ without `--force`.
   "Save this project as a file" writes `.insensical.toml` in the project's directory, asking
   first if one is there.
 - A mistake in the file shows in a notice with its line, and nothing is made.
-- The window always makes a new project, even if one from the file is open. A name you
-  type is used if the file gives none.
+- The window always makes a new project. A name you type is used if the file gives none.
 
 **Limits.**
 
@@ -853,9 +812,8 @@ A project you aren't working on still holds what its programs hold: a few megaby
 shell, several hundred for an agent. **Putting it to sleep ends its programs and keeps
 everything else.**
 
-- Tabs, splits, floating and minimized panes stay, and so does what each pane showed,
-  which is written to disk. In the sidebar the heading says `asleep` and its rows are
-  dimmed.
+- Tabs, splits, floating and minimized panes stay, and so does what each pane showed. In
+  the sidebar the heading says `asleep` and its rows are dimmed.
 - **Waking it** puts a shell in each pane, in its directory, under what it showed. What
   ran there is typed at the prompt for you to run again with Enter: an agent's own resume
   command if it gave one, otherwise the command the pane was started with. This is also what
@@ -878,8 +836,7 @@ and press Enter or `Wake it`, or use the same mark, command or `isc project wake
 
 The sidebar is a tree of project, tab and pane. It shows while `tabs = "sidebar"`, and
 `Ctrl+Shift+B` hides and shows it. Drag its right edge to change its width, from 190 to
-520 pixels (at least 240 are left for the panes). The next window opens at the width you
-left.
+520 pixels (at least 240 are left for the panes).
 
 | Row | Shows |
 |---|---|
@@ -891,8 +848,7 @@ left.
 in a close question:
 
 1. the name you gave it, if any;
-2. otherwise the title its program set, unless it's a shell (an agent's title says what
-   it's working on);
+2. otherwise the title its program set, unless it's a shell;
 3. otherwise the program and the last part of its directory, such as `nvim · api`. A shell
    is called by its directory alone, such as `api`. The home directory is `~`.
 
@@ -901,34 +857,31 @@ in a close question:
   the state's colour: "wants permission", "asks a question", "needs you to sign in",
   "waiting", "failed" or "done". The program's own words follow. Hover for the whole text.
 - A working pane shows progress and words after its name when they fit, as in "40% ·
-  Pushing image", and on their own line when they don't. A pane only running a command, or
-  at rest, has its mark and name.
+  Pushing image", and on their own line when they don't.
 - **A row says how long its pane has needed you**: `now` for the first minute, then `2m`,
-  `1h`, `3d`. After ten minutes waiting, the figure turns bold in the waiting colour.
+  `1h`, `3d`. After ten minutes the figure turns bold in the waiting colour.
 - Click a row to go to it. Click a minimized pane's row to bring the pane back.
-- **What an agent started is listed under it**, one level in and joined by a line,
-  whichever tab it's in. A tab whose panes all sit under their agents has no row of its own.
-  Folding the agent's tab or project folds its team.
+- **What an agent started is listed under it**, one level in, whichever tab it's in. A tab
+  whose panes all sit under their agents has no row of its own. Folding the agent's tab or
+  project folds its team.
 
 **Sharing.** An eye appears beside the pencil on a project's row under the pointer. It
 shares the project with a guest, or lists who has it: see [Sharing one project or one
 terminal](#sharing-one-project-or-one-terminal). A shared project always shows an eye, or
 a keyboard if a guest can type in it.
 
-**Naming.** Press the pencil at the end of the row under the pointer. The name becomes a
-selected field: Enter keeps it, Escape leaves the old name. For a tab or pane, an empty
-name removes the name. Names survive a restart and appear in the tab strip, the pane's
-header, notifications and `isc ls`.
+**Naming.** Press the pencil at the end of the row under the pointer. Enter keeps the
+name, Escape leaves the old one. For a tab or pane, an empty name removes the name. Names
+survive a restart and appear in the tab strip, the pane's header, notifications and
+`isc ls`.
 
 - From the command line: `isc tab rename TAB NAME` or `isc rename PANE NAME`.
 - From the palette: "Name this pane" or "Name this tab" (`name-pane`, `name-tab`, no
-  default keys). Where the name isn't written on screen, such as a one-pane tab with no
-  name, a small card asks.
+  default keys). Where the name isn't written on screen, a small card asks.
 
 **Folding.** The mark at the start of a project or tab row hides what's under it. Every
-project starts folded, one you add later too, so a long list reads by name first. Unfold
-the ones you work in: the next window opens with them unfolded, and tabs you folded stay
-folded. While the filter has text, matches show even inside
+project starts folded, so a long list reads by name first. Unfold the ones you work in: the
+next window opens with them unfolded. While the filter has text, matches show even inside
 something folded.
 
 **Filtering.** Type in the field to narrow the tree to projects, tabs and panes whose
@@ -951,9 +904,6 @@ counts them, as `working · 3 started`. Press a row to go to that pane. In each 
 panes that need you come first, then those at work, then finished, then agents at rest. A
 machine with nothing to list says "nothing at work".
 
-The list is kept calm: it doesn't flicker as work starts and stops, and rows don't move
-while your pointer is moving over it.
-
 - A long command at a shell that marks its commands (`isc shell-integration` sets bash and
   zsh up) gets a row with what you typed and how long it has run.
 - A finished or failed pane stays until you look at it. A waiting pane stays until its
@@ -964,13 +914,13 @@ The filter and arrows work as in the full list. Folds and the `sidebar` setting 
 apply. Set `activity-idle = false` to leave out agents at rest. Two commands walk the list
 from anywhere, round at the ends and across machines: `next-activity` (`Ctrl+Shift+J`) and
 `previous-activity` (`Ctrl+Alt+/`). While the sidebar shows activity, `Ctrl+Shift+A` goes
-to the next pane that needs you or has finished, in the order drawn.
+to the next pane that needs you or has finished.
 
 With `tabs = "top"` the button is in the bar and the list shows beside the panes while
-it's on. The interface in a terminal has the same list under the same rules: see [The
-whole interface in a terminal](#the-whole-interface-in-a-terminal). So does the page `isc
-hub` serves (see "In a browser"), though there a finger counts as the pointer, agents at
-rest are always listed, and there's no filter or forget arrow.
+it's on. The interface in a terminal has the same list: see [The whole interface in a
+terminal](#the-whole-interface-in-a-terminal). So does the page `isc hub` serves (see "In
+a browser"), though there agents at rest are always listed, and there's no filter or
+forget arrow.
 
 **From the keyboard.** `Ctrl+Shift+L` (leader `e`) puts the keyboard in the field. Down
 and Up move a highlight through the rows, or the matches after you've typed. Left folds
@@ -980,28 +930,24 @@ typed. Escape leaves the field.
 
 **Drag a row to put it in order.** A project dragged onto another takes its place, and a
 tab dragged onto another tab of the same project takes that tab's place. A one-pane tab
-with no name is dragged by its pane's row. Panes aren't ordered here: their order is the
-layout's.
+with no name is dragged by its pane's row. Panes aren't ordered here.
 
 ---
 
 ## 7. Tabs
 
-Tabs let you keep a separate layout of panes for each thing you're working on. A tab lasts
-as
-long as it holds a pane: close its last pane and the tab closes.
+Tabs keep a separate layout of panes for each thing you're working on. A tab lasts as long
+as it holds a pane: close its last pane and the tab closes.
 
 | To | Do |
 |---|---|
 | Open a tab | `Ctrl+Shift+T`, the `+` in the top bar, or `isc tab new`. It opens a shell in the project's root, or where the pane in front is if the project has no root. |
 | Switch | Click the tab; `Ctrl+Tab` / `Ctrl+Shift+Tab`; `Ctrl+PageDown` / `Ctrl+PageUp`; `Alt+1` to `Alt+9` for the project's first to ninth tab (`⌘1` to `⌘9` on macOS, leader `1` to `9`); `isc tab next`, `isc tab prev`, `isc tab select TAB`. |
 | Close | The cross on the tab, a middle click, `Ctrl+Shift+Q`, or `isc tab close [TAB]`. The window asks first. |
-| Move | `Ctrl+Shift+PageUp` / `Ctrl+Shift+PageDown`; `isc tab move TAB INDEX`, counted from 0; or drag the tab onto another, along the top or in the sidebar. |
+| Move | `Ctrl+Shift+PageUp` / `Ctrl+Shift+PageDown`; `isc tab move TAB INDEX`, counted from 0; or drag the tab onto another, along the top or in the sidebar. It takes that tab's place. |
 | Name | The pencil on its sidebar row, "Name this tab" in the palette, or `isc tab rename TAB NAME`. |
 
-- **Closing a tab closes every pane in it.** The window shows what would end and asks first.
-  `isc tab close` doesn't ask.
-- Drop a tab onto another and it takes that tab's place.
+- **Closing a tab closes every pane in it.** `isc tab close` doesn't ask.
 - A tab shows its panes as tiles, with the focused pane's program in front, and its name or
   what that pane is called ([section 6](#6-projects-and-the-sidebar)). It shows a state mark
   only when one of its panes needs you.
@@ -1010,28 +956,25 @@ long as it holds a pane: close its last pane and the tab closes.
 
 ## 8. Panes
 
-A pane is one running program in a terminal. You can split, float, minimize and move panes
-to arrange your work the way you like.
+A pane is one running program in a terminal. Split, float, minimize and move panes to
+arrange your work.
 
 ### The life of a pane
 
 A pane runs the shell, or the command you give to `isc run` or `isc split`.
 
 - **When its program ends, the pane closes.** A pane started with `isc run --keep` stays
-  open
-  and readable, and shows how the program ended (`done`, or `failed` with the exit code).
-  Press Enter in it to close it.
-- **Closing a pane ends its program, without asking**, even if something is running. The
-  program gets a hang-up, then its terminal closes after 300 ms, and its process group is
-  killed after three seconds.
+  open and shows how the program ended (`done`, or `failed` with the exit code). Press
+  Enter in it to close it.
+- **Closing a pane ends its program, without asking.** The program gets a hang-up, then its
+  terminal closes after 300 ms, and its process group is killed after three seconds.
 - Close a pane with `Ctrl+Shift+W`, the close button in its header, or `isc close [PANE]`.
 - When the focused pane closes, the keyboard goes to the pane that takes its space.
 - A fault inside one pane closes only that pane.
 
 Limits: a window or terminal shows at most 512 panes at once (the rest say "Not shown yet"
-and
-retry on their own), and a pane isn't shown if its terminal would have more than 1,024,000
-cells.
+and retry on their own), and a pane isn't shown if its terminal would have more than
+1,024,000 cells.
 
 ### Which shell runs
 
@@ -1042,7 +985,7 @@ A pane with no command runs the first of these that applies:
 2. `$SHELL` as the daemon sees it.
 3. `/bin/sh`.
 
-- A change to `shell` applies to the next pane, with no restart; open panes keep theirs.
+- A change to `shell` applies to the next pane; open panes keep theirs.
 - If your shell can't start, the login shell starts instead and the top bar says what went
   wrong.
 - `shell` changes what new panes run, not `$SHELL` inside them.
@@ -1050,13 +993,10 @@ A pane with no command runs the first of these that applies:
 ### What is known about a pane
 
 - **Program**: the foreground process's name. A pane that has printed and been sent
-  nothing has
-  no known program yet and shows the generic terminal icon.
-- **Directory**: read from the pane's own process, so it's right with any shell and needs no
-  setup.
-- **Title**: what the program set, without a busy mark such as an agent's spinner, because
-  the
-  pane's state has its own mark. `isc ls` shows the title exactly as set.
+  nothing has no known program yet and shows the generic terminal icon.
+- **Directory**: read from the pane's own process, so it's right with any shell.
+- **Title**: what the program set, without a busy mark such as an agent's spinner. `isc ls`
+  shows the title exactly as set.
 - **Tile**: chosen from the program's name. About six hundred programs have their own mark,
   in their maker's colour; anything else gets the terminal's. To give your own program one,
   see [Icons for your own programs](#icons-for-your-own-programs). The list is fixed.
@@ -1099,12 +1039,9 @@ program has ended.
 
 Buttons show on the focused pane and the pane under the pointer: split right, split down,
 float (on a float: put into the layout, keep on top, show over every tab), minimize, fill
-the
-tab, share (an eye: see [Sharing one project or one
-terminal](#sharing-one-project-or-one-terminal)),
-close. A pane on another machine has no share button.
-
-A two-pixel line under the header shows the state as a colour.
+the tab, share (an eye: see [Sharing one project or one
+terminal](#sharing-one-project-or-one-terminal)), close. A pane on another machine has no
+share button. A two-pixel line under the header shows the state as a colour.
 
 The `pane-header` setting:
 
@@ -1121,8 +1058,7 @@ this setting resizes the terminals.
 
 - **Split right / down**: `Ctrl+Shift+O` / `Ctrl+Shift+E`, the header buttons, or
   `isc split right|down [PANE] [-- COMMAND…]`. The new pane takes half of the pane it
-  splits.
-  With a floating pane focused, the tiled layout is split.
+  splits. With a floating pane focused, the tiled layout is split.
 - **Focus by direction**: `Ctrl+Alt+arrow`, or `isc focus left|right|up|down`, across tiled
   panes.
 - **Next / previous pane**, floats included: `Ctrl+Shift+]` / `Ctrl+Shift+[`.
@@ -1136,10 +1072,8 @@ this setting resizes the terminals.
 of the space being divided. From the command line:
 `isc resize left|right|up|down [PANE] [--by PERCENT]`.
 
-- The arrow says which way the divider goes, not whether the pane grows. The divider that
-  moves is the innermost one on that axis that holds the pane, so "right" widens a pane
-  whose
-  divider is on its right and narrows one whose divider is on its left.
+- The arrow says which way the divider goes, not whether the pane grows: "right" widens a
+  pane whose divider is on its right and narrows one whose divider is on its left.
 - A pane as wide as the tab has no divider to move, so the key does nothing.
 - On a floating pane, the same keys move its right and bottom edges.
 
@@ -1153,8 +1087,7 @@ of the space being divided. From the command line:
   `Ctrl+K`, `Ctrl+L`, and they repeat.
 - `isc swap A B` swaps the places of two panes.
 - `isc put PANE left|right|above|below --of OTHER` moves a pane to that side of another,
-  half
-  each. Without `--of` the pane takes that half of the whole tab, or of the tab `--tab`
+  half each. Without `--of` the pane takes that half of the whole tab, or of the tab `--tab`
   names.
 
 **Drag a tiled pane by its header.** Where you let go says what happens:
@@ -1169,9 +1102,8 @@ of the space being divided. From the command line:
 
 - **You see it before it happens.** The panes glide to where they'd be, and the pane you
   carry is ringed, with a word in its middle for what letting go does: "Swap", "Top half",
-  "Left of everything". You can let go as soon as the word is right.
+  "Left of everything".
 - **Escape puts it back** while you're still holding it.
-- No terminal is resized until you let go.
 - A tab left with no pane is gone. You can't drag while one pane fills the tab.
 
 ### Filling the tab (zoom)
@@ -1197,8 +1129,7 @@ as you like.
 
 - A float stays inside the tab and is at least a tenth of it each way.
 - `--rect` takes fractions of the tab: `--rect 0.5,0,0.5,1` is the right half. The default
-  is
-  `0.2,0.15,0.6,0.7`.
+  is `0.2,0.15,0.6,0.7`.
 - Floating a tiled pane gives its space to its neighbours. Putting it back places it beside
   the focused tiled pane.
 - Hidden floats keep running. A float closes when its command exits, like every pane.
@@ -1213,10 +1144,9 @@ floating pane over every tab" in the palette, leader `I`, or `isc follow [PANE] 
 ### The scratch pane
 
 A quick shell for a one-off command, without disturbing your layout. Press `` Ctrl+` ``
-and a
-shell floats across the lower part of the tab with the keyboard. Press it again to put it
-away and give the keyboard back. After the leader the key is `` ` ``; from the command line,
-use `isc scratch [--project NAME]`.
+and a shell floats across the lower part of the tab with the keyboard. Press it again to
+put it away. After the leader the key is `` ` ``; from the command line, use
+`isc scratch [--project NAME]`.
 
 - There's one scratch shell per project, the same over every tab. What runs in it keeps
   running while it's away.
@@ -1231,7 +1161,7 @@ use `isc scratch [--project NAME]`.
 
 Minimize a pane to get it out of the way while its program keeps running. Press
 `Ctrl+Shift+M`, use the header button, or run `isc minimize [PANE]`. The pane leaves the
-layout and keeps its size, so the program isn't disturbed.
+layout and keeps its size.
 
 - It waits in the dock as a chip: icon, title, percentage if reported, state mark, and a
   border in its state's colour. Chips stay in the order they were minimized.
@@ -1241,134 +1171,72 @@ layout and keeps its size, so the program isn't disturbed.
 - A middle click on a chip closes the pane without asking.
 - `minimize-others` and `restore-all` are palette commands with no default keys.
 - Beyond about one chip per 170 pixels of the tab's width, idle minimized panes share one
-  chip,
-  "3 idle", which opens the palette. Working, waiting, done or failed panes keep their own.
+  chip, "3 idle", which opens the palette. Working, waiting, done or failed panes keep
+  their own.
 
 ---
 
 ## 9. The terminal
 
-The terminal is libghostty-vt, Ghostty's terminal core, so escape sequences behave as they
-do
-in Ghostty. This section covers what you see and do in a pane: text, selecting, pasting,
-links and pictures.
+Escape sequences behave as they do in Ghostty.
 
 ### `TERM`
 
-`TERM` is `xterm-ghostty`, Ghostty's description of the terminal. It comes with insensical:
+`TERM` is `xterm-ghostty`, which comes with insensical:
 
-- If your system already has it, that one is used. Otherwise the daemon compiles its own
-  with
-  your system's `tic` the first time a pane starts.
+- If your system has it, that one is used. Otherwise the daemon compiles its own with your system's `tic` the first time a pane starts.
 - With no `tic`, `TERM` is `xterm-256color`.
 - `term = "xterm-256color"` in the settings makes it that for every pane started afterwards.
 
-**Over `ssh`** to a machine without that description, programs complain about an unknown
-terminal. Install it there (`infocmp -x xterm-ghostty | ssh host tic -x -`), set
-`TERM=xterm-256color` for that command, or set `term` if most of your work is on other
-machines.
+**Over `ssh`** to a machine without that description, programs complain about an unknown terminal. Install it there (`infocmp -x xterm-ghostty | ssh host tic -x -`), set `TERM=xterm-256color` for that command, or set `term` if most of your work is on other machines.
 
-Every pane also has `COLORTERM=truecolor`, `TERM_PROGRAM=insensical`,
-`TERM_PROGRAM_VERSION`,
-`INSENSICAL_PANE` and `INSENSICAL_SOCKET`.
+Every pane also has `COLORTERM=truecolor`, `TERM_PROGRAM=insensical`, `TERM_PROGRAM_VERSION`, `INSENSICAL_PANE` and `INSENSICAL_SOCKET`.
 
 ### Scrollback
 
-Each pane keeps 10 MB of history, an amount of memory rather than a number of lines. The
-`scrollback` setting changes it, from 1 to 200 megabytes, for panes started afterwards. The
-daemon holds the history; section 17 covers what happens to it when the daemon stops.
+Each pane keeps 10 MB of history. The `scrollback` setting changes it, from 1 to 200 megabytes, for panes started afterwards. The daemon holds the history; section 17 covers what happens to it when the daemon stops.
 
-- Quiet panes cost almost nothing, and a pane you aren't looking at costs the window
-  nothing.
-  The programs cost more than the panes: a shell is some megabytes, an agent can be several
-  hundred. insensical doesn't limit or stop them.
-- **The window shows what each project's programs hold.** On the right of a project's
-  heading
-  in the sidebar is the memory of everything running in it, and its share of a processor
-  when
-  it's using one: `1.2 GB · 40% cpu`. The overview shows it for each pane, and `isc usage`
-  prints it for every pane.
+- **The window shows what each project's programs hold.** The sidebar shows the memory and processor share of everything running in a project, beside its heading: `1.2 GB · 40% cpu`. The overview shows it per pane, and `isc usage` prints it.
 
-**History from another machine comes a part at a time.** With `--host`, a pane shows its
-screen and the newest half megabyte of history at once. Scroll to the top and the next four
-megabytes are fetched, and so on.
+**History from another machine comes a part at a time.** With `--host`, a pane shows its screen and the newest half megabyte at once. Scroll to the top and the next four megabytes are fetched, and so on. The top of the scrollbar's track is marked while there's more to come, and searching looks only through what has come.
 
-- The top of the scrollbar's track is marked while there's more to come.
-- Searching looks through what has come.
-- If the pane changes size before it has all arrived, it's fetched afresh.
+**From command to command.** `Ctrl+Shift+Up` scrolls to the prompt of the command before what you're looking at, and `Ctrl+Shift+Down` to the one after (`⌘↑` and `⌘↓` on macOS).
 
-**From command to command.** `Ctrl+Shift+Up` scrolls to the prompt of the command before
-what
-you're looking at, and `Ctrl+Shift+Down` to the one after (`⌘↑` and `⌘↓` on macOS).
-
-- It needs a shell that marks its prompts: fish 4 does, and bash and zsh do with the line
-  `isc shell-integration` prints. Without marks the keys do nothing.
+- It needs a shell that marks its prompts: fish 4 does, and bash and zsh do with the line `isc shell-integration` prints. Without marks the keys do nothing.
 - After the last command, `Ctrl+Shift+Down` goes to the bottom.
 
 ### Text
 
-- **Font.** `font-family` names the terminal's font. `font-size` is in points: the default
-  is
-  12, or 13 on macOS. On Linux a point is 1⅓ pixels, as most terminals count it, so the size
-  from your other terminal looks the same here. The text around the terminals has its own
-  font: see [Appearance](#appearance).
-- **There's no font weight setting.** Text uses the family's regular face, and bold and
-  italic use theirs. If your other terminal is set to semibold, text here looks thinner.
-- **Ligatures.** Symbols side by side are drawn as the font's ligature, if it has one: `->`,
-  `!=`, `<=`, `===`. `font-ligatures = false` turns that off. Only symbols join: letter
-  ligatures such as `www` or `fi` aren't formed, nor are symbols a program gave different
-  colours or weights.
-- Characters the font lacks, emoji included, come from the system's fallback fonts. A wide
-  Nerd Font glyph can overlap its neighbour.
-- **Cursor**: block, bar or underline as the program asks, in the theme's cursor colour or
-  the
-  program's.
-  - It blinks until a program asks for a steady one. Typing makes it visible and restarts
-    the
-    blink.
-  - Only the pane your typing goes to has a solid cursor. Every other pane shows an outline
-    that doesn't blink, as does every pane while the window isn't in front or a panel such
-    as
-    the palette has the keyboard.
-- **Half-drawn screens are held.** When a program says it's mid-draw (synchronized output),
-  its screen shows when it says it's done, or after one second.
+- **Font.** `font-family` names the terminal's font. `font-size` is in points: 12 by default, 13 on macOS. On Linux a point is 1⅓ pixels. The text around the terminals has its own font: see [Appearance](#appearance).
+- **There's no font weight setting.**
+- **Ligatures.** Symbols side by side are drawn as the font's ligature, if it has one: `->`, `!=`, `<=`, `===`. `font-ligatures = false` turns that off. Letter ligatures such as `www` or `fi` aren't formed, nor are symbols a program gave different colours or weights.
+- Characters the font lacks, emoji included, come from the system's fallback fonts. A wide Nerd Font glyph can overlap its neighbour.
+- **Cursor**: block, bar or underline as the program asks, in the theme's cursor colour or the program's.
+  - It blinks until a program asks for a steady one.
+  - Only the pane you type in has a solid cursor. Other panes show an outline, as does every pane while the window isn't in front or a panel has the keyboard.
+- **Half-drawn screens are held.** When a program says it's mid-draw (synchronized output), its screen shows when it says it's done, or after one second.
 
 ### Colours
 
-- The sixteen named colours come from the theme. 256 colours and true colour show exactly as
-  the program gives them.
-- A program that asks for the terminal's colours, or whether it's dark, gets the window's
-  theme.
-- **On a light theme**, text with less than 3:1 contrast against its background is painted a
-  darker shade of the same hue. What you copy is unchanged. Dark themes are painted as
-  asked.
+- The sixteen named colours come from the theme. 256 colours and true colour show as the program gives them.
+- **On a light theme**, text with less than 3:1 contrast against its background is painted a darker shade of the same hue. What you copy is unchanged.
 
 ### Selecting and copying
 
-- Drag to select. Click twice to select the word, three times for the line. Hold Alt while
-  you
-  drag to select a rectangle. Hold the pointer beyond the top or bottom to scroll.
+- Drag to select. Click twice to select the word, three times for the line. Hold Alt while you drag to select a rectangle. Hold the pointer beyond the top or bottom to scroll.
 - Selecting copies to the selection clipboard on systems that have one (Linux).
-- Press `Ctrl+Shift+C` to copy to the clipboard. The selection turns the accent colour for a
-  second and "Copied" (or "Copied 14 lines") shows at the bottom of the pane. With nothing
-  selected, nothing is copied. Wrapped lines are joined.
+- Press `Ctrl+Shift+C` to copy to the clipboard. The selection turns the accent colour for a second and "Copied" (or "Copied 14 lines") shows at the bottom of the pane. With nothing selected, nothing is copied. Wrapped lines are joined.
 - `select-all` selects everything in the pane. It has no default key.
-- Typing returns the view to the bottom and clears the selection.
-- A selection belongs to the window you made it in and stays on its text as output arrives.
+- Typing returns to the bottom and clears the selection. A selection stays on its text as output arrives.
 
 ### Selecting with the keyboard
 
-Move through a pane's screen and history, select and copy, without the mouse. Start with
-`Ctrl+Shift+X` (`⇧⌘X` on a Mac), the leader then `v`, or "Select and copy with the keyboard"
-in the palette. The same key leaves.
+Move through a pane's screen and history, select and copy, without the mouse. Start with `Ctrl+Shift+X` (`⇧⌘X` on a Mac), the leader then `v`, or "Select and copy with the keyboard" in the palette. The same key leaves.
 
 - **While it's on, every key is its own.** Nothing you press reaches the program.
-- **It starts at the program's cursor**, usually the line you're looking at. A strip at the
-  foot of the pane shows the keys that work right now.
-- Output doesn't move you: your place and selection stay on their text.
+- **It starts at the program's cursor**, usually the line you're looking at. A strip at the foot of the pane shows the keys that work right now.
 - **Copying leaves.** `y` or Enter copies and ends it.
-- **Escape lets go first, then leaves.** With something selected it drops the selection;
-  with nothing selected it leaves. `q` always leaves. Pasting also leaves.
+- **Escape lets go first, then leaves.** With something selected it drops the selection; with nothing selected it leaves. `q` always leaves. Pasting also leaves.
 
 **Moving**
 
@@ -1389,8 +1257,7 @@ in the palette. The same key leaves.
 | `[` `]` | The command before, and the command after |
 | A number first | Does the next key that many times: `5j` |
 
-- A wrapped line is one line.
-- The wheel and scrollbar still scroll, and a click puts the cursor there.
+- A wrapped line is one line. The wheel and scrollbar still scroll, and a click puts the cursor there.
 
 **Selecting**
 
@@ -1405,134 +1272,76 @@ in the palette. The same key leaves.
 | `p` | The path or web address under the cursor, or the nearest on the line |
 | `y`, Enter | Copies and leaves. With nothing selected, copies the line |
 
-- `o`, `c`, `[` and `]` need a shell that marks its prompts (OSC 133). The shells insensical
-  sets up do.
-- `p` goes by shape and doesn't ask the disk.
+- `o`, `c`, `[` and `]` need a shell that marks its prompts (OSC 133). The shells insensical sets up do.
 
 **Labels**
 
-Press `Space` and every path, web address, commit and machine address in view gets a letter.
-Type the letter to copy that one and return to your prompt.
+Press `Space` and every path, web address, commit and machine address in view gets a letter. Type the letter to copy that one and return to your prompt.
 
-- The newest get the keys under your fingers: `a`, `s`, `d`, `f`. With more than 26 in view,
-  labels are two letters.
-- Hold Shift with the letter to select without copying, so you can stretch the selection
-  before `y`.
+- The newest get the keys under your fingers: `a`, `s`, `d`, `f`. With more than 26 in view, labels are two letters.
+- Hold Shift with the letter to select without copying, so you can stretch the selection before `y`.
 - Escape, or any key that isn't a label, puts the labels away.
 
 **Searching**
 
 - `/` opens the pane's search, starting from the nearest match above the cursor.
-- Enter puts the cursor on the match and returns to selecting. A selection you'd started now
-  reaches the match.
-- Escape closes the search and restores everything. Up and Down step through matches while
-  the field is open.
+- Enter puts the cursor on the match and returns to selecting. A selection you'd started now reaches the match.
+- Escape closes the search and restores everything. Up and Down step through matches while the field is open.
 - `n` goes to the match before, `N` to the one after.
 
 **Limits**
 
 - In a full-screen program it works on what's shown, with no history.
-- If the program takes over the screen or gives it back while you select, the selection is
-  dropped and the cursor starts again at the program's.
+- If the program takes over the screen or gives it back while you select, the selection is dropped and the cursor starts again at the program's.
 - In the window, pressing the leader twice sends the leader's key to the program and leaves.
-- When the link to another machine is lost, it ends. The pane keeps its last picture,
-  dimmed.
-- On another machine, history that hasn't arrived is fetched when the cursor reaches the top
-  of what's here, and keys keep working.
+- When the link to another machine is lost, it ends. The pane keeps its last picture, dimmed.
 - There's no `isc` command for it.
 
 ### Pasting
 
-- `Ctrl+Shift+V` pastes the clipboard. `Shift+Insert` or the middle button pastes what you
-  last selected.
+- `Ctrl+Shift+V` pastes the clipboard. `Shift+Insert` or the middle button pastes what you last selected.
 - **A paste that would do more than it looks like is held, and you're asked first.** That's:
-  - more than one line, into a program that hasn't asked for pastes to be marked (bracketed
-    paste), which would run each line as it arrives;
+  - more than one line, into a program that hasn't asked for pastes to be marked (bracketed paste), which would run each line as it arrives;
   - text containing the sequence that ends a marked paste;
-  - more than one line, into a pane on a machine you marked careful, whatever the program
-    asked for. See [Other machines in the window](#other-machines-in-the-window).
-- Who copied it makes no difference. What a program put on the clipboard (see
-  [The clipboard and programs](#the-clipboard-and-programs)) is pasted like your own copy: a
-  command an agent copied lands at your prompt, where you read it before pressing Enter.
-- **The question shows what you'd paste.** A card at the bottom of the pane gives the line
-  count and the reason, and the text in the terminal's font. Control characters show as
-  their
-  sign (`␛` for Escape, `␉` for Tab), and invisible or direction-changing characters by
-  number, as in `<U+202E>`.
+  - more than one line, into a pane on a machine you marked careful, whatever the program asked for. See [Other machines in the window](#other-machines-in-the-window).
+- What a program put on the clipboard (see [The clipboard and programs](#the-clipboard-and-programs)) is pasted like your own copy: a command an agent copied lands at your prompt, where you read it before pressing Enter.
+- **The question shows what you'd paste.** A card at the bottom of the pane gives the line count, the reason and the text. Control characters show as their sign (`␛` for Escape), and invisible or direction-changing ones by number, as in `<U+202E>`.
 - Press Enter or click "Paste" to paste. Press Escape or click "Cancel" to drop it.
-- Most shells ask for marked pastes, so they get multi-line pastes straight away.
 
 ### Mouse and wheel
 
-- A program that asks for the mouse gets presses, releases, motion and the wheel. Hold Shift
-  to select text instead.
-- The wheel scrolls history. In a full-screen program that didn't ask for the mouse it sends
-  arrow keys; in one that did, it's reported to the program.
-- The wheel moves three rows per notch.
-- A scrollbar shows while the view is scrolled back, and when the pointer is at the pane's
-  right edge. Drag its thumb.
+- A program that asks for the mouse gets presses, releases, motion and the wheel. Hold Shift to select text instead.
+- The wheel scrolls history, three rows per notch. In a full-screen program it sends arrow keys, or goes to the program if it asked for the mouse.
+- A scrollbar shows while the view is scrolled back, and when the pointer is at the pane's right edge. Drag its thumb.
 
 ### Finding text
 
-Press `Ctrl+Shift+F` to open a field over the pane's top right corner. It moves to the
-bottom
-right when the match would be under it.
+Press `Ctrl+Shift+F` to open a field over the pane's top right corner.
 
-- It finds text anywhere in the history, ignoring case, shows which match you're on and how
-  many there are, and brings each match to the middle, selected, so you can copy it.
-- Enter goes to the previous (older) match, Shift+Enter to the next. Escape returns to where
-  the program is writing.
-- Text that wraps at the pane's edge is found across the wrap, over two rows but not three.
-- There are no regular expressions.
+- It finds text anywhere in the history, ignoring case, shows which match you're on and how many there are, and brings each match to the middle, selected, so you can copy it.
+- Enter goes to the previous (older) match, Shift+Enter to the next. Escape returns to where the program is writing.
+- Text is found across a wrap over two rows, not three. There are no regular expressions.
 
 ### Web addresses and paths
 
 - `Ctrl`+click a web address to open it (`⌘`-click on macOS).
-- `Ctrl`+click a file's path to open it or show it in your file manager, by the kind of file
-  (see "What a click on a path does" below).
-- **A web address is underlined under the pointer**, and a note in the pane's bottom right
-  shows where it leads, as in "Ctrl+click opens localhost:5173". A plain click doesn't open
-  it, because a click selects.
-- **A path is marked only while you hold `Ctrl`**, and the note says what the click will do:
-  "Ctrl+click opens main.rs in src/".
-- Only `http://` and `https://` addresses are opened. Brackets and punctuation around one
-  are
-  left out.
-- A path is marked only if it exists. It's read from the pane's directory, and `~/` is the
-  home
-  directory. A line and column, as in `src/main.rs:12:5`, go to the editor you chose with
-  `open-files-with`; your desktop's opener opens the file at its beginning. A path on a
-  network or automounted file system isn't looked up, so pointing at one can't make your
-  machine wait.
-- An address or path that continues onto the next row is found whole.
-- **Links a program marks** (OSC 8), such as an agent's "open the pull request" or the file
-  names of `ls --hyperlink`, work the same way. Only a web address, or a `file://` link to a
-  file that exists on this machine, is followed. Other kinds are ignored.
-- **The note names the machine first**, then the rest of the address, so you can see where a
-  click leads. Names with letters outside ASCII are shown in their network form
-  (`xn--mnchen-3ya.example`), and a name and password before the machine aren't shown.
-- **A click follows only what the note said.** If the words changed under the pointer, the
-  click opens nothing and the note shows the new destination. Click again to follow.
-- An address or path with an invisible or direction-changing character is never marked or
-  opened.
-**What a click on a path does.** Clicking something a program printed can't start
-anything, so
-a path opens only when opening it just shows it.
+- `Ctrl`+click a file's path to open it or show it in your file manager, by the kind of file (see "What a click on a path does" below).
+- **A web address is underlined under the pointer**, and a note in the pane's bottom right shows where it leads, as in "Ctrl+click opens localhost:5173".
+- **A path is marked only while you hold `Ctrl`**, and the note says what the click will do: "Ctrl+click opens main.rs in src/".
+- Only `http://` and `https://` addresses are opened.
+- A path is marked only if it exists. It's read from the pane's directory, and `~/` is the home directory. A line and column, as in `src/main.rs:12:5`, go to the editor you chose with `open-files-with`; your desktop's opener opens the file at its beginning. Paths on network or automounted file systems aren't looked up.
+- **Links a program marks** (OSC 8), such as an agent's "open the pull request" or the file names of `ls --hyperlink`, work the same way. Only a web address, or a `file://` link to a file that exists on this machine, is followed.
+- **The note names the machine first.** Names with letters outside ASCII are shown in their network form (`xn--mnchen-3ya.example`), and a name and password before the machine aren't shown.
+- **A click follows only what the note said.** If the words changed under the pointer, the click opens nothing and the note shows the new destination. Click again to follow.
+- An address or path with an invisible or direction-changing character is never marked or opened.
 
-- With `open-files-with` at `system`, plain text, source code, pictures and PDFs open in
-  your
-  desktop's usual program. `csv` and `tsv` don't, because a spreadsheet works out formulas.
-- Everything else is shown in your file manager: directories, programs, scripts, web pages,
-  installers and files with no ending.
-- So is a file someone else could replace, such as one in `/tmp` or in a directory your
-  group
-  can write to, and a file whose content doesn't look like its name.
-- With an editor chosen in `open-files-with`, any file opens in it. A directory is still
-  shown
-  in the file manager.
-- A path in a pane on another machine is that machine's. With `nvim`, `vim`, `hx` or `nano`
-  chosen, `Ctrl`+click opens it in that editor in a new pane on that machine; otherwise the
-  click copies the path. A web address opens in your browser from any pane.
+**What a click on a path does.** A path opens only when opening it just shows it.
+
+- With `open-files-with` at `system`, plain text, source code, pictures and PDFs open in your desktop's usual program. `csv` and `tsv` don't, because a spreadsheet works out formulas.
+- Everything else is shown in your file manager: directories, programs, scripts, web pages, installers and files with no ending.
+- So is a file someone else could replace, such as one in `/tmp` or in a directory your group can write to, and a file whose content doesn't look like its name.
+- With an editor chosen in `open-files-with`, any file opens in it. A directory is still shown in the file manager.
+- A path in a pane on another machine is that machine's. With `nvim`, `vim`, `hx` or `nano` chosen, `Ctrl`+click opens it in that editor in a new pane on that machine; otherwise the click copies the path. A web address opens in your browser from any pane.
 
 **Choosing the editor.** `open-files-with` says what a `Ctrl`+clicked file opens in:
 
@@ -1544,76 +1353,45 @@ a path opens only when opening it just shows it.
 | a command with `{file}` in it | By running it, with `{file}`, `{line}` and `{column}` filled in: `"myedit --goto {line} {file}"` |
 
 - With no line after the path, the line is 1.
-- The settings sheet lists the editors it finds on your `PATH`.
-- A command of your own is cut into words at spaces and run directly, not by a shell. If it
-  can't start, the file is handled as with `system`.
+- A command of your own is cut into words at spaces and run directly, not by a shell. If it can't start, the file is handled as with `system`.
 
 ### The clipboard and programs
 
-A program can put text on the clipboard (OSC 52). That's how an editor on another machine,
-reached over `ssh`, copies: `"+y` in Neovim there lands on the clipboard here.
+A program can put text on the clipboard (OSC 52). That's how an editor on another machine, reached over `ssh`, copies: `"+y` in Neovim there lands on the clipboard here.
 
-- **Only the program in the pane you're looking at can do this**: the pane with the
-  keyboard,
-  in a window that's in front. A program in another tab or a minimized pane is ignored, so
-  nothing can change what you're about to paste without you knowing.
-- **Pasting it is like pasting anything else**, with no extra question. [Pasting](#pasting)
-  says when a paste is held.
-- Text only, up to a megabyte, and only the clipboard: requests for the primary selection
-  (OSC 52 with `p` or `s`) change nothing.
-- **No program can read the clipboard.** OSC 52 with `?` gets no answer, and no setting
-  allows
-  it.
+- **Only the program in the pane you're looking at can do this**: the pane with the keyboard, in a window that's in front. A program in another tab or a minimized pane is ignored.
+- **Pasting it is like pasting anything else.** [Pasting](#pasting) says when a paste is held.
+- Text only, up to a megabyte, and only the clipboard: requests for the primary selection (OSC 52 with `p` or `s`) change nothing.
+- **No program can read the clipboard**, and no setting allows it.
 - Bursts are limited: at most three texts at once, then one a second. The rest are dropped.
-- `clipboard = "never"` turns it off. Set on this computer, it holds for every machine's
-  panes.
+- `clipboard = "never"` turns it off. Set on this computer, it holds for every machine's panes.
 
 ### Pictures
 
-Programs can show pictures in a pane: a plot, a thumbnail, a file manager's preview.
-insensical draws pictures sent by the **Kitty graphics protocol**, which `kitty +kitten
-icat`,
-`chafa`, `timg`, `viu`, matplotlib's kitty backend and many others use.
+Programs can show pictures in a pane: a plot, a thumbnail, a file manager's preview. insensical draws pictures sent by the **Kitty graphics protocol**, which `kitty +kitten icat`, `chafa`, `timg`, `viu`, matplotlib's kitty backend and many others use.
 
-- A picture is part of the screen: it scrolls with the text, goes into the history, and is
-  cut
-  off at the pane's edge. It's still there when you return to the tab or `isc attach`.
-- One too large for its pane is made smaller so you see all of it, in its own shape. It's
-  never stretched or cropped. Make the pane larger and it grows, up to the size asked for.
-- **Unicode placeholders** work, so programs such as Yazi can show pictures. The browser
-  page
-  doesn't draw pictures. The interface in a terminal shows them where your terminal can: see
-  [The whole interface in a terminal](#the-whole-interface-in-a-terminal).
+- A picture scrolls with the text, goes into the history, and is cut off at the pane's edge. One too large for its pane is shrunk to fit, in its own shape.
+- **Unicode placeholders** work, so programs such as Yazi can show pictures. The browser page doesn't draw pictures. The interface in a terminal shows them where your terminal can: see [The whole interface in a terminal](#the-whole-interface-in-a-terminal).
 
 Limits:
 
 - **Sixel** pictures aren't shown.
-- A picture must be sent in the escape sequences themselves, not named by a file or shared
-  memory. `icat` falls back to sending it.
+- A picture must be sent in the escape sequences themselves, not named by a file or shared memory. `icat` falls back to sending it.
 - Each pane keeps 64 MB of pictures; the oldest off-screen ones are forgotten first.
 - `isc capture` and copying give the text only.
 
 ### What the terminal does not do
 
-- **Input methods (IME) are off unless you turn them on.** With `input-method = true`, your
-  system's input method (fcitx, ibus, the Mac's) composes text in a pane, shown underlined
-  at
-  the cursor. Turn it off again if typing misbehaves.
-- Sixel images aren't shown. Kitty graphics are: see [Pictures](#pictures).
-- The words of a command running longer than a few seconds are read from the system, so
-  everyone who may see your panes can see them: don't put a secret on a command line.
-- Narrowing a pane rewraps its lines. A full-screen program's screen is cut off at the new
-  edge, and the program draws it again.
+- **Input methods (IME) are off unless you turn them on.** With `input-method = true`, your system's input method (fcitx, ibus, the Mac's) composes text in a pane, shown underlined at the cursor. Turn it off again if typing misbehaves.
+- Sixel images aren't shown; Kitty graphics are (see [Pictures](#pictures)).
+- The words of a command running longer than a few seconds are read from the system, so everyone who may see your panes can see them: don't put a secret on a command line.
+- Narrowing a pane rewraps its lines. A full-screen program's screen is cut off at the new edge, and the program draws it again.
 
 ---
 
 ## 10. States and attention
 
-Every pane shows whether its program is working, waiting for you, or finished, so you can
-see
-at a glance what needs you and jump straight to it. The daemon keeps each state, so it's
-right
-even when no window is open.
+Every pane shows whether its program is working, waiting for you, or finished. The daemon keeps each state, so it's right even when no window is open.
 
 | State | Means | Counts as needing you |
 |---|---|---|
@@ -1624,99 +1402,59 @@ even when no window is open.
 | `done` | Finished, and you haven't looked yet | |
 | `exited` | The program ended and the pane was kept (`isc run --keep`) | |
 
-Each state has its own mark in its own colour. `running` is a spinning ring, and it's
-the only mark that moves. `waiting` is a ringed dot, `done` a tick, `failed` a cross, and
-`exited` a ring with a bar across it.
+Each state has its own mark in its own colour. `running` is a spinning ring, the only mark that moves. `waiting` is a ringed dot, `done` a tick, `failed` a cross, and `exited` a ring with a bar across it.
 
-`done` and `failed` clear when you look at the pane: when it has the keyboard in a window
-that's in front.
+`done` and `failed` clear when you look at the pane: when it has the keyboard in a window that's in front.
 
 ### Where a state shows
 
-- **On the pane**: its header says the state in words, what the program said about it, and
-  how long it has needed you. A pane that waits glows in the waiting colour, so you catch it
-  from the corner of your eye.
-- **Everywhere else the pane appears**: its tab, its sidebar row, its dock chip. Hover over
-  a mark to read the words.
-- **As counts**, at the top of the sidebar or in the top bar: how many panes need you, and
-  how many finished. The tray, the Mac's menu bar and `isc tui` show the same numbers.
-- **On a folded tab or project**: the most urgent state of what's inside, in this order:
-  `waiting`, `failed`, `done`, `running`. Unfolded, the rows beneath show their own states.
+- **On the pane**: its header says the state in words, what the program said about it, and how long it has needed you. A waiting pane glows.
+- **Everywhere else the pane appears**: its tab, its sidebar row, its dock chip. Hover over a mark to read the words.
+- **As counts**, at the top of the sidebar or in the top bar: how many panes need you, and how many finished. The tray, the Mac's menu bar and `isc tui` show the same numbers.
+- **On a folded tab or project**: the most urgent state of what's inside, in this order: `waiting`, `failed`, `done`, `running`. Unfolded, the rows beneath show their own states.
 
-A waiting pane says what it waits for when its program tells it: "wants permission",
-"asks a question" or "needs you to sign in". An agent's permission question names the tool
-and what it would act on, such as `Needs permission: Bash · git push origin main`.
+A waiting pane says what it waits for when its program tells it: "wants permission", "asks a question" or "needs you to sign in". An agent's permission question names the tool and what it would act on, such as `Needs permission: Bash · git push origin main`.
 
-When the dock has more chips than room, the `idle` panes share one chip, such as "3 idle".
-Click it to open the palette. A pane with a state always keeps its own chip.
+When the dock has more chips than room, the `idle` panes share one chip, such as "3 idle". Click it to open the palette. A pane with a state always keeps its own chip.
 
-Nothing is ever reordered because of a state. Tabs, rows and chips stay where they are.
+Nothing is ever reordered because of a state.
 
 > [!TIP]
-> Turn off the glow with `attention-glow = false`. It's also left out when `pane-gap = 0`,
-> since there's no gap for it to fill.
+> Turn off the glow with `attention-glow = false`. It's also left out when `pane-gap = 0`, since there's no gap for it to fill.
 
 ### Going to the pane that needs you
 
-Press `Ctrl+Shift+A`, or click the count in the top bar. You go to the most urgent pane,
-restored if it was minimized. Press it again to step through the rest: first what needs
-you, then what finished.
+Press `Ctrl+Shift+A`, or click the count in the top bar. You go to the most urgent pane, restored if it was minimized. Press it again to step through the rest: first what needs you, then what finished.
 
 You can also:
 
 - Open the palette: the panes that need you are listed first.
-- Open the overview: every tab of every project, with what each waiting pane asks and for
-  how long.
-- Show only activity in the sidebar: press the pulse-line button at its head. See
-  [The sidebar](#the-sidebar).
+- Open the overview: every tab of every project, with what each waiting pane asks and for how long.
+- Show only activity in the sidebar: press the pulse-line button at its head. See [The sidebar](#the-sidebar).
 
 ### Where a state comes from
 
 insensical works out a state from four things. The strongest wins.
 
-1. **A report.** The program says it in its own terminal (see
-   [Programs that report by themselves](#programs-that-report-by-themselves)), or an
-   agent's hooks or a script run
-   `isc status running|waiting|done|failed|idle [-m "what about"]`. A `running` or
-   `waiting` report stands until the next report or until the command ends. In a pane you
-   started with a command, such as `isc run -- claude`, it stands until the next report
-   or until the program ends.
+1. **A report.** The program says it in its own terminal (see [Programs that report by themselves](#programs-that-report-by-themselves)), or an agent's hooks or a script run `isc status running|waiting|done|failed|idle [-m "what about"]`. A `running` or `waiting` report stands until the next report or until the command ends. In a pane you started with a command, such as `isc run -- claude`, it stands until the next report or until the program ends.
 2. **What the program writes to its terminal.**
-   - **Progress** (OSC 9;4): a percentage or an unknown amount is `running`; removed is
-     `done` if the pane was running; error is `failed`; paused is `waiting` until the
-     command ends or you look.
-   - **A notification** (OSC 9, 777 or 99) is `waiting` with its text, until you look. It
-     doesn't change a `done` or `failed` that was reported.
-   - **The bell**, while nobody is looking, is `waiting` until you look. It marks the pane
-     and never sends a desktop notification, because shells ring it on every failed
-     completion.
-   - **A password prompt** is `waiting`, with the line it asks on, such as
-     `[sudo] password for you:`. insensical knows because the terminal stops showing
-     what you type while still taking a whole line, as `sudo`, `ssh`, `git` and `read -s`
-     do. It stops when typing shows again or the command ends.
-3. **The foreground command ending**: `done` if the pane was `running`, or if the command
-   ran for 30 seconds or more (or as long as `long-command` says). This needs no shell
-   integration.
-4. **The program itself ending** in a kept pane: `failed` if it exited with a non-zero
-   status.
-
-States aren't only for agents. Any command that runs for 30 seconds gives its pane one.
+   - **Progress** (OSC 9;4): a percentage or an unknown amount is `running`; removed is `done` if the pane was running; error is `failed`; paused is `waiting` until the command ends or you look.
+   - **A notification** (OSC 9, 777 or 99) is `waiting` with its text, until you look. It doesn't change a `done` or `failed` that was reported.
+   - **The bell**, while nobody is looking, is `waiting` until you look. It marks the pane and never sends a desktop notification.
+   - **A password prompt** is `waiting`, with the line it asks on, such as `[sudo] password for you:`. It's spotted when the terminal stops showing what you type while still taking a whole line, as `sudo`, `ssh`, `git` and `read -s` do. It stops when typing shows again or the command ends.
+3. **The foreground command ending**: `done` if the pane was `running`, or if the command ran for 30 seconds or more (or as long as `long-command` says). This needs no shell integration.
+4. **The program itself ending** in a kept pane: `failed` if it exited with a non-zero status.
 
 | Command | Does |
 |---|---|
 | `isc status explain [--pane N]` | Tells you why a pane is in its current state. |
 | `isc status clear [--pane N]` | Forgets what was reported and puts the pane at rest. Use it when a pane says `running` or `waiting` for something that's gone. |
 
-The palette has the same as "Forget what this pane's program said it was doing"
-(`forget`). Looking at a pane never clears `running` or `waiting`, because looking doesn't
-answer a question.
+The palette has the same as "Forget what this pane's program said it was doing" (`forget`). Looking at a pane never clears `running` or `waiting`.
 
 ### Programs that report by themselves
 
-A program can tell its terminal what it's doing, and insensical listens. It needs no hook
-and no setup, and it works over `ssh` and inside a container, where `isc status` can't
-reach. This is the Program Status Protocol, an escape sequence numbered OSC 7501, read at
-revision 0.4.
+A program can tell its terminal what it's doing, and insensical listens. It needs no hook or setup, and works over `ssh` and in a container, where `isc status` can't reach. This is the Program Status Protocol, an escape sequence numbered OSC 7501, read at revision 0.4.
 
 Claude Code speaks it from version 2.1.295. So can any script:
 
@@ -1738,39 +1476,24 @@ rsync -a ~/Photos backup:/photos && status done "Photos synced" || status error 
 
 A program can also:
 
-- **Say what it's blocked on**: `permission`, `question` or `auth`. The pane shows "wants
-  permission", "asks a question" or "needs you to sign in", in `isc ls` too.
-- **Give its name**, as Claude Code gives `claude-code`. If insensical has an icon for it,
-  or you gave one under `[icons]`, the pane uses that icon.
-- **Report on tasks of its own**, such as an agent's helpers. The pane shows the most
-  urgent one, and the overview adds a count like "3 tasks · 1 waiting".
+- **Say what it's blocked on**: `permission`, `question` or `auth`. The pane shows "wants permission", "asks a question" or "needs you to sign in", in `isc ls` too.
+- **Give its name**, as Claude Code gives `claude-code`. If insensical has an icon for it, or you gave one under `[icons]`, the pane uses that icon.
+- **Report on tasks of its own**, such as an agent's helpers. The pane shows the most urgent one, and the overview adds a count like "3 tasks · 1 waiting".
 - **Take back what it said** (`state=clear`).
 
-It outranks an agent's own hooks while it says working or waiting, and the hooks count
-again after it says anything else, so you don't need to remove them. If it has been silent
-while working, a hook that says waiting, done or failed is believed. Working and waiting
-end when the command ends at your shell's prompt. `done` and `failed` stay until you've
-seen them.
+It outranks an agent's own hooks while it says working or waiting, and the hooks count again after it says anything else. If it has been silent while working, a hook that says waiting, done or failed is believed. Working and waiting end when the command ends at your shell's prompt. `done` and `failed` stay until you've seen them.
 
 **Good to know**
 
 - A program inside `tmux` or `screen` isn't heard.
-- A malformed report, an unknown state or an unknown key is ignored.
-- A pane can keep saying `running` or `waiting` after its program was killed, if it ran
-  through `ssh`, `docker exec` or `su`, under a shell inside a shell, or in a pane started
-  with a command that isn't a shell. Run `isc status clear`, choose Forget in the palette,
-  or type `printf '\e]7501;state=clear\e\\'` in the pane. insensical never ends a state
-  for being silent: a build says nothing for an hour.
+- A pane can keep saying `running` or `waiting` after its program was killed, if it ran through `ssh`, `docker exec` or `su`, under a shell inside a shell, or in a pane started with a command that isn't a shell. Run `isc status clear`, choose Forget in the palette, or type `printf '\e]7501;state=clear\e\\'` in the pane. A state never ends for being silent.
 - `isc shell-integration` (below) makes the shell end working and waiting at each prompt.
-- A shell function that reports and then waits with `wait` or `read` looks like a shell
-  at its prompt. Put the work in a script.
+- A shell function that reports and then waits with `wait` or `read` looks like a shell at its prompt. Put the work in a script.
 
 ### Commands that fail, and short commands
 
-- **A long command is one that ran for 30 seconds.** `long-command` changes that, from 1
-  second to 3600.
-- **With shell integration, a failed command is `failed`**, with a note such as "exited
-  with 2 after 1m 35s". Without it, a failed command shows as `done`.
+- **A long command is one that ran for 30 seconds.** `long-command` changes that, from 1 second to 3600.
+- **With shell integration, a failed command is `failed`**, with a note such as "exited with 2 after 1m 35s". Without it, a failed command shows as `done`.
 - **A short command isn't marked**, even if it fails.
 - **An exit status of 130** (Ctrl+C) counts as finished, not failed.
 
@@ -1783,10 +1506,7 @@ To turn shell integration on:
 | fish older than 4 | `isc shell-integration fish \| source` in `~/.config/fish/config.fish` |
 | fish 4 and later | Nothing: it does this itself |
 
-Each does nothing outside a pane. An older bash, such as the Mac's `/bin/bash` (3.2), is
-left alone. Other terminals' integrations that write the same marks (OSC 133 C and D) work
-too. In a pane you started with a command, a shell's marks don't take down what was
-reported.
+Each does nothing outside a pane. An older bash, such as the Mac's `/bin/bash` (3.2), is left alone. Other terminals' integrations that write the same marks (OSC 133 C and D) work too.
 
 ---
 
@@ -1807,8 +1527,8 @@ words:
 | You ask | The agent |
 |---|---|
 | "Open nvim with top in a narrow pane on the right." | Opens a tab with the editor, and `top` in a narrow pane beside it. |
-| "Start the dev server in another tab and tell me when it's ready." | Starts it without taking your focus, and waits until it says it's listening. |
-| "Run the tests beside you and fix what fails." | Runs them in a split, waits for them to end, and reads the failures. |
+| "Start the dev server in another tab and tell me when it's ready." | Starts it without taking your focus, and waits until it's listening. |
+| "Run the tests beside you and fix what fails." | Runs them in a split, waits, and reads the failures. |
 | "Run `\dt` in the psql pane." | Types it into the pane named psql, presses Enter, and reads the answer. |
 | "Show me that project, with bigger text." | Brings the project to the front and raises `font-size`. |
 | "Close everything you opened." | Closes the panes it opened, and none of yours. |
@@ -1816,22 +1536,20 @@ words:
 Three things go in, per agent:
 
 - **Hooks** that report its state.
-- **A skill**: a short file the agent reads when a request is about terminals, panes or
-  tabs. It tells the agent to run `isc guide`, so a new version of insensical teaches
-  every agent at once.
-- **A note at the start of each session**, inside a pane only: where the session runs, and
-  that `isc guide` says how to use insensical. An agent you started yourself is asked to
+- **A skill** the agent reads when a request is about terminals, panes or tabs. It tells
+  the agent to run `isc guide`, so a new version of insensical teaches every agent at once.
+- **A note at the start of each session**, inside a pane only, saying where the session
+  runs and that `isc guide` explains insensical. An agent you started yourself is asked to
   name an unnamed tab after your task.
 
-Where an agent acts follows your words. "Here", "beside you" or no place means its own
-pane and tab. "The focused pane" means the one with the keyboard. A name always wins. An
-agent types only into panes it opened or that you named, and asks you first otherwise.
-Another agent's question, seen in its pane, it tells you about, and answers only when you
-ask.
+"Here", "beside you" or no place means the agent's own pane and tab. "The focused pane"
+means the one with the keyboard. A name always wins. An agent types only into panes it
+opened or that you named, and asks you first otherwise. It tells you about another agent's
+question and answers only when you ask.
 
-`isc guide` prints the guide: where the agent is, where to act, and the topics.
-`isc guide layout`, `reading`, `acting`, `waiting` and `agents` print one topic each. For
-an agent insensical doesn't set up, tell it to run `isc guide`.
+`isc guide` prints the guide. `isc guide layout`, `reading`, `acting`, `waiting` and
+`agents` print one topic each. For an agent insensical doesn't set up, tell it to run
+`isc guide`.
 
 **Keeping agents out of a pane.** For a pane with a production database, a secret or
 anything else no agent should see, choose Keep agents out of this pane in the palette (the
@@ -1860,18 +1578,18 @@ crossed-out robot.
 > and the network. Allow `isc` only in an agent you'd let run commands as you, and keep a
 > pane that matters out of its reach.
 
-**Agents that start other agents.** An agent can hand work to another: Claude Code to
-Codex, Codex to Claude Code, either to Gemini CLI. Ask "have Codex review this diff" and it
-runs `isc agent start codex "Review the diff"`. Codex opens in a new tab with the task as
-its first prompt, so you can watch it and take over. The starter waits with
-`isc agent wait`, which prints `done` and the whole reply, or `waiting` and the question.
-Both need their hooks set up.
+**Agents that start other agents.** Claude Code, Codex and Gemini CLI can hand work to one
+another. Ask "have Codex review this diff" and the agent runs
+`isc agent start codex "Review the diff"`. Codex opens in a new tab with the task as its
+first prompt, so you can watch it and take over. The starter waits with `isc agent wait`,
+which prints `done` and the whole reply, or `waiting` and the question. Both agents need
+their hooks set up.
 
 | Command | Does |
 |---|---|
 | `isc agent start AGENT TASK` | Opens the agent in a new tab, leaving your keyboard alone; `--front` brings it forward. `--name NAME` refuses while a pane of that name is there. |
 | `isc agent wait` | Waits for a turn to end. `--timeout` sets how long; it exits with status 124 when it runs out. |
-| `isc agent tell PANE "MESSAGE"` | Pastes a message as the agent's next prompt. While the agent works, it goes in when the turn ends; if a program the agent started has the terminal then, such as a pager, it goes in ahead of the next message you tell it, or when the next turn ends. |
+| `isc agent tell PANE "MESSAGE"` | Pastes a message as the agent's next prompt. While the agent works, it goes in when the turn ends. |
 | `isc agent reply PANE` | Prints the last whole reply again. |
 | `isc agent answer PANE yes`, `no` or words | Answers a permission prompt. Words refuse it and go in as the next prompt. |
 | `--quiet` on `start` | Runs the agent's one-question mode (`claude -p`, `codex exec`, `gemini -p`) with no pane and prints only its answer. |
@@ -1883,21 +1601,19 @@ Both need their hooks set up.
 - If a started agent's hooks say nothing for a while, the pane turns to waiting for you
   with the likely reason: Codex runs no hook you haven't trusted with `/hooks`, and Claude
   Code runs none in a folder you haven't trusted.
-- `isc agent` knows Claude Code, Codex and Gemini CLI. `answer` presses Enter or Esc for
-  Claude Code, `y` or Esc for Codex, and `1` or Esc for Gemini CLI. An agent whose prompt
-  takes other keys has to be answered in its pane.
+- `answer` presses Enter or Esc for Claude Code, `y` or Esc for Codex, and `1` or Esc for
+  Gemini CLI. Answer an agent whose prompt takes other keys in its pane.
 - A program can't answer, or type into, the agent in its own pane, nor in a pane it
   opened: its agent's questions are yours.
 - A started agent can ask its starter something by ending its turn with the question. The
   starter's `isc agent wait` returns at once, and it answers with `isc agent tell`.
-- Only an agent's own hooks, or the plugin that `isc integrate` writes for opencode, pi and
-  Hermes, say which agent it is, so `tell` and `answer` work with those too. pi and Hermes
-  also pass on what they replied, so `isc agent reply` and `wait` show it. opencode doesn't:
-  its end-of-turn event carries no text.
+- `tell` and `answer` need the agent's own hooks, or the plugin `isc integrate` writes for
+  opencode, pi and Hermes. pi and Hermes also pass on what they replied, so `isc agent
+  reply` and `wait` show it; opencode doesn't.
 
-So a mistake can't run away, one agent can have 8 agents open at once, and agents started
-by agents go 2 levels deep. Change them under Agents in the settings sheet, or with
-`agents-at-once` and `agents-deep` in `config.toml`.
+One agent can have 8 agents open at once, and agents started by agents go 2 levels deep.
+Change them under Agents in the settings sheet, or with `agents-at-once` and `agents-deep`
+in `config.toml`.
 
 **Agents on other machines are kept out.** An agent that runs `isc --host` or `isc tui
 --host` from a pane on another machine is refused here, and told how to let it in: turn on
@@ -1921,10 +1637,9 @@ insensical · Set up".
 - "Set up the agents on this system to use insensical" in the palette asks at any time,
   and includes the agents you declined.
 
-`isc tui` offers them too: `Ctrl+Space` then `Shift+A` asks, `Enter` sets up, `Esc` leaves
-the notice and `N` says never. Declined agents are kept in
-`~/.local/state/insensical/agents-declined`, one per line. Delete a line to be offered
-that agent again.
+In `isc tui`, `Ctrl+Space` then `Shift+A` asks, `Enter` sets up, `Esc` leaves the notice
+and `N` says never. Declined agents are kept in `~/.local/state/insensical/agents-declined`,
+one per line. Delete a line to be offered that agent again.
 
 ### Setting up from the command line
 
@@ -1941,7 +1656,7 @@ that agent again.
 - With no terminal to ask on, `isc integrate` changes nothing unless you pass `--yes`, and
   exits with status 1.
 - **With `--host`, it's the other machine's agents**, and you must give `--yes` or
-  `--remove --yes`: nobody can be asked there. Its daemon must be running.
+  `--remove --yes`. Its daemon must be running.
 - `--status` can't be combined with `--remove`, `--yes` or `--force`. For each agent it
   prints `agent`, `title`, `found`, `integrated`, `stale`, `file`, `items` and `then`.
   `items` has `hooks`, `skill` and `note`, each with a `file` and a `state`: `current`,
@@ -1993,8 +1708,7 @@ What each agent reports:
 ### Claude Code
 
 Claude Code 2.1.295 and later also reports in its own terminal (section 10), and that's what
-the pane shows; the hooks' state reports are set aside. Keep the hooks: they name the
-session to resume (section 17).
+the pane shows. Keep the hooks: they name the session to resume (section 17).
 
 When Claude runs several tools at once and one finishes while another still waits for your
 answer, the row keeps saying `waiting` until that tool has run, a new tool starts, the
@@ -2064,7 +1778,7 @@ agent, and you can move, name and zoom them like any pane.
 isc config set tmux-shim true
 ```
 
-or switch on "Answer as tmux" in the settings sheet, under Terminal. It's off until you
+Or switch on "Answer as tmux" in the settings sheet, under Terminal. It's off until you
 turn it on, and applies to panes started afterwards.
 
 > [!NOTE]
@@ -2079,8 +1793,8 @@ tmux: `%5`, `@7`, `$3`, `api:0.1`, `api:logs`, `:1`.
   `send-keys`, `kill-pane`, `kill-window`, `select-pane`, `select-window`, `rename-window`,
   `list-panes`, `list-windows`, `list-sessions`, `display-message -p`, `capture-pane -p`,
   `resize-pane`, `select-layout`, `has-session` and `-V`. Common flags work (`-h`, `-b`,
-  `-l`, `-p`, `-c`, `-e`, `-d`, `-P -F`, `-n`, `-s`, `-S`, `-E`, `-Z`). Commands can be
-  chained with `;`.
+  `-l`, `-p`, `-c`, `-e`, `-d`, `-P -F`, `-n`, `-s`, `-S`, `-E`, `-Z`). Chain commands
+  with `;`.
 - **Formats**: `pane_id`, `pane_index`, `pane_title`, `pane_current_command`,
   `pane_current_path`, `pane_start_command`, `pane_active`, `pane_width`, `pane_height`,
   `pane_dead`, `pane_dead_status`, `window_id`, `window_index`, `window_name`,
@@ -2090,8 +1804,7 @@ tmux: `%5`, `@7`, `$3`, `api:0.1`, `api:logs`, `:1`.
 - **Accepted and ignored**: `set-option`, `set`, `set-window-option`, `bind-key`,
   `unbind-key`, `source-file`, `set-hook`, `set-environment`, `start-server` and
   `refresh-client`.
-- **Refused**: `kill-server`, which would stop every pane you have. Only
-  `isc kill-server` does that.
+- **Refused**: `kill-server`. Only `isc kill-server` stops every pane.
 - Anything else is `unknown command`, with exit status 1.
 
 Limits:
@@ -2117,9 +1830,6 @@ when a program sends a notification sequence, or when something runs `isc notify
 With nothing attached, the daemon can run a command or post to a web address instead: see
 [When nobody is attached](#when-nobody-is-attached).
 
-**What you'll notice.** The daemon gathers what your panes say before you're told, so every
-way of being told agrees.
-
 - Panes that wait, fail or finish together are one notification, such as `10 panes failed`.
   Click it to go to the first pane.
 - A finish is held for about 15 seconds. If you look at the pane or type in it first, you
@@ -2128,10 +1838,11 @@ way of being told agrees.
 - A pane that says the same thing again isn't told of again until it says something
   different or you've looked.
 - A pane that waits for you is never held back.
+- You aren't told when you're looking at the pane, when it's muted, or when the cause is
+  the bell.
 
-**Where you're told** depends on where you are. With insensical in front, you get a
-notice inside the window and nothing on the desktop. Otherwise, or with no window open,
-you get a desktop notification.
+**Where you're told.** With insensical in front, you get a notice inside the window and
+nothing on the desktop. Otherwise, or with no window open, you get a desktop notification.
 
 **The notice in the window** sits at the foot of the sidebar, or over the window's bottom
 right corner when the sidebar is hidden or the tabs are along the top. It never resizes a
@@ -2159,13 +1870,13 @@ macOS uses `afplay`. You can't use sounds of your own.
 **Turning them off.** `notifications = false` stops all of them. `notify-waiting`,
 `notify-failed` and `notify-done` turn off one kind each. Panes still show their state.
 
-**You aren't told** when you're looking at the pane, when it's muted, or when the cause is
-the bell.
-
-**What a desktop notification holds.** Each pane has one, and a new one replaces the old.
-The title is `project · pane`; the body is what the program said, or "Waiting for you",
-"Done" or "Failed". A title is cut to 120 characters and the text to 600. They're sent at
-normal urgency, so do-not-disturb applies.
+**A desktop notification.** Each pane has one, and a new one replaces the old. The title is
+`project · pane`; the body is what the program said, or "Waiting for you", "Done" or
+"Failed". A title is cut to 120 characters and the text to 600. They're sent at normal
+urgency, so do-not-disturb applies. Clicking one goes to the pane, restores it if it was
+minimized, and asks a window to come forward; with no window open, one opens on the pane.
+On Wayland the window may stay behind, though the pane is still selected. Hyprland brings
+it forward with `misc:focus_on_activate` on.
 
 **Muting a pane.** Use the `mute` command in the palette (no default key), or
 `isc mute [PANE] [--off]`. The pane's states still show, and a mark appears in its header.
@@ -2175,13 +1886,6 @@ normal urgency, so do-not-disturb applies.
 project sends a notification, including panes you open later. Panes muted on their own
 stay muted.
 
-**On Linux** the daemon sends them over D-Bus, so they arrive with no window open.
-
-**Clicking one** goes to the pane, restores it if it was minimized, and asks a window to
-come forward. With no window open, one opens on the pane. On Wayland the window may stay
-behind: a compositor lets a window raise itself only with a token the toolkit can't use.
-The pane is still selected. Hyprland brings it forward with `misc:focus_on_activate` on.
-
 **On Linux, a tray icon says what needs you**, with no window open too. It has an amber
 dot while any pane waits or failed. Its menu lists those panes, and picking one goes to
 it. **Quit insensical** in the menu asks first and says which panes would end. The tray
@@ -2189,10 +1893,8 @@ needs a desktop that shows status notifier items (GNOME needs the AppIndicator e
 `tray = false` takes the icon away; **Show in the tray** under **Notifications** in the
 settings is the same switch.
 
-**On macOS** the application posts them, even with the window closed. The system asks once
-whether to allow them.
-
-**On macOS, the menu bar and the Dock say what needs you**, even with the window closed.
+**On macOS**, notifications arrive even with the window closed. The system asks once
+whether to allow them. The menu bar and the Dock also say what needs you.
 
 - The menu bar item counts panes that wait or failed, and its menu lists them.
 - The Dock icon shows the same number as a badge. If it doesn't appear, turn on **Badge
@@ -2208,7 +1910,7 @@ An agent on a server stops to ask you something at two in the morning, and no wi
 open. The daemon can still tell you, by running a command of yours or posting to a web
 address of yours. Both go outward only: nothing listens.
 
-**The two settings** belong to the daemon, so set them on the machine the agent runs on.
+The two settings belong to the daemon, so set them on the machine the agent runs on.
 From another machine, put `--host NAME` before each command.
 
 ```sh
@@ -2262,11 +1964,9 @@ happened is in the command's environment:
 | `INSENSICAL_PROGRAM` | The program in the pane |
 
 A title or message is whatever a program wrote, so keep it in double quotes in your
-script: `"$INSENSICAL_BODY"`.
-
-The rest of the environment is the daemon's, so an `isc` your script runs reaches the same
-daemon. `INSENSICAL_PANE` is the pane the notification is about, so an `isc` command that
-acts on "this pane" acts on that one.
+script: `"$INSENSICAL_BODY"`. The rest of the environment is the daemon's, so an `isc` your
+script runs reaches the same daemon and, with `INSENSICAL_PANE`, acts on the pane the
+notification is about.
 
 **The web address** is posted this, as JSON:
 
@@ -2301,11 +2001,11 @@ value to the end of its input, less one final newline.
 
 A token is sent as `Authorization: Bearer …`, a user and password as Basic. With both set,
 the token is used, and either stands in place of an `Authorization` header you wrote.
-They're secrets: `isc config get`, `isc notify --sinks` and the settings sheets show only
-that one is set (a token by its last four characters).
+`isc config get`, `isc notify --sinks` and the settings sheets show only that a secret is
+set (a token by its last four characters).
 
-They're never sent over plain `http://` to another machine, nor is an `Authorization`
-header you wrote: use an `https://` address. An address on this machine (`127.0.0.1`,
+Neither is sent over plain `http://` to another machine, nor is an `Authorization` header
+you wrote: use an `https://` address. An address on this machine (`127.0.0.1`,
 `localhost`, `[::1]`) may be `http://`. Keep the settings file to yourself (`chmod 600`).
 
 **Who sees the address and the command.** Only a connection with the `manage` right sees
@@ -2374,99 +2074,83 @@ exec notify-send --app-name=insensical "$INSENSICAL_TITLE" "$INSENSICAL_BODY"
 
 ## 13. Keys
 
-Every command has a key, and you can change any of them. There are two keymaps.
-`keymap = "direct"` is the default and gives every command its own chord.
-`keymap = "leader"` puts every command on a key you press after a leader key. Section 19
-has the full table for both.
+Every command has a key, and you can change any of them. `keymap = "direct"` is the
+default: every command has its own chord. `keymap = "leader"` puts every command on a key
+you press after a leader key. Section 19 has the full table for both.
 
-**The window spells a key out in full**, joined by `+`: `Ctrl+Shift+T`, `Ctrl+Alt+Left`. A
-key is named by what you press, so `?` is shown as `Shift+/`. A capital letter never stands
-for Shift: after the leader, `T` is the `t` key alone and `Shift+H` is the capital.
+**Keys are spelled out in full**, joined by `+`: `Ctrl+Shift+T`, `Ctrl+Alt+Left`. A key is
+named by what you press, so `?` is shown as `Shift+/`. A capital letter never stands for
+Shift: after the leader, `T` is the `t` key alone and `Shift+H` is the capital.
 
-**On macOS, keys are shown in the signs your menus use**, in this order: Control `⌃`,
-Option `⌥`, Shift `⇧`, Command `⌘`, then the key, as in `⇧⌘N` and `⌃⌥←`. Keys pressed one
-after another are a space apart: `⌃Space T`.
+**On macOS, keys use your menus' signs**, in this order: Control `⌃`, Option `⌥`, Shift
+`⇧`, Command `⌘`, then the key, as in `⇧⌘N` and `⌃⌥←`. Keys pressed one after another are a
+space apart: `⌃Space T`. The direct keys are `⌘`-based; on Linux they're `Ctrl+Shift` with a
+letter.
 
-On Linux, the direct keys are `Ctrl+Shift` with a letter. On macOS, they're `⌘`-based.
+**On macOS, closing the window or pressing `⌘Q` doesn't quit.** insensical stays in the menu
+bar, still telling you when a pane needs you. Open it again from the menu bar item, the Dock
+or Spotlight. To quit, choose **Quit insensical** or press `⌥⌘Q`. If a pane is running or
+waiting, it asks first: `Esc` goes back, `W` closes the window and leaves the application
+running, `Enter` quits. With `menu-bar` off there's no item, and `⌘Q` quits. `⌘,` opens
+Settings. `⌘H`, `⌥⌘H` and `⌥⌘Q` are the application's and don't reach a pane.
 
-**On macOS, closing the window doesn't quit the application, and neither does `⌘Q`.** They
-leave insensical in the menu bar, still telling you when a pane needs you. Open it again
-from the menu bar item, the Dock or Spotlight. To quit, choose
-**Quit insensical** or press `⌥⌘Q`. If a pane is running or waiting, it asks first: `Esc`
-goes back, `W` closes the window and leaves the application running, `Enter` quits. With
-`menu-bar` off there's no item to go to, and `⌘Q` quits.
+On Linux, closing the window quits. The `quit` command has no key; find it in the palette,
+or add a line to `[keys]`, such as `"ctrl-alt-q" = "quit"`.
 
-`⌘,` opens Settings. `⌘H`, `⌥⌘H` and `⌥⌘Q` are the application's and don't reach a program
-in a pane.
-
-On Linux, closing the window quits. The `quit` command has no key there; find it in the
-palette, or add a line to `[keys]`, such as `"ctrl-alt-q" = "quit"`.
-
-**On macOS, Option isn't Alt unless you say so.** Option with a key types the character
-the layout gives it (Option+B is `∫`), so a shell's Alt+B doesn't answer. Set
-`option-as-alt = true` and Option is Alt to the program in the pane, and you can't type the
-layout's Option characters there. If the system's own `⌃Space` ("select the previous input
-source") is on, it takes the key before the leader can.
+**On macOS, Option isn't Alt unless you say so.** Option with a key types the layout's
+character (Option+B is `∫`), so a shell's Alt+B doesn't answer. Set `option-as-alt = true`
+and Option is Alt in the pane, and you can't type those characters there. If the system's
+`⌃Space` ("select the previous input source") is on, it takes the key before the leader can.
 
 **A chord in the direct keymap doesn't reach the program in the pane.** `` Ctrl+` ``,
 `Ctrl+Shift+Space`, `Ctrl+Shift+I` and `Alt+1` to `Alt+9` are among them. To hand a chord
-back, set it to `none` in `[keys]`, use the leader keymap, or lock the keys while the
-program needs them.
+back, set it to `none` in `[keys]`, use the leader keymap, or lock the keys.
 
 ### Seeing every key
 
-To see what's bound to what, press `Ctrl+Shift+/` or `Ctrl+F1`, or leader `?`, or choose
-"Show every key" in the palette.
+Press `Ctrl+Shift+/` or `Ctrl+F1`, or leader `?`, or choose "Show every key" in the palette.
+A sheet lists every command under its heading with its keys, for the keymap in use with your
+changes.
 
-A sheet opens over the window with every command under its heading and its keys on caps,
-for the keymap in use with your own changes.
-
-- A command with no key is listed too, greyed. If your own `[keys.direct]` or
-  `[keys.leader]`
+- A command with no key is listed greyed. If your own `[keys.direct]` or `[keys.leader]`
   table took its key, the sheet says `not in your [keys.direct]`.
 - Typing narrows the sheet by a command's words, heading or keys: `split`, `ctrl alt`.
-- **If you press a chord while the sheet is open, it describes the chord instead of
-  running it.** The foot shows what you pressed and the command it runs, or says it has
-  none. This is also how to find out how a key is written.
+- **A chord you press while the sheet is open is described, not run.** The foot shows what
+  you pressed and the command it runs. This is also how to find out how a key is written.
 - Escape, Enter, "Close" or a click outside closes it.
 
 ### Locking the keys
 
 When a program needs every key, such as an editor, another multiplexer or a remote desktop,
-press `Ctrl+Alt+Shift+L`, in either keymap, or choose "Give every key to the program, or
-take them back" in the palette.
+press `Ctrl+Alt+Shift+L` in either keymap, or choose "Give every key to the program, or take
+them back" in the palette.
 
-**While the keys are locked, every key goes to the program in the pane**, including the
-window's own chords and the leader.
+**While locked, every key goes to the program in the pane**, including the window's chords,
+the leader, copy, paste and find. Only the lock key stays the window's, and it unlocks.
 
-- The window keeps only the key that locks, and that key unlocks. Copy, paste and find go
-  to the program too.
 - The pane with the keyboard shows a "Locked" mark in its header, or over its corner when
   headers are hidden. Click it to unlock.
-- The pointer works as usual. The lock belongs to the window and is off the next time it
-  opens.
-- A lock key you set in `[keys]` must be a single chord; one that starts with the leader
-  can't unlock, because the leader goes to the program while locked.
+- The pointer works as usual. The lock is off the next time the window opens.
+- A lock key you set in `[keys]` must be a single chord; one starting with the leader can't
+  unlock.
 
 ### The leader keymap
 
-Use the leader keymap to keep the `Ctrl+Shift` chords for your programs.
+Use it to keep the `Ctrl+Shift` chords for your programs.
 
 ```toml
 keymap = "leader"
 leader = "ctrl-space"   # the default
 ```
 
-- The direct keymap's chords then reach the programs in the panes.
-- Copy, paste, paste-selection and find keep their chords in both keymaps.
-- While the leader waits, a panel at the bottom of the window lists every key that can
-  follow.
-- If nothing follows the leader for about a second, the leader goes to the program. Press
-  the leader twice to send its own key; Escape cancels it.
+- The direct keymap's chords then reach the panes. Copy, paste, paste-selection and find keep
+  their chords in both keymaps.
+- While the leader waits, a panel at the bottom lists every key that can follow.
+- If nothing follows the leader for about a second, it goes to the program. Press the leader
+  twice to send its own key; Escape cancels it.
 - Setting `leader` alone changes nothing. `keymap = "leader"` turns the leader keymap on.
-
-If the desktop takes `Ctrl+Space` (input method switchers do), the leader never arrives, so
-choose another with `leader = "…"`.
+- If the desktop takes `Ctrl+Space` (input method switchers do), choose another with
+  `leader = "…"`.
 
 **Repeat.** After you move a pane (`Ctrl+H` `Ctrl+J` `Ctrl+K` `Ctrl+L`), move its edge
 (`H` `J` `K` `L`) or move a tab (`<` `>`), the same keys work without the leader for one
@@ -2484,20 +2168,16 @@ Add a line under `[keys]` to rebind a command:
 "ctrl-shift-m" = "none"          # leave this key to the program
 ```
 
-- Write what you hold first: `ctrl`, `shift`, `alt`, `cmd` or `super`, joined by hyphens,
-  as in `ctrl-shift-t` or `ctrl-alt-left`.
+- Write what you hold first: `ctrl`, `shift`, `alt`, `cmd` or `super`, joined by hyphens, as
+  in `ctrl-shift-t` or `ctrl-alt-left`.
 - On Linux `ctrl-shift-]` and `ctrl-}` are the same key, and so are `ctrl-shift-/` and
   `ctrl-?`.
-- Separate keys in a sequence with spaces. The word `leader` stands for the key `leader`
-  is set to.
+- Separate keys in a sequence with spaces. `leader` stands for the key `leader` is set to.
 - Your keys are added to the defaults and win where they overlap. To remove a default, set
   its key to `none`. The command names are in section 19.
-- A name that doesn't exist, or a key that can't be read, is reported in the top bar; the
-  rest still apply.
-
-The top bar also reports conflicts between your own keys: the same key for two commands
-(`ctrl-shift-y` and `shift-ctrl-y` are the same key), a key that's also the start of a
-sequence, and the leader bound to a command itself.
+- A bad name or key is reported in the top bar; the rest still apply. The bar also reports
+  conflicts: the same key for two commands (`ctrl-shift-y` and `shift-ctrl-y` are the same),
+  a key that's also the start of a sequence, and the leader bound to a command.
 
 **To see every key in one place and move any of them**, write out a whole keymap:
 
@@ -2511,20 +2191,17 @@ t = "new-tab"
 "shift-h" = "resize-left"
 ```
 
-- A table lies over that keymap's defaults, and your lines win. A key or command the table
-  doesn't mention keeps its default, so keys added in a later version work without your
-  touching the file.
-- To take a default key away, write it with `none`: `"ctrl-shift-t" = "none"`. Taking a
-  line out of the table brings the default back.
-- Each table is read only in its own keymap, and `[keys]` is read in both, on top of the
-  table.
-- Copy, paste, paste-selection, find and the key that locks aren't in either table; change
-  them in `[keys]`.
+- A table lies over that keymap's defaults; keys and commands it doesn't mention keep them.
+- To take a default key away, write it with `none`: `"ctrl-shift-t" = "none"`. Removing a
+  line from the table brings the default back.
+- Each table is read only in its own keymap; `[keys]` is read in both, on top.
+- Copy, paste, paste-selection, find and the lock key aren't in either table; change them in
+  `[keys]`.
 - `isc config` prints both tables in full, with unbound commands as lines to uncomment.
 
 **You can make commands of your own.** A command is a name and a list of steps under
-`[commands]`. You bind it to a key like any other, and the palette lists it. If one is
-written wrongly, the top bar says so and only that command is left out.
+`[commands]`. Bind it to a key like any other; the palette lists it. If one is written
+wrongly, the top bar says so and only that command is left out.
 
 ```toml
 [commands]
@@ -2546,43 +2223,39 @@ steps = [
 A step is one of three things:
 
 - **A command's name**, in quotes: any command in section 19, such as `"split-right"`.
-- **`{ run = "…" }` runs a program in a new pane.** `in` says where: `"tab"` (a new tab,
-  the default), `"right"` or `"down"` (beside the pane in front), or `"float"`. `cwd` is the
-  directory it starts in, and `~` is your home on the machine the pane is on. `keep = true`
-  leaves the pane open when the program ends. `run = ""` runs your shell. The words are
-  split at spaces; when an argument has a space, write a list:
-  `run = ["sh", "-c", "make && ./serve"]`.
-- **`{ type = "…" }` types text into the pane in front**, as if at its keyboard. End it
-  with `\n` to press Enter: `{ type = "git status\n" }`.
+- **`{ run = "…" }` runs a program in a new pane.** `in` says where: `"tab"` (the default),
+  `"right"` or `"down"` (beside the pane in front), or `"float"`. `cwd` is the starting
+  directory, and `~` is your home on the pane's machine. `keep = true` leaves the pane open
+  when the program ends. `run = ""` runs your shell. The words are split at spaces; when an
+  argument has a space, write a list: `run = ["sh", "-c", "make && ./serve"]`.
+- **`{ type = "…" }` types text into the pane in front.** End it with `\n` to press Enter:
+  `{ type = "git status\n" }`.
 
 What to know:
 
-- The steps run in order. After a step that opens a pane, the pane in front is the new one:
+- Steps run in order. After a step that opens a pane, the pane in front is the new one:
   `[{ run = "", in = "right" }, { type = "npm test\n" }]` types into the new shell.
-- If a step fails, the rest don't run, and a notice says which step stopped. A step that
-  would ask first, such as `close-tab` with something running, asks, and the steps after it
-  don't run.
-- A name is letters, digits and hyphens, and can't be a command that already exists.
-- The palette and the leader's panel ("Your commands") list yours; the sheet of keys
-  doesn't.
-- - `isc do NAME` runs one from a shell: see [Running things](#running-things).
+- If a step fails, the rest don't run, and a notice says which stopped. A step that asks
+  first, such as `close-tab` with something running, stops the rest too.
+- A name is letters, digits and hyphens, and can't be an existing command.
+- The palette and the leader's panel ("Your commands") list yours; the sheet of keys doesn't.
+- `isc do NAME` runs one from a shell: see [Running things](#running-things).
 - A step can't be another command of your own, and there are no conditions or loops.
 
 **A mode makes plain keys into commands.** For things you do many times in a row, like
-moving a pane's edge, a mode is a set of keys that run commands with no leader and no
-chord, for as long as the mode is on. One comes ready: **resize mode**. Turn it on, press
-the arrows or `H` `J` `K` `L` as often as you like to move the edges of the pane in front,
-and press Escape when you're done.
+moving a pane's edge, a mode is a set of keys that run commands with no leader and no chord,
+for as long as it's on. One comes ready: **resize mode**. Turn it on, press the arrows or
+`H` `J` `K` `L` to move the edges of the pane in front, and press Escape when done.
 
-- **Turning it on.** In the leader keymap, and in a terminal, it's leader, then `Shift+R`.
-  In the direct keymap it has no key: choose "Resize mode" in the palette, or give
-  `resize-mode` a key under `[keys]`.
+- **Turning it on.** In the leader keymap, and in a terminal, it's leader, then `Shift+R`. In
+  the direct keymap it has no key: choose "Resize mode" in the palette, or give `resize-mode`
+  a key under `[keys]`.
 - While it's on, its keys aren't sent to the program.
-- Escape or Enter turns it off. Any other key turns it off too, and then does what it
-  always does, so if you start typing, the first letter is typed.
-- A small sign with the mode's name stays at the bottom until the mode is off.
+- Escape or Enter turns it off. Any other key turns it off too, then does what it always
+  does, so the first letter you type is typed.
+- A small sign with the mode's name stays at the bottom while it's on.
 
-You can write modes of your own, and change the resize mode, under `[modes]`:
+Write modes of your own, or change the resize mode, under `[modes]`:
 
 ```toml
 [modes.resize]
@@ -2607,16 +2280,15 @@ timeout = 3
 "leader shift-t" = "tabs-mode"
 ```
 
-- The command that turns a mode on is its name with `-mode` after it: `resize-mode`,
-  `tabs-mode`. Bind it like any other.
-- Each key runs one command: one of insensical's, or one of your own from `[commands]`. A
-  key is written as under `[keys]`, and is one key, not a sequence.
+- A mode's command is its name with `-mode` after it: `resize-mode`, `tabs-mode`. Bind it
+  like any other.
+- Each key runs one command, insensical's or your own from `[commands]`. A key is written as
+  under `[keys]` and is one key, not a sequence.
 - `timeout` is seconds with no key before the mode turns itself off. Without it the mode
-  stays on until you leave it.
-- `[modes.resize]` in your settings replaces the one that comes ready, whole: write every
-  key you want it to have.
-- A mode's name is letters, digits and hyphens. `NAME-mode` can't be a command that already
-  exists, so there can't be a mode called `copy`.
+  stays on.
+- `[modes.resize]` in your settings replaces the ready one whole: write every key you want.
+- A mode's name is letters, digits and hyphens, and `NAME-mode` can't be an existing command,
+  so there can't be a mode called `copy`.
 - A key in a mode can't turn on another mode. The page in a browser has no modes.
 
 ### Keys that are fixed
@@ -2634,9 +2306,9 @@ timeout = 3
 | Where one of several machines is chosen: a new project, the settings sheet | `Alt+M` goes to the next machine |
 
 Every place you type a line is a proper field: a name, a search, the palette, an address, a
-token. Pressing puts the caret there, dragging selects, and in the window a double press
-takes a word and a triple press the line. In the palette and other lists, Up, Down, Tab and
-Enter stay the list's, and Left, Right, Home and End are the field's.
+token. Pressing puts the caret there, dragging selects, and in the window a double press takes
+a word and a triple press the line. In lists such as the palette, Up, Down, Tab and Enter
+stay the list's, and Left, Right, Home and End are the field's.
 
 | | In the window (Cmd for Ctrl on a Mac) | In a terminal |
 |---|---|---|
@@ -2650,15 +2322,14 @@ Enter stay the list's, and Left, Right, Home and End are the field's.
 | Undo, redo | `Ctrl+Z`, `Ctrl+Shift+Z` or `Ctrl+Y` | `Ctrl+Z` or `Ctrl+/`, `Ctrl+Shift+Z` or `Ctrl+Y` |
 | Copy, cut, paste | `Ctrl+C`, `Ctrl+X`, `Ctrl+V`, `Shift+Insert` pastes | Paste with your terminal's paste; there's no copy or cut |
 
-A paste is always one line. A field for a secret, such as a token, shows dots and copies
-and cuts nothing to the clipboard. Where a key above already means something on that
-surface, such as `Ctrl+Left`
-and `Ctrl+Backspace` on a setting that has a value to change or reset, it keeps that
-meaning, and the field has `Alt+B`, `Alt+F` and `Ctrl+W` instead.
+A paste is always one line. A secret field, such as a token, shows dots and copies and cuts
+nothing. Where a key above already means something, such as `Ctrl+Left` and `Ctrl+Backspace`
+on a setting with a value to change or reset, it keeps that meaning, and the field has
+`Alt+B`, `Alt+F` and `Ctrl+W` instead.
 
-Every question that opens over the window is a card with buttons at its foot, each naming
-the key that gives the same answer. Enter gives the coloured button on the right: the accent
-colour when it doesn't end anything, red when it does.
+Every question over the window is a card with buttons at its foot, each naming the key that
+gives the same answer. Enter gives the coloured button on the right: the accent colour when
+it doesn't end anything, red when it does.
 
 ---
 
@@ -2669,53 +2340,48 @@ every project at once, so you can spot what needs you and jump to it.
 
 ### The palette
 
-Press `Ctrl+Shift+P`, or leader `Space`. With nothing typed, it lists everything under
-headings, in this order: **Needs you** (the panes that need you), **Recent** (the last five
-commands and settings you chose), **Commands**, **Settings**, **Projects**, **Panes** and
-**Themes**.
+Press `Ctrl+Shift+P`, or leader `Space`. With nothing typed, it lists, in this order:
+**Needs you**, **Recent** (the last five commands and settings you chose), **Commands**,
+**Settings**, **Projects**, **Panes** and **Themes**.
 
-- Your own commands from `[commands]`, and the command that turns on each mode from
-  `[modes]`, are under **Commands**.
-- Each row has an icon: a pane's program (or its state mark if it needs you), a folder for
-  a project, a cog for a setting, a palette for a theme.
+- Your own commands from `[commands]`, and each mode's command from `[modes]`, are under
+  **Commands**.
 - A command shows its keys, a setting its value, and a pane its project and, if it needs
   you, what it says.
-- **Typing narrows the list** by any of your words, in any order, and the headings go. A
-  word at the start of a name ranks highest, then the start of a later word, then inside a
-  word. Of two equal fits, the one you chose more recently comes first.
+- **Typing narrows the list** by any of your words, in any order. A word at the start of a
+  name ranks highest, then the start of a later word, then inside a word. Of two equal fits,
+  the one you chose more recently comes first.
 - Type `pane`, `project`, `setting` or `theme` to ask for that kind of thing.
 - `Enter` runs the command, goes to the project or pane, or chooses the theme.
 - **`Enter` on a setting opens it on the settings sheet**, with its list open if it has one.
   The palette never changes a setting to a value you haven't seen.
 - Themes listed are the built-in ones, those in your `themes` directory, and `ghostty` when
   Ghostty's configuration names a theme.
-- **Themes are previewed.** Highlight one and the whole window shows it. `Enter` keeps it
-  and
-  writes `theme = "…"` to the settings, leaving the rest of the file, comments included,
-  alone. `Esc` goes back to the theme in use. If the settings file can't be read, the theme
-  is applied but not written, and the top bar says why.
+- **Themes are previewed.** Highlight one and the whole window shows it. `Enter` keeps it and
+  writes `theme = "…"` to the settings, leaving the rest of the file alone. `Esc` goes back
+  to the theme in use. If the settings file can't be read, the theme is applied but not
+  written, and the top bar says why.
 
 ### The overview
 
 Press `Ctrl+Shift+Space` or leader `w`, or choose "See every tab of every project at once"
-in the palette. It covers the window with each project's name and its tabs drawn small, in
-their layouts: tiled panes where they sit, floating panes over them, minimized panes as a
-row of icons. Projects sit side by side while there's room.
+in the palette. It covers the window with each project's tabs drawn small, in their layouts:
+tiled panes where they sit, floating panes over them, minimized panes as a row of icons.
 
-- A pane shows its icon, name and a border in its state's colour, and the memory its
-  programs hold once that's a megabyte or more.
-- Under that is the pane's screen, small and live. You can't read it; it shows what kind of
-  thing is there (an editor, a scrolling log, a prompt) and whether it's moving.
-- A pane that's waiting, done or failed also shows what it says, readable, over the foot of
-  its picture. You can read an agent's question without going there.
+- A pane shows its icon, name, a border in its state's colour, and the memory its programs
+  hold once that's a megabyte or more.
+- Under that is the pane's screen, small and live. You can't read it, but it shows what's
+  there (an editor, a scrolling log, a prompt) and whether it's moving.
+- A pane that's waiting, done or failed also shows what it says, readable, so you can read an
+  agent's question without going there.
 - A project's name is followed by how many of its panes need you.
-- The overview opens on the tab in front, and the pane you came from says "here". `Left` and
-  `Right` step through every tab in order, across projects. `Up` and `Down` go to the
-  nearest tab in the row above or below.
+- It opens on the tab in front, and the pane you came from says "here". `Left` and `Right`
+  step through every tab in order, across projects. `Up` and `Down` go to the nearest tab in
+  the row above or below.
 - In the tab the keyboard is on, a ring marks the pane `Enter` goes to: the first that needs
-  you, or else the one that had the keyboard. `Space` moves the ring to the tab's next pane.
+  you, or else the one that had the keyboard. `Space` moves the ring to the next pane.
 - A sleeping project is marked "asleep". `Enter` on one of its tabs wakes it and takes you
-  there, the same as "Wake it" on the project's page.
+  there.
 
 | Key | Does |
 |---|---|
@@ -2726,63 +2392,53 @@ row of icons. Projects sit side by side while there's room.
 
 Looking never resizes a pane or tells its program anything.
 
-Good to know: the small screens are live only while the overview is open, and only for the
-panes in view, so a very busy pane's picture may lag. A dropped link shows "link lost"
-over a
+Good to know: the small screens are live only while the overview is open and only for panes
+in view, so a very busy pane's picture may lag. A dropped link shows "link lost" over a
 machine's panes. `isc tui` has an overview of layouts and words, with no small screens.
 
 ### Finding a file
 
-Type a file's path into the pane without typing the path. Press `Ctrl+Shift+I` or leader
-`/`, or choose "Find a file under the pane's directory and type its path" in the palette.
+Type a file's path into the pane without typing the path. Press `Ctrl+Shift+I` or leader `/`,
+or choose "Find a file under the pane's directory and type its path" in the palette.
 
-A small list opens at the cursor, showing the files and directories under the focused
-pane's directory, each with an icon. With a daemon on another machine, they're that
-machine's files. Type a few letters, then press `Enter` to type the path into the pane.
+A list opens at the cursor with the files and directories under the focused pane's directory,
+each with an icon. With a daemon on another machine, they're that machine's files. Type a few
+letters, then press `Enter` to type the path into the pane.
 
-- The path `Enter` would type is shown dimmed at the cursor as you move through the list.
-  Nothing reaches the program until you press `Enter`.
+- The path `Enter` would type is shown dimmed at the cursor. Nothing reaches the program until
+  you press `Enter`.
 - Your letters must appear in the path in order, in any case; the nearer path wins ties.
-- `Up` and `Down` choose among up to ten paths. `Enter` types the path and a space. `Esc`,
-  or
+- `Up` and `Down` choose among up to ten paths. `Enter` types the path and a space. `Esc`, or
   a click outside, types nothing.
-- **`Tab` goes into the marked directory.** The list then holds only what's in it.
-  `Shift+Tab`, or `Backspace` with nothing typed, comes back out. The path typed is still
-  from the pane's directory.
+- **`Tab` goes into the marked directory.** `Shift+Tab`, or `Backspace` with nothing typed,
+  comes back out. The path typed is still from the pane's directory.
 - The path is relative, as in `src/main.rs`; a directory's ends in a slash. It's quoted when
   a shell would read it as more than one word, as in `'my notes/to do.md'`.
-- **What git ignores isn't listed.** Inside a repository the list leaves out everything git
-  ignores. The daemon asks git once, as the list opens, and git is told to run nothing,
-  fetch nothing and write nothing. Outside a repository, or without git, only the skipped
-  directories below are left out.
+- **What git ignores isn't listed** inside a repository. The daemon asks git once, as the
+  list opens, and git is told to run nothing, fetch nothing and write nothing, so a
+  repository's own config can't run a command.
 
 Good to know: directories named `target`, `node_modules` or `__pycache__` and those starting
 with a dot are skipped, and at most 30 000 entries are listed, nearest first. A file whose
-name
-holds a control or text-direction character isn't listed.
+name holds a control or text-direction character isn't listed.
 
 ---
 
 ## 15. Settings and themes
 
-Everything about how insensical looks and behaves lives in one file you can edit by hand
-or through the settings sheet.
+Everything about how insensical looks and behaves lives in one file you can edit by hand or
+through the settings sheet.
 
-Settings live in `~/.config/insensical/config.toml`
-(`$XDG_CONFIG_HOME/insensical/config.toml`
-if that's set; `INSENSICAL_CONFIG_DIR` overrides both). You needn't create anything: without
-the file, the defaults apply.
+Settings live in `~/.config/insensical/config.toml` (`$XDG_CONFIG_HOME/insensical/config.toml`
+if that's set; `INSENSICAL_CONFIG_DIR` overrides both). Without the file, the defaults apply.
 
-**The window makes the file the first time it starts**, if there isn't one. It explains
-every
-setting and shows its default, but sets none: each setting line begins with `#`, so a
-default
-that changes in a later version still reaches you. Remove the `#` to set a line, or use the
-settings sheet, which writes its line under the one that shows the default.
+**The window makes the file the first time it starts**, if there isn't one. It explains every
+setting and shows its default, but sets none: each setting line begins with `#`. Remove the
+`#` to set a line, or use the settings sheet, which writes its line under the one that shows
+the default.
 
 - A file that's already there is never written over.
-- `isc` on its own doesn't make the file. The window does, and so does `isc config set`,
-  with its one line.
+- `isc` on its own doesn't make the file; the window and `isc config set` do.
 - The keymaps aren't in it. `isc config` prints them.
 
 `isc config` prints a complete file: every setting at its default with a note and its
@@ -2801,22 +2457,22 @@ isc config set sidebar tabs,panes
 isc config reset font-size      # takes the line out, which leaves the default
 ```
 
-- `set` changes that one line and keeps the rest of the file as you wrote it. If there's no
-  file, it makes one with that line.
+- `set` changes that one line and keeps the rest of the file. If there's no file, it makes
+  one with that line.
 - A setting shown in a comment, such as `# shell = "fish"`, is written under that comment.
   `reset` takes out only that line.
 - A value the setting can't have is refused, and the message says what it can be.
 - `colours` and `mouse`, which only the interface in a terminal has, are read, set and reset
   under `[tui]`.
-- These work for the settings in the table in section 19, not for the `[keys]` tables.
+- These work for [every setting](#settings), not for the `[keys]` tables.
 
 **Some settings are the daemon's, and the rest are the interface's.** The daemon's are
-`shell`, `agents-at-once`, `agents-deep`, `agents-from-other-machines`, `term`, `scrollback`, `keep-scrollback`,
-`tmux-shim`, `clipboard`, `notifications`, `notify-waiting`, `notify-failed`, `notify-done`,
-`sound`, `long-command`, `tray`, `notify-command`, `notify-command-when`, `notify-url`,
-`notify-url-when`, `notify-url-body`, `notify-url-headers`, `notify-url-token`,
-`notify-url-user` and `notify-url-password`. On one machine they share a file. With a daemon
-on another machine, its settings are in the file there and the interface's are here:
+`shell`, `agents-at-once`, `agents-deep`, `agents-from-other-machines`, `term`, `scrollback`,
+`keep-scrollback`, `tmux-shim`, `clipboard`, `notifications`, `notify-waiting`,
+`notify-failed`, `notify-done`, `sound`, `long-command`, `tray`, `notify-command`,
+`notify-command-when`, `notify-url`, `notify-url-when`, `notify-url-body`,
+`notify-url-headers`, `notify-url-token`, `notify-url-user` and `notify-url-password`. With a
+daemon on another machine, its settings are in the file there and the interface's are here:
 
 ```sh
 isc --host build config get scrollback      # what the file on build gives it
@@ -2837,7 +2493,7 @@ shell = "fish"
 keymap = "leader"
 ```
 
-The settings table is in section 19.
+The meaning and default of [every setting](#settings) are in section 19.
 
 ### Icons for your own programs
 
@@ -2861,28 +2517,23 @@ deploy = { mark = "docker", colour = "#ff8800" }   # Docker's mark on a tile of 
 
 ### The settings sheet
 
-The sheet lets you change settings by clicking and see the result at once. Press `Ctrl+,`
-(`⌘,` on macOS) or leader `,`, or choose "Settings" in the palette. It opens over the
-window,
-which stays in view. Nothing is typed as a value: a setting is switched, picked or
-stepped. A
+Press `Ctrl+,` (`⌘,` on macOS) or leader `,`, or choose "Settings" in the palette. It opens
+over the window. Nothing is typed as a value: a setting is switched, picked or stepped. A
 number steps by one, the background's opacity by 0.05, and `long-command` (up to 3600
 seconds) by five.
 
-- **Pages are down the left**, under the search field: **Hub**, then Interface and Themes,
-  then Terminal, Shortcuts and Remote Hosts, then Notifications and Agents. On a Mac, Menu
-  bar and Dock follows Themes. The sheet opens on the page you last looked at. Arrows by the
-  page's name go back and forward through pages you've visited. `Esc` or the X at its top
-  right closes the sheet.
+- **Pages are down the left**, under the search field: **Hub**, Interface, Themes, Terminal,
+  Shortcuts, Remote Hosts, Notifications and Agents. On a Mac, Menu bar and Dock follows
+  Themes. The sheet opens on the page you last looked at. Arrows by the page's name go back
+  and forward through pages you've visited. `Esc` or the X at its top right closes it.
 - **A change applies at once** and is written to that setting's one line in `config.toml`.
-- **Type to find a setting** by name or what it does. Results are listed under their page.
+- **Type to find a setting** by name or what it does.
 - **To reset a setting** your file changes, put the pointer on its row and press the small
-  arrow that appears left of the control, or press `Ctrl+Backspace`. Its line leaves the
-  file.
+  arrow left of the control, or press `Ctrl+Backspace`. Its line leaves the file.
 - **Showing** is at the top right of Hub, Terminal, Notifications and Agents once you've
-  named another computer. It says which computer the page is about: press it for the list,
-  or `Alt+M` to step through them. A computer that can't be reached can be chosen; its page
-  says so and waits.
+  named another computer. It says which computer the page is about: press it for the list, or
+  `Alt+M` to step through them. A computer that can't be reached can be chosen; its page says
+  so and waits.
 
 | Control | For | Change it |
 |---|---|---|
@@ -2907,109 +2558,98 @@ seconds) by five.
 
 The pages:
 
-- **Hub** is the first page, for this computer's server and who can reach it. Four things
-  live here; the hub sections have the details.
+- **Hub** is for this computer's server and who can reach it.
   - **Server and Connected**: the server's state, version and the paths of its socket and
     settings file, each with a copy button, and `Restart Server`, which asks first. The
     Version row has `Check Now`, and `Update` when a new release is out, with the switch
     **Check for updates automatically** under it. See [A new version installed
-    underneath](#a-new-version-installed-underneath). Under
-    **Connected** is every window, browser, `isc tui` and the hub's notifications looking
-    at this computer's terminals, with what each can do and for how long. `Disconnect` ends
-    one, with all its connections; for a named browser or phone, `Disconnect and Remove
-    Device` also ends its pairing.
+    underneath](#a-new-version-installed-underneath). **Connected** lists every window,
+    browser, `isc tui` and the hub's notifications looking at this computer's terminals, with
+    what each can do and when it connected. `Disconnect` asks, then ends one; for a named browser or phone,
+    `Disconnect and Remove Device` also ends its pairing.
   - **Access from your other devices**: the switch **Open in a browser or on your phone**
-    runs `isc hub start` and `isc hub stop` for this computer, and says what keeps it
-    running: systemd, insensical when it opens, or a terminal. While it's on,
-    `Restart Hub` runs `isc hub restart`. If the hub runs an older version than the one
-    installed, the row says so and `Restart Hub` stands out. While it's on you can open a browser
-    here with `Open in Browser`, copy a sign-in link for another, and turn on **Reach it
-    from anywhere on your tailnet**. **Notifications on your devices** counts the devices
-    that asked for them, and `Send a Test` tries each. See [Reaching isc hub from another
-    device](#reaching-isc-hub-from-another-device).
+    runs `isc hub start` and `isc hub stop`, and says what keeps the hub running: systemd,
+    insensical when it opens, or a terminal. While it's on, `Restart Hub` runs
+    `isc hub restart` (it stands out if the hub is older than the installed version), and you
+    can open a browser here with `Open in Browser`, copy a sign-in link for another, and turn
+    on **Reach it from anywhere on your tailnet**. **Notifications on your devices** counts
+    the devices that asked for them, and `Send a Test` tries each. See [Reaching isc hub from
+    another device](#reaching-isc-hub-from-another-device).
   - **Your devices**: each paired device, with its icon, name and when it was last used or
-    ends. Press one for **Pair Again** or **Remove**. A guest has `End`. `Add a Device`
-    asks for a name, what it may do (Everything, Look and type, or Only look), how long it
-    stays paired and its icon, then shows a QR code and a link. See [Pairing a
+    ends. Press one for **Pair Again** or **Remove**. A guest has `End`. `Add a Device` asks
+    for a name, what it may do (Everything, Look and type, or Only look), how long it stays
+    paired and its icon, then shows a QR code and a link. See [Pairing a
     device](#pairing-a-device) and [Sharing one project or one
     terminal](#sharing-one-project-or-one-terminal).
-  - **Joined machines** (on a hub) lists computers joined to it, with `Remove` and `Invite
-    a Machine`. **Join a hub** (on any computer that joined none) has `Join a Hub`, where
-    you paste the invite line. See [Joining another machine to your
+  - **Joined machines** (on a hub) lists computers joined to it, with `Remove` and `Invite a
+    Machine`. **Join a hub** (on any computer that joined none) has `Join a Hub`, where you
+    paste the invite line. See [Joining another machine to your
     hub](#joining-another-machine-to-your-hub).
-  - A computer that joined a hub has the same switch and `Restart Hub`, then **Joined to
-    the hub at** with the hub's name, whether it's connected, and `Leave`. **Your devices
-    are managed on** the hub: you add and remove them in Settings > Hub there. It has no
-    browser link, Tailscale row, notifications row, Joined machines or Add a Device, since
-    your devices reach it through the hub. **Guests** lists the guests it shared something
-    with; devices paired here before it joined aren't listed, since they can't reach it.
-- **Interface** has four cards: **Panes** (density, space between panes, pane header),
-  **Tabs and sidebar** (where the tabs are, what the sidebar lists), **Terminal text**
-  (terminal font, text size, ligatures) and **Window** (interface font, motion). The
-  terminal font list shows only fonts of one width; any other can be named in the file.
+  - A computer that joined a hub has the same switch and `Restart Hub`, then **Joined to the
+    hub at** with the hub's name, whether it's connected, and `Leave`. **Your devices are
+    managed on** the hub: add and remove them in Settings > Hub there. It has no browser
+    link, Tailscale row, notifications row, Joined machines or Add a Device. **Guests** lists
+    the guests it shared something with.
+- **Interface** has five cards: **Starting** (what insensical does when you log
+  in), **Panes** (density, space between panes, pane header), **Tabs
+  and sidebar** (where the tabs are, what the sidebar lists), **Terminal text** (terminal
+  font, text size, ligatures) and **Window** (interface font, motion). The terminal font list
+  shows only fonts of one width; name any other in the file.
 - **Themes** has two cards: **Colours** (the theme, the interface colours) and **Behind the
   window** (the background's opacity and blur). A theme is shown on the whole window as you
-  move through the list; `Esc` puts back the one you had. A theme for each appearance,
-  `{ light = …, dark = … }`, shows as "By the desktop's appearance". Picking a theme from
-  the list replaces the pair with one theme; to have a pair again, write it in the file.
-- **Terminal** has four cards: **Shell** (the shell, the terminal type; the shell list holds
-  the shells in `/etc/shells`), **Typing** (input method, Option as Alt, type ahead),
-  **History** (how much each pane keeps, and whether it's kept when the server stops) and
-  **Files and clipboard** (what opens a file, and whether programs may write the
-  clipboard).
-- **Remote Hosts** lists the computers you've named, one card each. The first row shows its
-  state (Connected, Can't be reached, or that its server can't be used) and where ssh goes,
-  with a `Check` button that meets it and says what's wrong in plain words. Press the row to
-  fold or open the card. Open, it has the colour and icon (dropdowns), whether it's careful
-  (it asks before a paste of more than a line), `Rename`, the address (`Change`, type it,
-  `Enter` keeps it, `Esc` leaves it) and `Forget`, which asks once and changes nothing on
-  that computer.
+  move through the list; `Esc` puts back the one you had. A pair, `{ light = …, dark = … }`,
+  shows as "By the desktop's appearance". Picking a theme from the list replaces the pair
+  with one theme; write the pair in the file to have it again.
+- **Terminal** has four cards: **Shell** (the shell, from `/etc/shells`, and the terminal
+  type), **Typing** (input method, Option as Alt, type ahead), **History** (how much each pane
+  keeps, and whether it's kept when the server stops) and **Files and clipboard** (what opens
+  a file, and whether programs may write the clipboard).
+- **Remote Hosts** has one card per computer you've named. The first row shows its state
+  (Connected, Can't be reached, or that its server can't be used) and where ssh goes, with a
+  `Check` button that meets it and says what's wrong in plain words. Press the row to fold or
+  open the card. Open, it has the colour and icon, whether it's careful (it asks before a
+  paste of more than a line), `Rename`, the address (`Change`, type it, `Enter` keeps it,
+  `Esc` leaves it) and `Forget`, which asks once and changes nothing on that computer.
   - A card starts open if it's your only one, just added, or needs you; otherwise folded.
-  - A host with an older insensical says so as soon as it connects, such as "insensical
-    0.5.0 there · this computer has 0.6.0", with `Update There`, which brings it to this
-    computer's version. When a check finds insensical missing there, or its server older, a
-    row offers `Update There` or `Restart Its Server`. Where a package or Homebrew owns
-    insensical there, the row says so and shows the command to run on that machine, with a
-    copy button. Where insensical there was built from source, the row says to build the
-    new version there the same way. A host with a newer insensical says to update this
-    computer. Where `ssh` has a question, the row has an `Answer` button.
+  - A host with an older insensical says so when it connects, with `Update There`, which
+    brings it to this computer's version. If a check finds insensical missing there, or its
+    server older, a row offers `Update There` or `Restart Its Server`. Where a package or
+    Homebrew owns insensical there, the row shows the command to run on that machine, with a
+    copy button. Where the copy there was built from source, the row says to build the new version there
+    the same way. A host with a newer insensical says to update this computer. Where `ssh`
+    has a question, the row has an `Answer` button.
   - `Add Remote Host` opens a dialog with the machines of your tailnet and the names in your
     ssh configuration under two tabs; anything you type is given to ssh.
 - **Notifications** has three cards: **Being told** (notifications at all, the tray's icon),
-  **What you're told of** (a pane that waits, something that fails, something that
-  finishes, and how long a command counts as long) and **Light and sound** (the glow around
-  a waiting pane, the sound, and a `Play` for each of the two sounds).
+  **What you're told of** (a pane that waits, something that fails, something that finishes,
+  and how long a command counts as long) and **Light and sound** (the glow around a waiting
+  pane, the sound, and a `Play` for each of the two sounds).
   - **When you're away** is how you're told on your phone when something needs you and no
     window or terminal is open. Choose **ntfy** and give the server (the free
-    `https://ntfy.sh` unless you change it), a topic, and an access token if your server
-    needs one; or choose **Another web address** and give the address. **Only when I'm
-    away** is a switch: off, you're told every time. `Send a Test` says how it went, and a
-    quiet line says how the last alert went.
-  - **More options** holds how an address is sent, a user and password, a token and a
-    command to run. Secret fields show only dots.
-  - The settings behind it are `notify-url`, `notify-url-token`, `notify-url-body`,
-    `notify-url-when`, `notify-url-user`, `notify-url-password`, `notify-command` and
-    `notify-command-when`. Giving an ntfy topic also sets `notify-url-body` to `text`.
-    `notify-url-headers` is set only with `isc config set`.
-- **Agents** starts with how many agents one agent may start and how many levels deep, each
-  a number between − and +, and a switch for whether agents on other machines can use this
-  computer. Under them is each agent it knows and whether it reports what
-  it's doing: it does, it doesn't, its hooks are stale (they name an `isc` that's gone), or
-  the agent isn't on this system. `Set up` asks before adding hooks, as in
-  [section 11](#11-agents).
-- **Shortcuts** has the keymap and the leader under **Keys**. The keys themselves are tables
-  in the file; under **Every key** are buttons for the sheet of every key and for opening
-  the file. The `[keys]` tables and a theme's own file aren't on the sheet.
+    `https://ntfy.sh` unless you change it), a topic, and an access token if your server needs
+    one; or choose **Another web address** and give the address. **Alert me only when I'm
+    away** is a switch: off, you're told every time. `Send a Test` says how it went, and a quiet line says
+    how the last alert went.
+  - **More options** holds how an address is sent, a user and password, a token and a command
+    to run. Secret fields show only dots.
+  - An ntfy topic also sets `notify-url-body` to `text`. `notify-url-headers` is set only
+    with `isc config set`. [Every setting](#settings) behind this page is listed in section 19.
+- **Agents** starts with how many agents one agent may start and how many levels deep, each a
+  number between − and +, and a switch for whether agents on other machines can use this
+  computer. Under them is each agent it knows and whether it reports what it's doing: it
+  does, it doesn't, its hooks are stale (they name an `isc` that's gone), or the agent isn't
+  on this system. `Set up` asks before adding hooks, as in [section 11](#11-agents).
+- **Shortcuts** has the keymap and the leader under **Keys**, and under **Every key** buttons
+  for the sheet of every key and for opening the file. The `[keys]` tables and a theme's own
+  file aren't on the sheet.
 - With more than one machine, pages that hold a server's settings say whose they are; see
   [Other machines in the window](#other-machines-in-the-window).
 
 ### When a change applies
 
-- **Saved changes apply within a second.** The window checks the file once a second; you
-  needn't restart.
-- The daemon reads `shell` and `keep-scrollback` when the next pane starts. A pane already
-  open keeps its values.
-- The daemon reads `clipboard` each time a program asks, so it applies right away.
+- **Saved changes apply within a second.** You needn't restart.
+- The daemon reads `shell` and `keep-scrollback` when the next pane starts; open panes keep
+  their values. It reads `clipboard` each time a program asks.
 - Changing `sidebar`, `pane-header`, `density` or `pane-gap` changes how much room terminals
   have, so they're resized.
 
@@ -3023,12 +2663,10 @@ The pages:
 - A value that reads but can't be used (a font size of 500, a theme that doesn't exist, a
   leader that isn't a key, a shell that isn't a program) is reported, and only that setting
   falls back.
-- **The daemon is more forgiving.** It reads its own settings one at a time: a value it
-  can't
-  read leaves only that setting at its default, and a broken file leaves the settings it
-  last
-  read. It tells you what it couldn't use in a notification, at the end of `isc notify
-  --sinks`, and through `isc --host NAME config get`.
+- **The daemon is more forgiving.** A value it can't read leaves only that setting at its
+  default, and a broken file leaves the settings it last read. It reports what it couldn't
+  use in a notification, at the end of `isc notify --sinks`, and through
+  `isc --host NAME config get`.
 
 ### Themes
 
@@ -3050,7 +2688,7 @@ Eight themes come with insensical:
 | `quartz` | Quiet grey with soft colours and a touch of rose | dark and light |
 
 A theme with both follows the desktop: `theme = "lantern"` is dark when the desktop is dark
-and light when it's light, and changes as the desktop does. It can't be held to one side.
+and light when it's light. It can't be held to one side.
 
 A theme name is looked up like this:
 
@@ -3060,23 +2698,19 @@ A theme name is looked up like this:
 | `ghostty:Name` | The Ghostty theme with that name |
 | anything else | `themes/NAME.toml` beside the settings file, then the themes that come with insensical |
 
-- Without `theme`, you get `fjord` on a dark desktop and `paper` on a light one.
-- A pair, `{ light = "…", dark = "…" }`, follows the desktop's appearance.
-- Ghostty's themes are read in place from where Ghostty keeps them, on macOS inside
-  `Ghostty.app`. **Without Ghostty installed, `ghostty` and `ghostty:…` are errors.**
-- **Only the theme comes from Ghostty.** Its font, font size, font style, padding, opacity,
-  blur, cursor style and `command` aren't used.
+- **Without Ghostty installed, `ghostty` and `ghostty:…` are errors.** Only the theme comes
+  from Ghostty; its font, font size, font style, padding, opacity, blur, cursor style and
+  `command` aren't used.
 - The terminals' colours always come from the theme. The window around them is grey unless
   you set `interface-style = "terminal"`. A program's tile is always in its own colours.
 
 ### A neutral interface
 
 By default the window around the terminals is grey: near-black on a dark desktop, near-white
-on a light one, never lighter than the theme's own step under its panes. That leaves the
-colour to the terminals. `interface-style = "terminal"` (the switch Follow terminal theme in
-the settings) works the window out from the theme instead, so a warm theme gives a warm
-sidebar. `isc tui` is the other way round: it's in the theme's colours unless you write
-`interface-style = "insensical"`.
+on a light one. That leaves the colour to the terminals. `interface-style = "terminal"` (the
+switch Follow terminal theme in the settings) works the window out from the theme instead, so
+a warm theme gives a warm sidebar. `isc tui` is the other way round: it's in the theme's
+colours unless you write `interface-style = "insensical"`.
 
 - In grey, the sidebar, tabs, headers, borders and sheets are grey; the theme's accent, the
   state colours and the terminals stay as they are.
@@ -3086,7 +2720,7 @@ sidebar. `isc tui` is the other way round: it's in the theme's colours unless yo
 ### A see-through window
 
 `background-opacity` sets how much of what's behind the window its background hides, from
-`0.2` to `1`. At `1`, the default, the window is solid but for the little `background-blur`
+`0.2` to `1`. At `1` the window is solid but for the little `background-blur`
 lets through. Below that, your desktop shows through behind the text:
 
 ```toml
@@ -3094,18 +2728,14 @@ background-opacity = 0.85
 background-blur = true
 ```
 
-- Only the background thins. Text, cells a program coloured, tiles, borders, sheets and
-  questions stay solid.
-- A floating or zoomed pane stays solid, since it lies over other panes.
-- `background-blur` is on unless you turn it off. It asks the desktop to blur what shows
-  through, and even at an opacity of `1` it lets a little through the sidebar and the space
-  around the panes. On Hyprland and other compositors that blur by their own rules, turn
-  blur
+- Only the background thins. Text, cells a program coloured, tiles, borders, sheets, questions
+  and floating or zoomed panes stay solid.
+- `background-blur` asks the desktop to blur what shows through, and even at an opacity of `1` it lets a little through the sidebar and the space
+  around the panes. On Hyprland and other compositors that blur by their own rules, turn blur
   on for the window there (the class and title are both `insensical`). On a desktop that
   doesn't blur, turn it off if you'd rather the sidebar be fully solid.
 - With no compositor there's nothing to show through, and the window is drawn over black.
-- Both apply as you save. Text over a busy picture is harder to read, and nothing corrects
-  for that.
+- Both apply as you save. Text over a busy picture is harder to read.
 
 ### A theme file
 
@@ -3125,8 +2755,8 @@ palette = [               # the sixteen named colours: eight normal, then eight 
 ]
 ```
 
-Light or dark is worked out from the background, unless `appearance = "light"` or `"dark"`
-at the top of the file sets it.
+Light or dark is worked out from the background, unless `appearance = "light"` or `"dark"` at
+the top of the file sets it.
 
 One file can hold a theme for both. Write each side under `dark` and `light`, and the
 desktop's appearance picks:
@@ -3178,10 +2808,10 @@ failed = "#f0706a"
 ```
 
 What you leave out is derived from the theme: the canvas is the background a step darker,
-muted and faint text sit between the foreground and the canvas, the accent is the
-palette's blue, and the state colours are its blue (cyan if the accent took the blue),
-yellow, green and red. Text that wouldn't stand out enough is shifted in lightness until
-it does, colours you set included.
+muted and faint text sit between the foreground and the canvas, the accent is the palette's
+blue, and the state colours are its blue (cyan if the accent took the blue), yellow, green and
+red. Text that wouldn't stand out enough is shifted in lightness until it does, colours you
+set included.
 
 ---
 
@@ -3193,26 +2823,22 @@ commands is in section 19.
 
 ### Naming things
 
-Point `isc` at a pane, tab or project and it works out the rest.
-
 - A pane is its number as `isc ls` prints it (`3` or `pane:3`), or the name you gave it
   with `isc rename` or `--name`. A tab works the same way (`7`, `tab:7` or its name). Names
   ignore case, and a number is always a number.
 - A project is its name or its number. If two projects share a name, the name means the
   first one listed. See [Projects](#projects).
 - A layout command with no pane acts on the pane it's run in (`$INSENSICAL_PANE`), or
-  outside any pane, the one with the keyboard. `isc status` and `isc notify` never guess:
-  outside a pane they need `--pane`.
-- Every command takes `--socket PATH`, which names the daemon's socket in place of
-  `$INSENSICAL_SOCKET` and the default.
+  outside any pane, the one with the keyboard. `isc status` and `isc notify` outside a pane
+  need `--pane`. Every command takes `--socket PATH` in place of `$INSENSICAL_SOCKET`.
 - `isc --help` and `isc COMMAND --help` describe the commands. `isc --version` prints the
-  version of `isc` only.
+  version of `isc` only, with the commit it was built from when you built it from source,
+  such as `isc 0.7.0+bcb3964c`.
 
 ### Which commands start the daemon
 
 A command about panes, tabs or projects starts the daemon if it isn't running. So do `isc
-status explain`, `isc notify --test`, `isc notify --sinks`, and `isc restart-server` when
-no daemon is running.
+status explain`, `isc notify --test`, `isc notify --sinks`, and `isc restart-server`.
 
 These never start it: `daemon`, `kill-server`, `version`, `status` with a state, `notify`
 with a title, `integrate`, `shell-integration`, `config`, `completions`, `host` and the
@@ -3224,9 +2850,9 @@ started it:
 | Started by | Where it prints |
 |---|---|
 | `isc` | Where you ran it |
-| The window | Whatever started the window. Run `insensical` in a terminal to read it. Mistakes in the settings file are among it, and the settings sheet lists the same ones |
-| The user unit | The journal: `journalctl --user -u insensical` |
-| On demand, by a window or command | Nowhere. To read it, stop the daemon and run `isc daemon` in a terminal |
+| The window | Whatever started the window. Run `insensical` in a terminal to read it. Mistakes in the settings file show here and in the settings sheet |
+| The user unit | `journalctl --user -u insensical` |
+| On demand, by a window or command | Nowhere. Stop the daemon and run `isc daemon` in a terminal |
 
 ### Listing
 
@@ -3236,16 +2862,13 @@ project, tab and focused pane with `*`.
 - A project's line has its number, name and root, and `asleep` while it sleeps.
 - A tab's line has its number, its name if it has one, and `zoomed` while a pane fills it.
 - A pane's line has its number, state, program, directory (`~` for home), name or title,
-  and what its state is about, each after two spaces. Empty parts are left out. The state is
-  one word and the program is the process's name, so a script can count columns up to there.
+  and what its state is about, each after two spaces. Empty parts are left out.
 
-After those, each after two spaces, come the parts that are only sometimes there:
-`floating` or `minimized`; what a waiting pane waits for and how long it has been
-`waiting`, `failed` or `done` (`wants permission, 2h`); the name a program gives itself,
-in brackets; how many things it reports; `opened by pane:N` for a pane that `isc run` or
-`isc split` opened from inside another pane that's still open; and `keeps agents out`.
-Scripts should read `isc ls --json` for these. If an update has been installed under the
-running daemon, `isc ls` says so on standard error.
+Sometimes more follows: `floating` or `minimized`; what a waiting pane waits for and how
+long (`wants permission, 2h`); the name a program gives itself, in brackets; how many
+things it reports; `opened by pane:N`; and `keeps agents out`. Scripts should read
+`isc ls --json` for these. If an update was installed under the running daemon, `isc ls`
+says so on standard error.
 
 ```text
 * project:5  api  /home/you/code/api
@@ -3260,9 +2883,8 @@ running daemon, `isc ls` says so on standard error.
         pane:11  idle  fish  ~/code/web
 ```
 
-Narrow the list with these. Panes that fit are shown under the projects and tabs that hold
-them, and the command fails with nothing listed when none fits. Given together, a pane
-must fit them all.
+These narrow the list. Given together, a pane must fit them all. The command fails with
+nothing listed when none fits.
 
 | Option | Lists |
 |---|---|
@@ -3271,7 +2893,7 @@ must fit them all.
 | `--opened` | Panes opened by the pane `isc` runs in |
 | `--here` | Panes of the tab the pane `isc` runs in |
 
-`isc ls --json` prints everything the daemon knows, and is the stable format for scripts.
+`isc ls --json` prints everything the daemon knows and is the stable format for scripts.
 `isc usage`, `isc clients` and `isc api` take `--json` too, and `isc integrate --status`
 always prints JSON.
 
@@ -3284,34 +2906,25 @@ always prints JSON.
 isc run [--cwd DIR] [--keep] [--name NAME] [--background] [--wait] [--json] [WHERE] [-- COMMAND…]
 ```
 
-The working directory is the one you run `isc` in. Give only one place:
+The working directory is the one you run `isc` in. Give only one place, as `WHERE` in
+[every isc command](#isc-commands). With `--split`, `--beside` names the pane when it isn't
+the one `isc` runs in or the focused one.
 
-| `WHERE` | Place |
-|---|---|
-| nothing | A new tab in the current project |
-| `--project NAME` | A new tab in that project |
-| `--new-project [NAME]` | A new project for the working directory, called `NAME` if you give one |
-| `--split right\|down [--beside PANE]` | Beside a pane, sharing its space. `--beside` names the pane when it isn't the one `isc` runs in or the focused one |
-| `--float [--rect X,Y,W,H]` | Floating above the current tab |
-
-`--keep` leaves the pane open when the command ends so you can read what it printed. Press
-Enter in it, or run `isc close`, to close it.
+`--keep` leaves the pane open when the command ends. Press Enter in it, or run `isc close`,
+to close it.
 
 `isc run` and `isc split` share these options:
 
 | Option | Does |
 |---|---|
-| `--name NAME` | Names the pane from the start, as `isc rename` would |
-| `--background` | Opens the pane behind, leaving the keyboard, tab and project you're looking at where they are |
-| `--wait` | Waits for the command to end, then prints the end of its output (the last whole lines that fit in 4 KB) and a last line with its status (`exit 7`, or `exit 7, 1980 earlier lines left out`). It exits with that status, so `isc run --wait -- make test && echo passed` works. The pane closes afterwards unless you add `--keep`. If you stop `isc` while it waits, the pane stays open |
+| `--wait` | Waits for the command to end, then prints the end of its output (up to 4 KB of whole lines) and a last line with its status (`exit 7`, or `exit 7, 1980 earlier lines left out`). It exits with that status, so `isc run --wait -- make test && echo passed` works. The pane closes afterwards unless you add `--keep`. If you stop `isc` while it waits, the pane stays open |
 | `--json` | Prints `{"pane":12,"tab":7}` in place of `pane:N`. With `--wait` it's printed once the command ends, with `status`, `output` and, when lines were left out, `left_out` |
 
 A pane you open from inside another pane remembers that pane as its opener. `isc close
---opened`, run in that pane, closes every pane it opened and every pane those opened, and
-nothing else. An agent can tidy up after itself without touching your panes. A pane you've
-typed into or focused stays, with what it opened, and the command says `pane:9 left open:
-the user is using it`. `isc close --opened 3` does the same for pane 3. A pane whose
-opener has closed is no one's.
+--opened`, run in that pane, closes every pane it opened and every pane those opened, so an
+agent can tidy up without touching your panes. A pane you've typed into or focused stays,
+with what it opened, and the command says `pane:9 left open: the user is using it`. `isc
+close --opened 3` does the same for pane 3.
 
 `isc do NAME` runs a command by name: one of your own from `[commands]` in the settings
 file on this machine (see [Changing keys](#changing-keys)), or one of the commands in
@@ -3332,26 +2945,19 @@ isc --host build do tests
 
 ### Typing into a pane and reading it
 
-These commands let a script drive a pane and read what came back.
-
 | Command | Does |
 |---|---|
-| `isc send PANE TEXT` | Types text. Text may begin with a hyphen. If it's one of `isc`'s own options (`--host`, `--rights`, `--socket`), put `--` first: `isc send 3 -- --host`. The same goes for a title given to `isc notify`, which also has `--test`, `--sinks` and `--pane` |
-| `isc key PANE KEY…` | Presses keys by name, in order, encoded as the pane's program expects: `isc key 3 escape : w q enter`. Write a key as in `[keys]`: `ctrl-c`, `enter`, `escape`, `shift-tab`, `space`, `a`, with `ctrl`, `shift`, `alt`, `cmd` or `super` held |
-| `isc upload PANE FILE…` | Sends files to the pane's machine and types each path at the cursor, as if you'd dragged the file in |
-| `isc ask PANE TEXT` | Types a line, presses Enter, waits and prints only the answer |
-| `isc capture PANE` | Prints the end of the screen and scrollback as text |
-| `isc history PANE` | Prints the commands run in the pane |
+| `isc send PANE TEXT` | Types text. If it starts with one of `isc`'s own options (`--host`, `--rights`, `--socket`), put `--` first: `isc send 3 -- --host`. The same goes for a title given to `isc notify`, which also has `--test`, `--sinks` and `--pane` |
+| `isc key PANE KEY…` | Presses keys by name, in order: `isc key 3 escape : w q enter`. Write a key as in `[keys]`: `ctrl-c`, `enter`, `escape`, `shift-tab`, `space`, `a`, with `ctrl`, `shift`, `alt`, `cmd` or `super` held |
 
-**Uploading.** Nothing is pressed after the paths, which are separated by a space and
-quoted when they hold a space or a sign the shell reads. `isc upload` prints where each
-file was kept.
+`isc upload`, `isc ask`, `isc capture` and `isc history` are in [every isc
+command](#isc-commands).
 
-- Files go in `.insensical-uploads` in the pane's directory, made on first use with a
-  `.gitignore` that keeps it out of git.
-
-Good to know: files are limited to 50 MB, and a file keeps its name without replacing
-another.
+**Uploading.** `isc upload PANE FILE…` sends files to the pane's machine and types each
+path at the cursor with a space after it, as if you'd dragged the file in, and presses nothing else. `isc upload` prints where each file was
+kept: `.insensical-uploads` in the pane's directory, made on first use with a `.gitignore`
+that keeps it out of git. Files are limited to 50 MB, and a file keeps its name without
+replacing another.
 
 **Asking.** What `isc ask` waits for depends on the pane:
 
@@ -3360,33 +2966,31 @@ another.
   status: `isc ask build 'make test'`.
 - Anywhere else, such as a database prompt, it waits until the pane has printed nothing
   for a second (`--quiet SECONDS` changes that) and prints what came after the line: at most
-  4 KB with the end kept, and a closing line with a token. `isc ask psql '\dt'`. An answer
-  that pauses for longer is cut short.
+  4 KB with the end kept, and a closing line with a `--since` token. `isc ask psql '\dt'`. An answer that pauses for longer is cut short.
 
 `isc ask --timeout SECONDS` gives up with status 124. `--anyway` types into a busy pane.
 
-**Capturing.** `isc capture PANE` prints nothing your terminal would act on: a control
-character a program left there is printed as an escape like `\u{1b}`. Trailing spaces and
-trailing empty lines are left out. It prints at most 4 KB, the end kept, and always closes
-with a line starting `--`: how many earlier lines were left out, if any, and a token to
-read on from, as in `-- 1980 earlier lines left out; --since 3fa2c1d0`.
+**Capturing.** `isc capture PANE` prints at most 4 KB, the end kept. Control characters
+print as escapes like `\u{1b}`, and trailing spaces and empty lines are left out. It always
+closes with a line starting `--`: how many earlier lines were left out, if any, and a token
+to read on from, as in `-- 1980 earlier lines left out; --since 3fa2c1d0`.
 
 | Option | Prints |
 |---|---|
 | `--all` | All of it |
 | `--screen` | Only what's in view |
 | `--tail N` | Only the last `N` lines |
-| `--last [N]` | Only what the latest command printed, without its prompt or command line. The closing line says how it ended (`exit 1`, or `running`). `--last 2` is the one before. It goes by the marks your shell writes around each command (see [Commands that fail, and short commands](#commands-that-fail-and-short-commands)) and says so when the shell writes none. The daemon remembers a pane's last 100 commands and holds the output of the last 20, so `--last 21` says it's no longer held |
-| `--grep PATTERN` | Only lines matching a regular expression. `--context N` adds `N` lines around each, with an empty line between groups. With no match it prints only the closing line and exits with 1 |
-| `--since TOKEN` | Only what came after the read whose closing line gave the token: the line the cursor was on then, and every line after it. Reading a log again this way prints nothing twice. A pane keeps the places of its last 8 reads. If the place is no longer held (it scrolled out, the daemon restarted, or 8 later reads were made), all of it is printed and the closing line says so |
-| `--vt` | All of it with colours and styles as escape sequences, and no others. It takes none of the other options. The title, links, palette, modes and cursor position are never printed |
+| `--last [N]` | Only what the latest command printed, without its prompt. The closing line says how it ended (`exit 1`, or `running`). `--last 2` is the one before. It goes by the marks your shell writes around each command (see [Commands that fail, and short commands](#commands-that-fail-and-short-commands)) and says so when the shell writes none. The output of a pane's last 20 commands is held, so `--last 21` says it's no longer held |
+| `--grep PATTERN` | Only lines matching a regular expression. `--context N` adds `N` lines around each. With no match it prints only the closing line and exits with 1 |
+| `--since TOKEN` | Only what came after the read whose closing line gave the token, so reading a log again prints nothing twice. A pane keeps its last 8 reads; if the place is gone, all of it is printed and the closing line says so |
+| `--vt` | All of it with colours and styles as escape sequences. It takes none of the other options |
 
-These combine: `isc capture 4 --last --grep error --context 2`. `--since` can't be used
+Options combine: `isc capture 4 --last --grep error --context 2`. `--since` can't be used
 with `--last` or `--screen`.
 
-**What was run in a pane.** `isc history PANE` prints the commands run there, newest last,
-one line each: when it started, how long it ran, how it ended (`exit 1`, or `running`),
-the directory (`~` for home), and what was typed at the prompt.
+**What was run in a pane.** `isc history PANE` prints the commands run there, newest last:
+when it started, how long it ran, how it ended (`exit 1`, or `running`), the directory, and
+what was typed.
 
 ```text
 14:02:11  1.2s  exit 0  ~/code/api  cargo fmt
@@ -3394,21 +2998,18 @@ the directory (`~` for home), and what was typed at the prompt.
 14:03:05  4m12s  running  ~/code/api  npm run dev
 ```
 
-- It prints at most 4 KB, the newest kept, then a line saying how many earlier ones were
-  left out. `--all` prints every one the daemon remembers (the last 100). `--json` prints
-  them with times in milliseconds since 1970.
+It prints at most 4 KB, the newest kept, then a line saying how many earlier ones were left
+out. `--all` prints all the last 100. `--json` prints
+them with times in milliseconds since 1970.
 
 ### Waiting
-
-`isc wait` pauses a script until a pane is ready.
 
 ```sh
 isc wait PANE [--until STATE]… [--timeout SECONDS]
 ```
 
-- It succeeds when the pane reaches a state you name with `--until` (`idle`, `running`,
-  `waiting`, `done`, `failed`, `closed`), and prints which.
-- Without `--until` it waits for `done`, `failed`, `waiting` or `closed`.
+- It waits for the states named in [every isc command](#isc-commands) and prints which one
+  it reached.
 - It exits with 124 when time runs out. The time can be a fraction of a second. `inf` is
   refused.
 
@@ -3422,10 +3023,10 @@ the pane closes first and exits with 124 on timeout.
 
 | Option | Waits for |
 |---|---|
-| `--output PATTERN` | A line on the screen or in the history that matches a regular expression, and prints that line. It succeeds at once if the line was printed before you asked. It reads line by line, so a line the pane's width broke in two is two lines: wait for a shorter piece. Colours don't matter |
+| `--output PATTERN` | A line on the screen or in the history that matches a regular expression, and prints it. It succeeds at once if the line was printed before you asked. A line the pane's width broke in two is two lines, so wait for a shorter piece. Colours don't matter |
 | `--prompt` | The command running at the shell to end, by your shell's marks. It prints the end of the output and a closing line as `isc capture --last` does, and exits with the command's status. With nothing running, it does that at once for the last command. A shell that writes no marks is an error |
-| `--quiet SECONDS` | The pane to print nothing for that long. Prints nothing |
-| `--address` | The pane to show an address on this machine with a port, as a server prints where it listens (`localhost:5173`, `127.0.0.1:8000`, `0.0.0.0:3000`, `[::1]:4000`). It prints the last one shown, as `http://localhost:5173/`. One printed before you asked counts |
+| `--quiet SECONDS` | The pane to print nothing for that long |
+| `--address` | The pane to show an address on this machine with a port (`localhost:5173`, `127.0.0.1:8000`, `0.0.0.0:3000`, `[::1]:4000`). It prints the last one shown, as `http://localhost:5173/`. One printed before you asked counts |
 
 ```sh
 pane=$(isc run -- npm run dev)
@@ -3450,9 +3051,9 @@ isc agent answer PANE yes|no|TEXT
 - With `--quiet` it runs the agent's own one-question mode on this machine, with no pane,
   prints only the answer and exits with the agent's status.
 - `isc agent wait` waits until the agent's turn ends, then prints `done` or `failed` with
-  its whole reply, or `waiting` with its question. It waits 30 minutes unless you give
-  `--timeout`, then exits with 124, saying the agent is still working. It fails sooner,
-  saying why, if the agent's hooks have said nothing 30 seconds after it started.
+  its reply, or `waiting` with its question. It waits 30 minutes unless you give
+  `--timeout`, then exits with 124. It fails sooner, saying why, if the agent's hooks have
+  said nothing 30 seconds after it started.
 - A reply is cut to its last 4 KB, with a closing line saying how many lines were left
   out, unless you say `--all`.
 - `isc agent answer` prints the state the agent moved on to, and fails if it still asks 10
@@ -3471,12 +3072,10 @@ isc api '{"Float":{"pane":3,"rect":{"x":0.5,"y":0.1,"w":0.45,"h":0.8}}}'
 echo '{"Zoom":{"tab":2,"on":true}}' | isc api
 ```
 
-- A request is one JSON value: a name alone if it takes nothing, or an object with the
-  name as its key. The answer is JSON: `"Done"`, `{"Pane":7}`, `{"State":{…}}`,
-  `{"Text":"…"}`.
-- What the window asks of the daemon's machine is here too: `"Clients"`,
-  `{"List":{"dir":"~/src","deep":false}}` for a directory's names, `"Hooks"` and
-  `"Settings"`.
+A request is one JSON value: a name alone if it takes nothing, or an object with the name
+as its key. The answer is JSON: `"Done"`, `{"Pane":7}`, `{"State":{…}}`, `{"Text":"…"}`.
+`"Clients"`, `{"List":{"dir":"~/src","deep":false}}` (a directory's names), `"Hooks"` and
+`"Settings"` are here too.
 
 **To see what's available, ask `isc api`.** It sends nothing and starts no daemon.
 
@@ -3487,9 +3086,9 @@ isc api --json          # the same list, as JSON
 isc api Float --json
 ```
 
-With no request it lists every request, one to a line: its name, the right it needs, and
-what it does. `isc api NAME` describes one. `NAME` is the request's name alone, without
-quotes; capitals don't matter, and `hide-floats` is `HideFloats`.
+With no request it lists every request: its name, the right it needs, and what it does.
+`NAME` is the request's name alone, without quotes; capitals don't matter, and
+`hide-floats` is `HideFloats`.
 
 ```
 Float: Lifts a pane out of the layout to float, or moves one that floats. The rectangle is in fractions of the tab.
@@ -3502,14 +3101,14 @@ Example:  isc api '{"Float":{"pane":3,"rect":{"x":0.5,"y":0.1,"w":0.45,"h":0.8}}
 Answers:  "Done"
 ```
 
-- `--json` gives the same as data: `name`, `needs`, `says`, `fields` (each with `name`,
-  `is`, `optional` and `defaulted`), `example` and `answers`.
+- `--json` gives `name`, `needs`, `says`, `fields` (each with `name`, `is`, `optional` and
+  `defaulted`), `example` and `answers`.
 - `isc api '"?"'` fails and lists the names. So does piping in an empty standard input.
 
 ### Events
 
 `isc events` prints what happens, one JSON object per line. Each has an `event` and
-usually a `pane`. Pipe it into a script to react to your panes.
+usually a `pane`. It ends if you stop reading for long enough; run it again.
 
 | `event` | Other fields |
 |---|---|
@@ -3522,8 +3121,8 @@ usually a `pane`. Pipe it into a script to react to your panes.
 | `activate` | You picked the pane from a notification |
 | `did` | `did` (what was asked, such as `mute` or `close`), `revision`, and `by`: the `client`'s number, its `kind`, its `name` and its `pane`. It has no `pane` of its own |
 
-`did` is printed after a client changed something: opened, closed, moved, named, muted,
-put to sleep, changed a daemon setting, or stopped it. It says who:
+`did` is printed after a client opened, closed, moved, named, muted, put to sleep, changed
+a daemon setting, or stopped something. It says who:
 
 ```json
 {"event":"did","did":"mute","revision":41,"by":{"client":12,"kind":"command-line","name":"desk","pane":null}}
@@ -3532,76 +3131,63 @@ put to sleep, changed a daemon setting, or stopped it. It says who:
 `by.pane` is the pane the command was run in, when the daemon could check that, and null
 otherwise. Looking, typing and refused requests aren't reported.
 
-
-
-`isc events` ends if you stop reading for long enough; run it again.
-
 ### Who is connected
 
-`isc clients` shows who is connected to the daemon, so you can see who can do what.
+`isc clients` shows who is connected to the daemon.
 
 ```
 session:12  desk · App  0.7.0  look,type,arrange,manage  6 connections  pid 4121  looking at pane:3  for 512s
 session:31  kitchen tablet · Browser  0.7.0  look,type  2 connections  pid 3990  through `isc proxy` (claimed, not verified)  for 40s
 ```
 
-Each line is one session: a window, a browser, `isc tui`, or the hub's notifications.
-A window holds a connection for each pane it shows, one for its notifications and one
-for itself, and they're all one session. A line has the session's number, the machine
-it's on (or a browser's device) and what it is, its version, what its connections can
-do between them, how many there are, the process at the other end of the socket, the
-pane it's looking at, and how long it's been connected.
+Each line is one session: a window, a browser, `isc tui`, or the hub's notifications. It
+has the session's number, the machine it's on (or a browser's device) and what it is, its
+version, what its connections can do between them, how many there are, the process at the
+other end of the socket, the pane it's looking at, and how long it's been connected.
 
-- A command you run, and a program in a pane, aren't listed. They come and go too often
-  to be worth a line, and nothing is told when they do.
+- A command you run, and a program in a pane, aren't listed.
 - A guest's browser, paired with `isc hub device add --only`, shows what it's kept to:
   `only project 4` or `only pane:12`.
-- `isc clients --json` prints all of it, with each session's `scope` (`{"project": 4}`,
-  `{"pane": 12}`, or `null` for one that sees everything) and its `connections`.
+- `isc clients --json` adds each session's `scope` (`{"project": 4}`, `{"pane": 12}`, or
+  `null` for one that sees everything) and its `connections`.
 
 **Putting a session off.** `isc disconnect 12` (or `session:12`) ends every connection of
-that session and tells it you ended it: a window's panes and its notifications go with
-it, and it connects again only when you press Enter in it. It needs the right to
-`manage`, and you can't end your own. With `--host NAME` it acts on that machine's
-server.
+that session: a window's panes and notifications go with it, and it connects again only
+when you press Enter in it. It needs the right to `manage`, and you can't end your own.
+With `--host NAME` it acts on that machine's server.
 
-- Each browser is a session of its own, named by its device: two browsers paired as
-  the same device are two lines. Putting one off doesn't unpair it. To keep it out,
-  remove its device with `isc hub device rm`, which ends all its sessions.
+- Each browser is a session of its own, named by its device: two browsers paired as the
+  same device are two lines. Putting one off doesn't unpair it. To keep it out, remove its
+  device with `isc hub device rm`, which ends all its sessions.
 
 **Rights.** A connection has up to four:
 
 | Right | Lets it |
 |---|---|
 | `look` | See projects, tabs and panes, each pane's screen and history, what programs use, who is connected, a directory's names, the daemon's settings (with `notify-url` and `notify-command` cut short), how the last notification sent outward went, and agents' hooks |
-| `type` | Type and paste into a pane, set the size it's shown at, report a state or a notification for it, and count as you: what it looks at is seen |
+| `type` | Type and paste into a pane, set the size it's shown at, and report a state or a notification for it |
 | `arrange` | Open a pane with any command, close, split, move, float, focus, name, mute, put to sleep and wake, and choose icons |
 | `manage` | Stop the daemon, change its settings, add or remove agents' hooks, and send a test notification outward |
 
-You get all four unless you ask for fewer. `--rights`, before any command, asks for fewer:
+You get all four unless you ask for fewer with `--rights`, before any command:
 
 ```sh
 isc --rights look ls
 isc --rights look,type attach 3
 ```
 
-- A command that needs a right the connection wasn't given is refused, and says which:
-  "this connection was not given the right to arrange, which `close` needs. Its rights are:
-  look". Typing without the right to type is dropped, silently.
-- `look` reads everything: every screen and its history, with any password, key or token a
-  program printed there. It runs and changes nothing.
-- `type`, `arrange` and `manage` each let a client run programs as you. `type` types into
-  your shell. `arrange` opens a pane with any command, so it needs no `type` to run one.
-  `manage` changes what the daemon runs: your shell, the command it tells you with, agents'
-  hooks. Give any of them only to what you'd give your account.
+- A command that needs a right the connection wasn't given is refused, and says which.
+  Typing without the right to type is dropped, silently.
+- `look` reads everything on every screen, including any password, key or token a program
+  printed there. It changes nothing.
+- `type`, `arrange` and `manage` each let a client run programs as you. `arrange` opens a
+  pane with any command, so it needs no `type` to run one. `manage` changes what the daemon
+  runs. Give any of them only to what you'd give your account.
 
 ### Attaching from a terminal
 
 `isc attach [PANE]` shows a pane in the terminal you run it in and sends what you type to
-it. Press `Ctrl+]` to leave.
-
-
-You reach a pane on another machine the same way:
+it. Press `Ctrl+]` to leave. You reach a pane on another machine the same way:
 
 ```sh
 ssh build-host isc attach 3
@@ -3619,14 +3205,13 @@ and the daemon there opens nothing to the network.
 
 You need two things:
 
-- **`ssh` to that machine asks nothing.** insensical runs `ssh` where nobody can answer,
-  so use a key (loaded in your agent if it has a passphrase) and connect once by hand to
-  accept the host's key. If `ssh build true` prints nothing and asks nothing, you're set.
-- **`isc` is there, in the same version as here.** `isc host put` brings it there
-  (see "Putting insensical on a machine" below). Or install it there yourself with the
-  one-line install, which takes a version: see [Installing](#installing). `~/.local/bin`,
-  `/usr/local/bin` and Homebrew's `bin` are looked in even when a shell started by `ssh`
-  doesn't.
+- **`ssh` to that machine asks nothing.** Use a key (loaded in your agent if it has a
+  passphrase) and connect once by hand to accept the host's key. If `ssh build true`
+  prints nothing and asks nothing, you're set.
+- **`isc` is there, in the same version as here.** `isc host put` brings it there. Or
+  install it there yourself with the one-line install, which takes a version: see
+  [Installing](#installing). `~/.local/bin`, `/usr/local/bin` and Homebrew's `bin` are
+  looked in even when a shell started by `ssh` doesn't.
 
 Name the machine once, then check it:
 
@@ -3638,21 +3223,14 @@ isc host check build
 The second word is whatever you'd give `ssh`: a host, `user@host`, or a `Host` from your
 `~/.ssh/config`. Your ssh configuration, keys, agent and jump hosts all apply.
 
-| Command | Does |
-|---|---|
-| `isc host add NAME WHERE` | Names a machine. Takes `--color`, `--icon` and `--careful`, and `--no-node` (see below) |
-| `isc host check NAME` | Meets the machine, prints four lines, changes nothing and starts nothing. It fails unless the machine is ready to use |
-| `isc host ls [--json]` | Lists the machines you've named, with where `ssh` goes and what's set on each |
-| `isc host set NAME` | Changes a named machine. `--color`, `--icon`, `--careful` set; `--no-color`, `--no-icon`, `--no-careful` clear; `--ssh` changes where `ssh` goes; `--name NEW` renames. Only what you give changes |
-| `isc host rm NAME` | Forgets a machine. Nothing changes on it |
-| `isc host put NAME` | Brings this version of `isc` to a machine: see below |
-| `isc host restart NAME` | Restarts the server there: see "What it doesn't do" |
-| `isc host answer NAME` | Lets `ssh` ask you what it has to ask: see "When `ssh` has a question" |
+`isc host check NAME` meets the machine, prints four lines, changes nothing and starts
+nothing. It fails unless the machine is ready to use. The other `isc host` commands are in
+[every isc command](#isc-commands).
 
 A name may use ASCII letters and digits and `.` `-` `_` `+` `@` `:` `%` `[` `]`, with
 `ssh://` before it if you like (`ssh://me@build:2222`). Anything else is refused, in the
-settings file too: it's listed among the settings' problems and never tried. A `Host` in
-your ssh configuration with other characters isn't offered; give it a second name there.
+settings file too. A `Host` in your ssh configuration with other characters isn't offered;
+give it a second name there.
 
 `isc host check` prints four lines:
 
@@ -3664,49 +3242,43 @@ your ssh configuration with other characters isn't offered; give it a second nam
 ```
 
 They say whether `ssh` got there and how long a round trip takes, whether insensical is
-there in a version that works with this one, whether its server (the daemon) is running,
-and what's open there. `✓` is a line that holds and `✗` one that doesn't, with what to do
-about it underneath. Lines after a failure aren't tried and are marked `·`. `→` marks what
-`isc host put` can put right. No server running yet isn't a failure: the first command
-that needs one starts it.
+there in a version that works with this one, whether its server is running, and what's open
+there. `✓` holds and `✗` doesn't, with what to do about it underneath. Lines after a
+failure aren't tried and are marked `·`. `→` marks what `isc host put` can put right. No
+server running yet isn't a failure: the first command that needs one starts it.
 
-The names are lines under `[hosts]` in your settings file, which you can write yourself:
-`build = "me@build.example.com"`. A machine can also carry a colour, an icon and a mark
-that it's one to be careful on:
+The names are lines under `[hosts]` in your settings file: `build = "me@build.example.com"`.
+A machine can also carry a colour, an icon and a mark that it's one to be careful on:
 
 ```toml
 build = { ssh = "me@build.example.com", color = "teal", icon = "server", careful = true }
 ```
 
 - `color` is `#rrggbb` or one of `blue`, `green`, `orange`, `purple`, `pink`, `teal`,
-  `gold`, `grey`, `rust` and `indigo`. With none set, a machine gets one of those ten from
-  its name, the same every time.
+  `gold`, `grey`, `rust` and `indigo`. With none set, a machine gets one from its name.
 - `icon` is one of `server`, `laptop`, `desktop`, `mini`, `nas`, `board`, `phone`,
-  `container` and `cloud`. Any other word is left in the file, and the machine is shown as a
-  server.
-- A machine of your tailnet that `isc host add` found there also keeps its node: `build =
-  { ssh = "me@build", node = "nABC123CNTRL" }`. See "A machine of your tailnet" below.
+  `container` and `cloud`. Any other word shows as a server.
+- A tailnet machine that `isc host add` found also keeps its node: `build = { ssh =
+  "me@build", node = "nABC123CNTRL" }`. See "A machine of your tailnet" below.
 
 **Putting insensical on a machine.** If a machine has no `isc`, or an older one,
 `isc host put build` brings it to this version, never to a newer one: the two must match
 exactly. It says which way it went.
 
 - **An `isc` there that can update itself is asked to.** It runs `isc upgrade --version`
-  with this version, so the machine downloads that release itself and checks its signature.
-  That works on a Mac too. If the machine can't reach GitHub, a Linux machine gets a copy
-  of `isc` from here instead, and you're told.
+  with this version, downloading that release itself and checking its signature. That works
+  on a Mac too. If the machine can't reach GitHub, a Linux machine gets a copy of `isc` from
+  here instead, and you're told.
 - **An `isc` that a package or Homebrew owns** isn't touched. You get the command that
   updates it, to run there.
 - **A machine with no `isc`, or one from before `isc upgrade --check --json`,** gets a copy
-  of `isc` in `~/.local/bin`, no sudo. That works on x86-64 and arm64 Linux. On a Mac you're
-  given the line to run there yourself.
-
-- A server already running there is left running, on the older version. You're told what a
-  restart would come to. `--restart-server` does it, as does a yes to a second question at a
-  terminal, or `isc host restart build` afterwards. A server that can move to the new
-  version keeps everything in its panes. One that can't is stopped and started, which ends
-  what runs in its panes, and you're told how many panes first. A server asked to move that
-  can't refuses and runs on.
+  in `~/.local/bin`, no sudo. That works on x86-64 and arm64 Linux. On a Mac you're given
+  the line to run there yourself.
+- A server already running there is left running, on the older version, and you're told
+  what a restart would come to. `--restart-server` does it, as does a yes to a second
+  question at a terminal, or `isc host restart build` afterwards. A server that can move to
+  the new version keeps everything in its panes. One that can't is stopped and started,
+  which ends what runs in its panes, and you're told how many panes first.
 
 Then put `--host` before any command:
 
@@ -3719,22 +3291,21 @@ isc --host build
 
 The last one is the whole interface, in this terminal, on that machine's projects.
 
-- **From inside the interface you can go to another machine without leaving.** "Go to a
-  machine" in the palette lists this computer and every machine you've named. Each is tried
-  while you look and says `reached` with the version of `isc` there, or `not reached`; mark
-  that one and the line below says why. `Enter` shows the marked machine's projects. While
-  another machine is shown, its name stands at the left of the top row. One machine is shown
+- **From inside the interface**, "Go to a machine" in the palette lists this computer and
+  every machine you've named, each tried while you look as `reached` (with its `isc`
+  version) or `not reached`; mark one and the line below says why. `Enter` shows the marked
+  machine's projects, and its name stands at the left of the top row. One machine is shown
   at a time, and what runs on the others runs on. A machine that can't be reached leaves you
   where you were, with a notice.
 - `INSENSICAL_HOST=build` in a shell does the same for every command you run there, except
   the ones that end something: `isc kill-server`, `isc close`, `isc tab close`, `isc project
   close` and `isc project sleep`. With only the variable set, those are refused and say
-  which machine it names. Add `--host build` to the command to act there.
-- What belongs to that machine is that machine's. The file finder lists its files. A new
-  project's directory is a directory there, and `~` is your home there. A project's drawing
-  is kept by the daemon there. `isc --host build integrate` sets up the agents there, and
-  `isc --host build config set` changes the daemon's settings there: see [section
-  11](#11-agents) and [section 15](#15-settings-and-themes).
+  which machine it names. Add `--host build` to act there.
+- What belongs to that machine is that machine's: its files in the file finder, a new
+  project's directory (`~` is your home there), a project's drawing. `isc --host build
+  integrate` sets up the agents there, and `isc --host build config set` changes the
+  daemon's settings there: see [section 11](#11-agents) and [section
+  15](#15-settings-and-themes).
 
 **When the machine can't be reached.** A machine that has sent nothing for four seconds is
 given up on. A command says "the link to the other machine was lost" and ends. Nothing
@@ -3743,18 +3314,16 @@ window](#other-machines-in-the-window).
 
 The interface dims your panes and puts a small card over them: "build is out of reach",
 how long ago it was last heard once that's over ten seconds, and the key to leave. It
-tries again after a second, then two, then four, up to every thirty seconds, with no key
-pressed, and shows your panes again when the machine answers. Any key tries at once.
-Nothing there was touched, and no daemon is started on this machine in its place.
+tries again after a second, then two, then four, up to every thirty seconds, and shows your
+panes again when the machine answers. Any key tries at once. Nothing there was touched.
 
-If the machine won't let you in any more, because `ssh` would ask for a password or
-doesn't know the machine's key, the interface tries once and stops, since a machine that
-counts failed logins might lock you out. It says what `ssh` needs. Put that right, then
-press a key.
+If `ssh` would ask for a password or doesn't know the machine's key, the interface tries
+once and stops, since a machine that counts failed logins might lock you out. It says what
+`ssh` needs. Put that right, then press a key.
 
 **Typing on a far machine.** When the round trip takes 70 milliseconds or more, a letter
 you type is drawn at once, a little fainter than the rest, and turns to its usual colour
-when the program shows it. Your keys still go to the program at once, unchanged.
+when the program shows it. Your keys still go to the program at once.
 
 - `type-ahead = "off"` turns it off. `"on"` draws ahead over any link to another machine,
   however quick. A pane on this machine never has it.
@@ -3772,8 +3341,7 @@ isc host add nas me@100.64.0.7
 isc host add office me@10.8.0.2
 ```
 
-With Tailscale SSH there's no key to set up; the rule is the same, `ssh build true` must
-ask nothing.
+With Tailscale SSH there's no key to set up; `ssh build true` must still ask nothing.
 
 **A machine of your tailnet.** A name on a tailnet stops working when the machine or the
 tailnet is renamed, or when this computer doesn't use the tailnet's DNS. The machine's
@@ -3784,20 +3352,19 @@ is written beside it, and it's dialled at its address:
 isc host add build me@build
 ```
 
-- `--no-node` keeps it as typed. So does a name your ssh configuration gives a machine,
-  which leads where your configuration says. The window's `Add Remote Host` dialog keeps the
-  node of a machine you choose under `Tailscale` or type by its tailnet name, and changing a
-  machine's address in the settings sheet looks for its node as `isc host set build --ssh
-  me@build` does.
+- `--no-node` keeps it as typed. So does a name your ssh configuration gives a machine.
+  The window's `Add Remote Host` dialog keeps the node of a machine you choose under
+  `Tailscale` or type by its tailnet name, and changing a machine's address in the settings
+  sheet looks for its node as `isc host set build --ssh me@build` does.
 
 **When `ssh` has a question.** A link is made by `ssh` told to ask nothing, so each thing
-it would have asked is a machine that isn't reached. Each has its own words:
+it would have asked is a machine that isn't reached:
 
 | It says | What happened | What to do |
 |---|---|---|
 | `ssh hasn't met build before` | `ssh` has no host key for it yet | `isc host answer build`, and say yes once you've compared the fingerprint |
-| `build's host key is not the one ssh has for it` | The key changed. A machine set up again does this, and so does another machine standing in its place | Find out why first. When you're sure, `ssh-keygen -R build` forgets the old key |
-| `ssh needs your key or password for build` | It wants a key, a passphrase or a password | `isc host answer build` shows what it asks. A key in your agent (`ssh-add`) or on the machine (`ssh-copy-id`) lets it in without asking |
+| `build's host key is not the one ssh has for it` | The key changed: a machine set up again, or another machine in its place | Find out why first. When you're sure, `ssh-keygen -R build` forgets the old key |
+| `ssh needs your key or password for build` | It wants a key, a passphrase or a password | `isc host answer build` shows what it asks. A key in your agent (`ssh-add`) or on the machine (`ssh-copy-id`) lets it in |
 | `Tailscale wants you to sign in again before it lets ssh through` | The tailnet's rules ask for a fresh sign-in | `isc host answer build` shows the link to sign in at |
 | `Tailscale's rules don't let you in as root on build` | The tailnet's access rules refuse that user, or you | Whoever looks after the tailnet changes its rules |
 | `build is off` | Tailscale says it isn't online | Turn it on, or start Tailscale there |
@@ -3806,31 +3373,29 @@ it would have asked is a machine that isn't reached. Each has its own words:
 `isc host check` prints `ssh`'s own last line under these, after `` `ssh` said: ``.
 
 `isc host answer build` runs your own `ssh` to the machine at your terminal, free to ask,
-running nothing there but `true`. You see `ssh`'s real question and answer it yourself;
-insensical doesn't read, keep or pass on what you type. Then it meets the machine and
-prints the four lines. It needs a terminal and succeeds only if the machine was then
-reached. For a machine you haven't named, give it where `ssh` goes: `isc host answer
-me@build`. In the window, the `Answer` button runs it for you in a new tab on this
-computer, and in the interface in a terminal `a` does in "Go to a machine".
-
+running nothing there but `true`. You answer `ssh`'s real question yourself; insensical
+doesn't read, keep or pass on what you type. Then it meets the machine and prints the four
+lines. It needs a terminal and succeeds only if the machine was then reached. For a machine
+you haven't named, give it where `ssh` goes: `isc host answer me@build`. In the window, the
+`Answer` button runs it for you in a new tab, and in the interface in a terminal `a` does in
+"Go to a machine".
 
 **What it doesn't do:**
 
 - **A link can't ask you anything.** A host that wants a password, a passphrase or a yes
   to its key is refused, with what to do about it.
-- **The two versions must match** (the same protocol and terminal engine, which `isc
-  version` prints). If they don't, you're told which machine has which. `isc host put` puts
-  this version on the other machine. If the other machine's is newer, update this one.
+- **The two versions must match** (`isc version` prints them). If they don't, you're told
+  which machine has which. `isc host put` puts this version on the other machine. If the
+  other machine's is newer, update this one.
 - **`--host` is for `isc` and the interface in a terminal.** The window shows every
   machine you've named at once: see [Other machines in the
   window](#other-machines-in-the-window).
 - **Some commands are about this machine only**, and say so if you give them a host:
   `daemon`, `proxy`, `restart-server` and `host`. To restart the server elsewhere, use `isc
-  host restart build`: it meets the machine, tells you what a restart comes to, and asks. If
-  the server there already runs the installed insensical, it says so and restarts nothing.
-  Don't run `ssh build isc restart-server`: a shell started by `ssh` often can't find the
-  server. `isc --host build kill-server` asks the daemon there to stop, and can't signal one
-  that doesn't answer.
+  host restart build`: it tells you what a restart comes to, and asks. If the server there
+  already runs the installed insensical, it restarts nothing. Don't run `ssh build isc
+  restart-server`: a shell started by `ssh` often can't find the server. `isc --host build
+  kill-server` asks the daemon there to stop, and can't signal one that doesn't answer.
 - **`config` reaches the daemon's settings there and no others.** A setting of the
   interface, such as `theme`, is read from this machine's file, and `isc --host build config
   set theme paper` is refused. Leave `--host` out for those.
@@ -3840,7 +3405,6 @@ computer, and in the interface in a terminal `a` does in "Go to a machine".
   path does](#web-addresses-and-paths).
 - `INSENSICAL_SSH` names a program to run in place of `ssh`, given the same arguments.
   `INSENSICAL_TAILSCALE` does the same for `tailscale`.
-
 ### In a browser
 
 `isc hub` lets you use insensical from a phone, a tablet, or a laptop with nothing
@@ -3848,9 +3412,8 @@ installed. On a phone it opens on what needs you, with each agent's question and
 answer it, and it can notify you when you're away. On a wide screen it's the sidebar and
 the tab in front. Anywhere, you can open a pane, read it, scroll back, and type into it.
 
-It's a separate program that runs only when you ask for it (you start it, join a hub, or
-turn it on), and a client of the daemon like the window. The daemon still listens
-on nothing but its socket.
+It's a separate program that runs only when you ask for it, and a client of the daemon like
+the window. The daemon still listens on nothing but its socket.
 
 ### Starting isc hub
 
@@ -3861,8 +3424,8 @@ isc hub setup
 ```
 
 1. **Hub or join.** Choose whether this computer is the hub, where your browsers and
-   phones go, or joins a hub you already have. A computer that's already joined says which
-   hub and skips to step 3. `isc hub leave` makes it a hub of its own again.
+   phones go, or joins a hub you already have. A computer that's already joined skips to
+   step 3. `isc hub leave` makes it a hub of its own again.
 2. **Reach** (the hub). Choose how you'll reach this computer: Tailscale, a name of your
    own behind your proxy, an ssh tunnel, or this computer only. A proxy name must be
    `https://`, since a browser can't pair over plain `http://`.
@@ -3873,10 +3436,9 @@ isc hub setup
    scrollback. A joined computer dials the hub, so there's no Reach step.
 3. **Keep running.** Where systemd runs for your user, choose whether the hub starts after
    a restart. **Yes** is `isc hub start`.
-4. **Add a device.** **Yes** opens the form that asks what to call your phone and shows
-   the code to scan. On a joined computer, the code pairs at the hub's address.
-5. **Done.** It shows the address, who's paired, and the plain commands that do the same
-   without the guide. The summary stays on your screen. The line you pasted isn't in it.
+4. **Add a device.** **Yes** opens the form that shows the code to scan. On a joined
+   computer, the code pairs at the hub's address.
+5. **Done.** It shows the address, who's paired, and the plain commands that do the same.
 
 `Enter` goes on, `Shift`+`Tab` goes back, and `Esc` leaves. Nothing changes until you
 choose a way in step 2 or press `Enter` on the line. The guide needs a terminal; in a
@@ -3890,24 +3452,21 @@ isc hub
 
 It listens at `http://127.0.0.1:7433`, this machine only. `--port 8000` picks another
 port. It runs until `Ctrl`+`C` or `isc hub stop`, which also stops the window starting it
-again. In a terminal, `isc hub` tells you that `Ctrl`+`C` stops it and that `isc hub
-start` keeps it running in the background, and says so when it stops.
+again.
 
 `isc hub status` says whether it's running, where, and what keeps it running (systemd,
-launchd, the window or a terminal). If it's an older version than the installed one, it says so and that
-`isc hub restart` moves it. On a joined machine it names the hub and whether it's
-connected. `--json` adds `owner` (`systemd`, `launchd`, `window` or `terminal`), `version` and
+launchd, the window or a terminal). If it's older than the installed version, `isc hub
+restart` moves it. On a joined machine it names the hub and whether it's connected.
+`--json` adds `owner` (`systemd`, `launchd`, `window` or `terminal`), `version` and
 `installed`, and a `tailscale` object with `state`, `address` and `serves_port`; a joined
 machine's leaves out `door`, `tailscale` and `members`, and `devices` counts its guests.
-A second `isc hub` or `start` that finds one running says where and what keeps it. On a
-Mac, status also says the hub keeps the Mac awake while it's on power.
+On a Mac, status also says the hub keeps the Mac awake while it's on power.
 
 The hub keeps what you start it with. `--name`, `--port`, `--listen`, `--tls-cert` with
-`--tls-key`, `--guest-port` and `--guest-name` each replace the one it kept, and the next
-`isc hub` uses them, however it's started. What you leave out stays as it was. `--name ''`
-takes the names away, and so does `--guest-name ''`; `--listen ''` and `--tls-cert ''
---tls-key ''` go back to this machine alone, unencrypted. A value it can't run with is
-refused, and nothing changes.
+`--tls-key`, `--guest-port` and `--guest-name` each replace the one it kept; what you leave
+out stays. `--name ''` and `--guest-name ''` take the names away; `--listen ''` and
+`--tls-cert '' --tls-key ''` go back to this machine alone, unencrypted. A value it can't
+run with is refused, and nothing changes.
 
 To turn it on and keep it running:
 
@@ -3915,17 +3474,12 @@ To turn it on and keep it running:
 isc hub start
 ```
 
-It takes the same options as `isc hub`. With systemd for your user, it switches
-`insensical-hub.service` on (writing one for the `isc` you ran if none is installed), and
-the hub comes back after you log in. On a Mac, launchd keeps it running: it comes back
-after you log in, and if it ends without `isc hub stop`. Without either, it starts the hub
-on its own in the background, keeps what the hub says when it fails in `hub.log`, and
-starts it again when you open the window. If the hub is already running, `start` says so,
-or, if you gave other options, starts it again with them and then keeps it running. A
-service file `start` wrote for another `isc`, such as a build you've since removed, is
-written again for this one, and one that hides the service installed with insensical is
-taken away. `isc hub stop` stops it now and turns it off: the service is switched off,
-launchd lets it go, and the window doesn't start it again.
+It takes the same options. With systemd for your user, or launchd on a Mac, the service
+keeps it running: see **Keep it running** under [Reaching isc hub from another
+device](#reaching-isc-hub-from-another-device). Without either, it starts the hub in the
+background, keeps its failure messages in `hub.log`, and starts it again when you open the
+window. If the hub is already running, `start` says so, or, if you gave other
+options, starts it again with them. `isc hub stop` stops it now and turns it off.
 
 To change a setting while it runs, or just to start it again:
 
@@ -3933,14 +3487,10 @@ To change a setting while it runs, or just to start it again:
 isc hub restart --name desk.example.ts.net
 ```
 
-It takes the same options. The hub starts again as the installed `isc`, on the port it
-has, and says what changed. The port stays held the whole time, so no connection is
-turned away. Your devices reconnect by themselves. If the hub can't start with what you
-gave, say a port something else holds, it starts again as it was, keeps its settings, and
-`restart` tells you why. `start` on a hub that's off does the same: it starts with the
-settings it kept and writes nothing new. It works however the hub
-was started: in a terminal, by a service or by the window. A hub from before it could
-start itself again is stopped and started again where it was started from.
+It takes the same options and works however the hub was started. No connection is turned
+away, and your devices reconnect by themselves. If the hub can't start with what you gave,
+say a port something else holds, it starts again as it was and `restart` tells you why.
+`start` on a hub that's off does the same.
 
 **Open it in your browser on this computer**
 
@@ -3954,9 +3504,9 @@ device. Run it again for another address for the same device; removing the devic
 out every browser paired this way.
 
 The address works once, for 10 minutes, and only for a request from this machine that asks
-for `127.0.0.1`, `localhost` or `[::1]`. From anywhere else it's refused and not used up,
-so a leaked link is no use off this computer. A port forward of yours that ends here (`ssh
--L`) does pass, so keep the address to yourself.
+for `127.0.0.1`, `localhost` or `[::1]`. From anywhere else it's refused and not used up.
+A port forward of yours that ends here (`ssh -L`) does pass, so keep the address to
+yourself.
 
 - `--print` prints the address and how long it works, and opens nothing.
 - `--json` prints `{"url": …, "code": …, "until": …}` and opens nothing. `until` is in
@@ -3985,12 +3535,11 @@ From a shell:
 isc hub device add --name phone
 ```
 
-In a terminal you can leave the name out and get the same form. Anything on the command
-line, such as `--rights look`, is where the form starts. With `--name`, with `--json`, or
-with no terminal, it prints the code: the link on one line and the letters on the next.
-`--json` gives `url`, `code` (the same link) and `typed`. `--url
-https://desk.example.ts.net` prints the address and code for a name other than this
-machine's own.
+In a terminal you can leave the name out and get the same form; anything else on the
+command line, such as `--rights look`, is where the form starts. With `--name`, `--json`,
+or no terminal, it prints the link on one line and the letters on the next. `--json` gives
+`url`, `code` (the same link) and `typed`. `--url https://desk.example.ts.net` prints the
+address and code for a name other than this machine's own.
 
 **Icon and colour.** A device has an icon (phone, tablet, laptop, desktop or browser) and
 a colour (blue, green, orange, purple, pink, teal, gold, grey, rust or indigo). Add a
@@ -4026,8 +3575,8 @@ code for good. `isc hub device ls --json` gives each device's `code` as `open`, 
 `closed` or `expired`.
 
 **When a program in a pane asks.** An agent in a pane could otherwise make itself a phone
-that types anywhere and keep it after it's gone. So when one of these runs inside an
-insensical pane, you're asked first:
+that types anywhere. So when one of these runs inside an insensical pane, you're asked
+first:
 
 - `isc hub device add`, `isc hub device pair-again`, `isc hub device set --far`
 - `isc hub open`
@@ -4036,8 +3585,7 @@ insensical pane, you're asked first:
 The window, or `isc tui` in a terminal of its own, shows the question over everything,
 naming the pane and its program. The command waits.
 
-- **Allow**, or `A`, lets it go on. For the first second neither choice counts, so a key
-  meant for a pane can't allow anything.
+- **Allow**, or `A`, lets it go on. For the first second neither choice counts.
 - **Deny**, `Enter` or `Esc` stops it. So does not answering within two minutes.
 - Only the window and an `isc tui` outside insensical's panes can answer. A program in a
   pane can't, and a browser never is asked.
@@ -4047,39 +3595,35 @@ naming the pane and its program. The command waits.
   **Add a Device** on the Hub page, or a terminal outside insensical.
 
 **Typing the code on the page.** Case, spaces and dashes don't matter, and `I`, `L` and
-`O` are read as `1`, `1` and `0`. The field groups letters in fives and counts them.
-Nothing is sent until the code checks, so a typo uses nothing up.
+`O` are read as `1`, `1` and `0`. Nothing is sent until the code checks, so a typo uses
+nothing up.
 
 **Good to know**
 
-- **A browser keeps its own key.** It's known by that key alone, and stays paired through
-  restarts until you press **Forget This Browser** on the page or remove its device. Nothing
-  lapses by itself.
+- **A browser keeps its own key.** It stays paired through restarts until you press
+  **Forget This Browser** on the page or remove its device.
 - **Clearing site data loses the key**, and the browser needs a new code. A browser is
   paired at one address: another name or port is a different browser.
 - **A plain-HTTP address can't pair.** A browser gives keys only to a page over HTTPS, or
   at `localhost` or `127.0.0.1`. Use an `https://` address (Tailscale gives one) or an ssh
   tunnel.
 - **If another server answers later at the same address with a different key**, the page
-  says so and stops. This guards against a swapped server, not against the one that served
-  the page.
+  says so and stops.
 - **One device can pair several browsers.** `isc hub device ls` shows each device, what it
   may do, when it was last used, how its code stands, when the device ends, and its paired
   browsers.
 - **Scan the Code** on the page opens the camera, where the browser may use one.
-- **A home-screen app is a browser of its own.** On an iPhone, the page you add to the
-  home screen doesn't share Safari's pairing, so Safari hands it one: press **Add** where
-  the page offers the home screen, and it becomes a device of its own, named after yours,
-  as in `iPhone · home screen`. It may do what yours may and ends when yours does. Its code
-  works once, for 10 minutes, and counts among the devices added from pages. If nothing
-  paired by then, the device is removed and Safari offers the home screen again. A guest's
-  page doesn't hand over: a guest's app pairs by a link of its own. Your computer
-  tells you it was added, `isc hub device ls` lists it beside yours, and you remove or ban
-  each apart. If the app still asks to pair, give it a code of its own and scan with
-  **Scan the Code** in the app, not the Camera app, which would open Safari and use the
-  code up.
+- **A home-screen app is a browser of its own.** On an iPhone, the app you add to the home
+  screen doesn't share Safari's pairing, so Safari hands it one: press **Add** where the
+  page offers the home screen, and it becomes a device of its own, named after yours, as in
+  `iPhone · home screen`. It may do what yours may and ends when yours does. Its code works
+  once, for 10 minutes, and counts among the devices added from pages. If nothing paired by
+  then, the device is removed and Safari offers the home screen again. A guest's app pairs
+  by a link of its own. You remove or ban each apart. If the app still asks to pair, give
+  it a code of its own and scan with **Scan the Code** in the app, not the Camera app,
+  which would open Safari and use the code up.
 - **A paired browser opened at a link with a code** says it's already paired. The code
-  isn't used and still pairs the device it was meant for.
+  isn't used.
 
 ### What a device may do
 
@@ -4102,13 +3646,13 @@ The second code pairs up to two browsers in the next hour. Rights are set on the
 `isc hub --rights look` is refused.
 
 A device with only `look` can read every pane and its history, and can't type, resize or
-change anything. The daemon refuses, so a page somebody wrote themselves gets no further.
-It doesn't count as you looking: a pane open in that browser still notifies you. See [Who
-is connected](#who-is-connected). `isc clients` lists a browser under its device's name,
-as in `kitchen tablet · Browser`.
+change anything. The daemon refuses, so a page somebody wrote themselves gets no
+further. It doesn't count as you looking: a pane open in that browser still
+notifies you. See [Who is connected](#who-is-connected). `isc clients` lists a browser
+under its device's name, as in `kitchen tablet · Browser`.
 
 **Make a device that ends by itself.** To pair a co-worker's or client's browser for a
-while without having to remove it:
+while:
 
 ```
 isc hub device add --name client --rights look --stays 1d
@@ -4166,11 +3710,8 @@ While something is shared, its sidebar row and the header of each terminal a gue
 carry a small sign: an eye where guests look, a keyboard where one can type. The same
 button lists who it's shared with. **End** signs one out at once and stops their link, and
 `Share With Someone Else` makes another link. Settings lists every guest on the Hub page.
-
-**Good to know**
-
-- You can share only what's on this computer, not a project on another machine.
-- The window names the guest after what's shared: `api guest`, then `api guest 2`.
+The window names the guest after what's shared: `api guest`, then `api guest 2`. You can
+share only what's on this computer, not a project on another machine.
 
 ### Sharing with someone who isn't on your network
 
@@ -4185,9 +3726,12 @@ on`). Then it shows the public link and its QR code. Whoever opens the link firs
 and it works once. Don't post it where others can read it.
 
 - **What it exposes.** The address is Tailscale's, made by Tailscale Funnel on port 8443
-  of this computer's Tailscale name. Anyone on the internet can reach its sign-in page. Only
-  someone with a link you made gets past it, and only to look at what you shared. Nothing of
-  insensical's own listens on the internet.
+  of this computer's Tailscale name. Anyone on the internet can reach its sign-in page. The
+  address shows up in public lists of certificates and gets scanned. A stranger gets the
+  page and nothing else. Only someone with a link you made gets past it, and only to look at
+  what you shared. Nothing of insensical's own listens on the internet, and nobody of ours
+  is in between. Your own devices don't work at that address at all: a lost phone or leaked
+  code of yours is worth nothing there.
 - **If it can't be opened, the dialog says why** and offers the fix: `How to Install`,
   `Sign In`, or `Turn On Funnel`. If Tailscale already serves something else on port 8443,
   it's left as it is. If a step fails, the guest it made is removed.
@@ -4195,9 +3739,8 @@ and it works once. Don't post it where others can read it.
   amber in the bar, at the sidebar's foot, or over the window's corner. Press it to see
   what's shared, each with `End`.
 - **To close it**, press the sign and then `Close Public Link`, or press `Close` on the
-  `Public link` row of the Hub page. That's `isc hub public off`: every public guest is
-  signed out and Tailscale no longer leads to this computer. Ending the last public guest
-  closes it too.
+  `Public link` row of the Hub page. That's `isc hub public off`, as below. While the window
+  is open, it also closes the link when the last public guest ends.
 
 **Share from the command line**
 
@@ -4225,9 +3768,8 @@ everything the terminal has shown, including what was printed before you shared 
 renames anything, and never changes a setting.
 
 **What a guest never gets.** Notifications, the Settings screen, the list of devices, and
-making a device, one for their home-screen app included: on an iPhone that app needs a
-link of its own. A guest looking at a terminal doesn't mark it seen, so you're still
-notified.
+making a device, one for their home-screen app included. A guest looking at a terminal
+doesn't mark it seen, so you're still notified.
 
 > [!WARNING]
 > A guest who can type has your account. Someone who can type in a terminal can read your
@@ -4247,21 +3789,19 @@ notified.
 - **Give it an end** with `--stays 1h`, `1d` or `7d`. Without it a guest stays until you
   remove it.
 - **To end it now**, `isc hub device rm sam`. If you close the terminal or project
-  instead, the guest has nothing left to see, and the device stays paired to nothing until
-  it ends or you remove it.
+  instead, the guest has nothing left to see, and the device stays until it ends or you
+  remove it.
 - **Pane numbers come from one counter**, so a new terminal's number tells a guest roughly
   how many terminals you've opened in all. Never what they are.
-- **A share ends if insensical's saved state is lost or can't be read.** Numbers start
-  again from one, so every guest device then stops working and shows as `ended` in `isc hub
-  device ls`. Remove it and make a new one. A device made by an earlier version of `isc hub`
-  ends this way too.
+- **A share ends if insensical's saved state is lost or can't be read.** Every guest device
+  then stops working and shows as `ended` in `isc hub device ls`. Remove it and make a new
+  one.
 - **A guest's page** has a bar across the top saying what they are and when the share
   ends. Under it is what you shared and nothing else, with no Home, Settings, bell or
   notifications. They see each terminal at the size and colours you have it, and can still
   scroll, find, copy, and change the letter size on their own screen. **Leave** is in the
   menu at the end of the bar.
-- **When it's over**, because you closed what they saw, removed the device, or time is up,
-  their page says so and to ask for a new link.
+- **When it's over**, their page says so and to ask for a new link.
 
 **Share from the command line to someone outside your network.** Add `--public`, then open
 the address:
@@ -4280,16 +3820,13 @@ whoever has the link. Read these limits first.
 - **It ends within a week.** `--stays` is required and is 7 days at most. The link pairs
   one browser, for ten minutes, unless you say `--uses 2` or `--expires 1h`. `--uses any`
   and `--expires never` are refused.
-- **Anyone can reach the sign-in page.** The address shows up in public lists of
-  certificates and gets scanned. A stranger gets the page and nothing else. Only the link
-  gets in, and only to what you shared.
 - **The address is Tailscale's.** `isc hub public on` asks your own Tailscale to open it
-  with Funnel, at `https://your-machine.your-tailnet.ts.net:8443`. Nothing of insensical's
-  own listens on the internet, and nobody of ours is in between. Your own devices don't work
-  at that address at all: a lost phone or leaked code of yours is worth nothing there.
+  with Funnel, at `https://your-machine.your-tailnet.ts.net:8443`. Anyone can reach its
+  sign-in page; see **What it exposes** above.
 - **Close it with one command.** `isc hub public off` removes every public device, signs
   them out, and takes the address away. `isc hub device rm sam` ends one. When the last one
-  ends the address stays with Tailscale until you run `off`. If Tailscale won't close it,
+  ends, an open window closes the address; with no window open it stays with Tailscale until you
+  run `off`. If Tailscale won't close it,
   `off` still removes the devices, says what Tailscale said, and fails, so you know to run
   it again.
 
@@ -4301,12 +3838,12 @@ reads everything through it, the link included. `isc hub device ls` marks these 
 `public`.
 
 **Check a public address.** `isc hub public status` says whether the address is open and
-for which devices, open with nothing shared (close it with `isc hub public off`), closed,
-not known because Tailscale isn't answering, or held under a name this computer no longer
-has. It succeeds when the address is open and fails otherwise, so a script can ask.
-`--json` always succeeds and has `state`, `open` (null when Tailscale can't be asked),
-`address`, `port`, `leads_to`, `devices` (each with `name` and `ends`), `record` and
-`record_without_device`. `isc hub status --json` carries the same under `door`.
+for which devices, open with nothing shared, closed, not known because Tailscale isn't
+answering, or held under a name this computer no longer has. It succeeds when the address
+is open and fails otherwise, so a script can ask. `--json` always succeeds and has `state`,
+`open` (null when Tailscale can't be asked), `address`, `port`, `leads_to`, `devices` (each
+with `name` and `ends`), `record` and `record_without_device`. `isc hub status --json`
+carries the same under `door`.
 
 ### Your other machines, through this computer
 
@@ -4343,19 +3880,17 @@ The second and third give it to a device that's already paired, and take it back
 **What the page shows.** On such a device the page lists your other machines too:
 
 - **Each machine is a heading over its projects.** This computer is first, then the others
-  in the order your settings have them. A device without `--far`, and a guest, see nothing
-  about other machines.
-- **The page connects to every machine on its own.** What needs you isn't sorted by where
-  it runs, so you don't open a machine to see it. Connecting never starts anything there.
-- **The arrow on a heading only hides its rows.** The machine stays connected and counted,
-  and the browser remembers which you folded.
+  in the order your settings have them. A device without `--far`, and a guest, see
+  nothing about other machines.
+- **The page connects to every machine on its own**, so what needs you isn't sorted by
+  where it runs. Connecting never starts anything there.
+- **The arrow on a heading only hides its rows.** The machine stays connected and counted.
 - **If a machine's server isn't running**, its heading says so. If the device may arrange,
-  a **Start** button starts the server there. Nothing else does.
+  a **Start** button starts it.
 - **Home and the counts cover every machine.** Each card says which machine it's on, and
   an answer goes to that machine. A machine you can't reach shows its heading and why.
 - **A terminal on another machine has a chip** in its header with the machine's icon and
-  name. No chip means this computer. What you type goes only to the terminal you're looking
-  at.
+  name. No chip means this computer.
 - **An address names the machine.** `?pane=3&at=atlas` is terminal 3 on `atlas`. A
   notification about another machine's terminal opens that machine and lands on the card.
 - **Devices**, **Add a Device** and the settings on the page are this computer's. You
@@ -4364,19 +3899,18 @@ The second and third give it to a device that's already paired, and take it back
 **When a machine has a problem**
 
 - **Out of reach.** The machine's heading says so, its terminals dim, and what you type
-  there isn't sent. This computer's terminals carry on. The page keeps trying and the
-  machine comes back by itself.
+  there isn't sent. The page keeps trying and the machine comes back by itself.
 - **Needs a password.** `ssh` would ask for a password or passphrase, so nothing retries
   by itself. Fix it as "When the machine can't be reached" says under [Other machines, over
   ssh](#other-machines-over-ssh), then press **Try again** under the machine's heading.
-- **Another version.** The page says once which side is older and stops dialling. Run
-  `isc upgrade` on the older one, then `isc restart-server` there, then press **Try again**.
+- **Another version.** Run `isc upgrade` on the older side, then `isc restart-server`
+  there, then press **Try again**.
 - **Not connected, "the insensical running on" your computer "is older".** The daemon there
   is older than the hub that serves the page. Run `isc restart-server` on that computer.
 - **Closed: it sent what no machine sends.** That machine sent something no insensical
   sends, or listed more than 4,096 terminals, tabs or projects. The page closes it and shows
-  nothing of it, so it can't pass for another of your machines. Fold it and open it again to
-  try once more. If it says so again, don't trust that machine until you know why.
+  nothing of it. Fold it and open it again to try once more. If it says so again, don't
+  trust that machine until you know why.
 - What `ssh` said is shown as one line of at most 300 characters. It can include your user
   name and the machine's address.
 
@@ -4392,35 +3926,34 @@ and the server refuses if they ask. It covers the computer `isc hub` runs on.
 - **Notifications on your devices** lists the browsers that asked for them. **Send a
   Test** says for each whether its push service took it.
 - **Alerts when away** sets where the server tells you when nobody is looking: ntfy (a
-  server, a topic, and a token if your server needs one) or another web address. It has a
-  switch for only when you're away, a test, and under More options the rest, including a
-  command.
-- **Connected now** says what is connected and what it may do. Each row names the
-  machine first, then what it is: `arch · App`, `arch · Terminal`. A browser is named by
-  its device, as in `kitchen tablet · Browser`. Commands and programs in panes aren't
-  listed. **Disconnect** ends one with all its connections, as `isc disconnect` does. This
-  page's own row has no button, and neither has **Hub notifications**, which is how the
-  hub tells your phone.
+  server, a topic, and a token if your server needs one) or another web address. Turn off
+  **Alert Me Only When I'm Away** to be alerted every time. It has a test, and under
+  **More Options** the rest, including a command.
+- **Connected now** says what is connected, what it may do and when it connected
+  (`connected 1h ago`), each row naming the machine first: `arch · App`, `arch · Terminal`,
+  `kitchen tablet · Browser`. **Disconnect** asks first, then ends one with all its
+  connections, as `isc disconnect` does. This page's own row has no button, and neither has
+  **Hub notifications**, which is how the hub tells your phone.
 
 Nothing else of the server's settings can be changed from the page. The page is never
 given a token or password back, only its last few characters, and **Clear** takes it out.
-An address is shown shortened, to its host and the first part of its path, and can't be
-edited as shown: **Change** empties the field so you can type the whole address.
+An address is shown shortened: **Change** empties the field so you can type the whole
+address.
 
 **Add a device from the page**
 
 1. Press **Add a Device**.
 2. Enter a name and choose what it may do: everything, look and type, or only look.
 3. Choose how long it **Stays paired**: until you remove it, 1 hour, 1 day or 7 days.
-   Under More options, set how many devices the code pairs and for how long.
+   Under More Options, set how many devices the code pairs and for how long.
 4. Press **Add**. You get a code to scan and the link, which is this page's own address,
    so a phone on the same network or tailnet can open it.
 
 A device you add sees every terminal on this computer unless you change **What it sees**
 to **One project** or **One terminal** and pick which. The device is then a guest: see
 [Sharing one project or one terminal](#sharing-one-project-or-one-terminal). A guest can
-**Look** or **Look and type**. It starts on Look, ending in 1 day. **Add** stays dim for
-Look and type until you press **Let Them Type**.
+**Look** or **Look and Type**. It starts on Look, ending in 1 day. **Add** stays dim for
+Look and Type until you press **Let Them Type**.
 
 Limits when adding from a page:
 
@@ -4433,8 +3966,7 @@ Limits when adding from a page:
 **The device list.** The device this page is paired as comes first, marked "this device".
 Each row shows what it may do (for a guest, what it sees, marked "guest"), when it was
 last used, how many browsers it paired, and how long its code or the device itself has
-left. A device that ends is gone from the list when its time is up, and a page paired as
-it is signed out.
+left. A device that ends is gone from the list, and a page paired as it is signed out.
 
 **Pair Again** shows a new code for a device. **Remove** asks once and then ends it at
 once, like `isc hub device rm`. On the device this page is paired as, it signs this page
@@ -4443,11 +3975,10 @@ out.
 On these screens a choice of two shows both side by side: tap one, or use `Left` and
 `Right`. A choice of more opens a list: tap it or press `Space`, `Enter` or an arrow key,
 then pick, or press `Esc` to close it without choosing.
-
 ### Reaching isc hub from another device
 
-`isc hub` listens on this machine only, so a phone needs a way in. `isc hub setup` offers
-these ways and sets up the one you choose. Or use one you already trust.
+`isc hub` listens on this machine only. `isc hub setup` offers the ways below and sets up
+the one you choose.
 
 **ssh**
 
@@ -4465,34 +3996,24 @@ isc hub tailscale on
 ```
 
 This starts `isc hub` if it isn't running, has it answer to this computer's Tailscale
-name, and has Tailscale serve it on port 443 of that name, to the devices on your tailnet.
-It prints the address, such as `https://desk.example.ts.net`. If no device is paired yet,
-it ends with `isc hub device add --name phone`.
-
-It starts the hub as `isc hub start` does, then says what happens after a restart. With
-`insensical-hub.service` on, the service starts again when you log in, or with the
-computer where lingering is on. On a Mac, launchd starts it again when you log in. Without
-either, the window starts the hub again when you open it.
+name, and has Tailscale serve it on port 443 of that name, to your tailnet. It prints the
+address, such as `https://desk.example.ts.net`. If no device is paired yet, it ends with
+`isc hub device add --name phone`. It also says what happens after a restart; see **Keep it running** below.
 
 If Tailscale isn't installed, isn't signed in, or isn't answering, it says which and
 changes nothing. If Tailscale already serves something else on port 443, it says what and
-leaves it alone. The one exception is a mapping to a port that nothing answers on, such as
-`tailscale serve 7443` typed while `isc hub` is on 7433: that gives a 502, so it's
-replaced.
+leaves it alone, except a mapping to a port nothing answers on (a 502), which it replaces.
 
-| Command | What it does |
-|---|---|
-| `isc hub tailscale on` | Sets it up, as above |
-| `isc hub tailscale off` | Takes away the mapping `on` made, and nothing else of Tailscale's. A mapping you made by hand is left |
-| `isc hub tailscale status` | Says whether Tailscale serves `isc hub` and at what address, or why it doesn't. Ends with 0 only when `isc hub` is served |
+`isc hub tailscale off` takes away the mapping `on` made, and nothing else of Tailscale's.
+`isc hub tailscale status` ends with 0 only when `isc hub` is served.
 
 `--json` always ends with 0 and has `state` (`on`, `off`, `absent`, `signed out`,
 `silent`, `taken` or `mismatch`), `address`, and `serves_port`. It's the same as the
-Tailscale switch on the Hub page of the settings, and the two see each other's work.
+Tailscale switch on the Hub page of the settings.
 
-To do it by hand, `tailscale serve 7433` gives the machine an `https` address inside your
-tailnet. Start `isc hub` with that name, `isc hub --name desk.example.ts.net`, and add the
-device with `--url` and that address.
+By hand: `tailscale serve 7433` gives the machine an `https` address inside your tailnet.
+Start `isc hub --name desk.example.ts.net`, and add the device with `--url` and that
+address.
 
 **Keep it running**
 
@@ -4509,34 +4030,28 @@ your user, it does only what's missing, in this order:
 2. Switches the service on and starts it. A hub running on its own is restarted from the
    service with the same settings and port.
 3. If your user's services don't run with nobody logged in, runs `loginctl enable-linger`
-   for you. If you aren't allowed to, the service is still on and it tells you to run `sudo
-   loginctl enable-linger NAME` to start with the computer.
+   for you. If you aren't allowed to, it tells you to run `sudo loginctl enable-linger
+   NAME`.
 
-Run again with everything in place, it changes nothing and says so. The service runs a
-plain `isc hub`: the settings come from the file the hub keeps.
+Run again with everything in place, it changes nothing. The service runs a plain
+`isc hub`, which uses the settings the hub keeps. Change them with
+`isc hub restart --name desk.example.ts.net`, not in the unit. A package installs the unit
+but turns nothing on; `systemctl --user enable --now insensical-hub` does.
 
-On a Mac, it writes `~/Library/LaunchAgents/com.insensical.hub.plist`, running the `isc`
-you ran, and hands it to launchd. launchd starts the hub now, again each time you log in,
-and again if it ends any way but by `isc hub stop`, such as by crashing. A hub running on
-its own is started again by launchd, with the same settings and port. What the hub says
-goes to `~/Library/Logs/insensical/hub.log`. If the window used to start your hub, the
-next time it does, launchd takes over.
-
-With no one logged in to the Mac's screen, such as over `ssh` before anyone has, there's no
-session for launchd to keep the hub in. Then, as without systemd on Linux, it starts `isc
-hub` on its own in the background and remembers that you asked, so opening the window
-starts it again. What the hub prints on its error line is added to `hub.log`.
+On a Mac, it writes `~/Library/LaunchAgents/com.insensical.hub.plist` and hands it to
+launchd, which starts the hub now, at each login, and again if it ends any way but by
+`isc hub stop`. The log is `~/Library/Logs/insensical/hub.log`. With no one logged in to
+the Mac's screen, such as over `ssh` before anyone has, it starts `isc hub` in the
+background instead and remembers that you asked, so opening the window starts it again.
 
 | Command | What it does |
 |---|---|
-| `isc hub stop` | Stops the hub now and turns it off: the service is switched off, and the window doesn't start it again. A service file is left for the next `start`. On a Mac, launchd lets the hub go and the file in `~/Library/LaunchAgents` is removed. Lingering is left as it is: `loginctl disable-linger` is yours to run |
+| `isc hub stop` | Stops the hub now and turns it off: the service is switched off, and the window doesn't start it again. A service file is left for the next `start`; on a Mac the file in `~/Library/LaunchAgents` is removed. Lingering is left as it is: `loginctl disable-linger` is yours to run |
 
-A Mac goes to sleep a few seconds after its display turns off, and a Mac that's asleep
-can't be reached. So while `isc hub` runs and the Mac is on power, it keeps the Mac awake:
-your devices, and the hub it's joined to, still reach it with the display off. The display
-still sleeps. On battery, the Mac sleeps as it always does. Activity Monitor's Energy tab
-and `pmset -g assertions` show it as `isc`. If macOS refuses, `isc hub` says so as it starts
-and runs anyway.
+While `isc hub` runs and the Mac is on power, it keeps the Mac awake (the display still
+sleeps), since a sleeping Mac can't be reached. On battery the Mac sleeps as usual.
+Activity Monitor's Energy tab and `pmset -g assertions` show it as `isc`. If macOS refuses,
+`isc hub` says so and runs anyway.
 
 **Headscale, or a proxy of your own.** Point it at `127.0.0.1:7433`, with your own
 certificate. It has to speak TLS to the browser, pass the `Host` and `Origin` headers on
@@ -4544,25 +4059,23 @@ as they came, and pass WebSockets. Start `isc hub` with `--name` and the name th
 will ask for.
 
 **A public address, for a guest.** `isc hub public on` has Tailscale Funnel open one, to a
-second door that `isc hub` keeps at `127.0.0.1:7434` (`--guest-port` changes the port).
-That door is on this machine only, always. It's open only while a device made with
-`--public` exists, lets in only those devices, and they can only look. It answers to the
-names you give with `--guest-name` and to `127.0.0.1`, not to `--name`'s names or
-`localhost`. `--guest-port` can't be the port `isc hub` itself listens on. A key paired at
-one door is nobody at the other. See [Sharing one project or one
+second door that `isc hub` keeps at `127.0.0.1:7434` (`--guest-port` changes the port, but
+not to the port `isc hub` itself listens on). That door is on this machine only, always.
+It's open only while a device made with `--public` exists, lets in only those devices, and
+they can only look. It answers to the names you give with `--guest-name` and to
+`127.0.0.1`, not to `--name`'s names or `localhost`. A key paired at one door is nobody at
+the other. See [Sharing one project or one
 terminal](#sharing-one-project-or-one-terminal).
 
 **What the hub accepts.** `isc hub` answers only to names it knows are its own: this
 machine's addresses, `localhost`, and each `--name` you give it. Asked by any other name
-it gives nothing, not even the page. That keeps another site's page from reaching it under
-a name of that site's making.
+it gives nothing, not even the page. That keeps another site's page from reaching it.
 
 It won't listen anywhere else without encryption. `--listen 0.0.0.0` is refused unless you
 also give `--tls-cert` and `--tls-key`, a certificate and its key as PEM files. With those
 it speaks `https` only.
 
-- Over `ssh -L`, the browser's address is plain `http` and `ssh` does the encrypting. Over
-  Tailscale, Tailscale does.
+- Over `ssh -L`, `ssh` does the encrypting. Over Tailscale, Tailscale does.
 - **Other accounts on this machine can reach the port**, where they can't reach the
   daemon's socket. Without a device's key they get the page and nothing else.
 
@@ -4580,7 +4093,7 @@ failed, then finished. To answer one:
 
 | Under the card | What it does |
 |---|---|
-| `Enter`, `y`, `n`, `1`, `2`, `3`, `Esc` | Each sends that key and nothing else. They're the same on every card, so read the pane's foot to see which key means what. |
+| `Enter`, `y`, `n`, `1`, `2`, `3`, `Esc` | Each sends that key and nothing else, the same on every card. |
 | The line | Type or dictate, then press the arrow. It's sent as typed, then `Enter`. |
 | Password field | Hides what you type, with `Enter` and `Esc`. |
 | **Open the pane**, **Seen** | For a pane that only failed or finished. |
@@ -4588,32 +4101,30 @@ failed, then finished. To answer one:
 With nothing waiting, the top says **All quiet**.
 
 Under the cards, each machine has a section with a card per project, lit if it needs you.
-Tap a card to open the place most worth looking at: the pane that needs you, else the one
-at work, else the pane you used last.
+Tap a card to open the pane that needs you, else the one at work, else the one you used
+last.
 
 **Everything**, at the bottom, lists every project, tab and pane as the window's sidebar
-does. Every project starts folded, one you add later too; unfold the ones you work in and
-your browser keeps them unfolded. The switch over its foot narrows it to **Activity**: only panes at work or with
-something for you, kept quiet by the rules in "Showing only activity" under [The
-sidebar](#the-sidebar). Your browser remembers the choice.
+does. Projects start folded; your browser keeps the ones you unfold. The switch over its
+foot narrows it to **Activity**: only panes at work or with something for you, by the rules
+in "Showing only activity" under [The sidebar](#the-sidebar). Your browser remembers the
+choice.
 
-The number on the title, on **Home** and on the switch is how many panes need you: waiting
-and failed. Finished panes are counted beside it, never in it. The page's tab and the
-home-screen icon's badge show the same number.
+The number on the title, on **Home** and on the switch counts panes that need you: waiting
+and failed, not finished. The page's tab and the home-screen icon's badge show it too.
 
 ### A pane in the browser
 
 Tap a pane to open it at your screen's width. Tap it again for the keyboard.
 
-- **Scroll back** by sliding down at the top. More history arrives each time you reach the
-  top.
+- **Scroll back** by sliding down at the top. More history arrives each time you reach it.
 - **Resize the letters** by pinching.
 - **Copy** by holding a finger on a word, dragging to select more, and pressing **Copy**.
   **Copy everything**, under `…`, copies all the pane holds.
 - **Search** with **Find**, under `…`.
 - **Open a web address** by tapping it. A sheet shows where it really leads, with **Open**
-  and **Copy**, since a pane's words can say one thing and lead to another. Only `http` and
-  `https` open. With a mouse, hold `Ctrl` (`⌘` on a Mac) and click.
+  and **Copy**. Only `http` and `https` open. With a mouse, hold `Ctrl` (`⌘` on a Mac) and
+  click.
 - **With a keyboard**, `Ctrl+Shift+C` copies what you've selected with the mouse and
   `Ctrl+Shift+V` pastes (`⌘C` and `⌘V` on a Mac).
 
@@ -4628,13 +4139,12 @@ hold for the next key. The pencil opens a line you can type or dictate into, sen
 2. Wait for the ring to fill. **Cancel** on the card drops a file.
 3. Type your question and press `Enter` yourself.
 
-Each file is kept on the pane's machine, in the pane's directory, in
-`.insensical-uploads`, and its path is typed at the cursor, as `isc upload` does, so an
-agent there can read it. A file can be 50 MB at most.
+Each file (50 MB at most) is kept on the pane's machine, in `.insensical-uploads` in the
+pane's directory, and its path is typed at the cursor with a space after it, as `isc upload` does.
 
 **Fit panes to your screen.** The button beside `…` (also **Give the size back** under
 `…`) switches whether the pane has your screen's size. Leaving the pane gives the size
-back. **Fit panes as they open**, in the page's menu, is the same choice, and the browser
+back. **Fit panes as they open**, in the page's menu, makes it the default; the browser
 remembers it.
 
 When the machine is far, what you type is drawn at once, a little fainter, until the
@@ -4658,18 +4168,16 @@ a tab with its panes where its layout puts them, each one live.
 
 A device that may arrange can also drag the border between two panes (`Escape` while you
 hold it puts it back), or drag a pane by its header onto another: in the middle the two
-swap, near a side the pane takes that half, and a word says which. On a touch screen, hold
-the header first. Nothing is split, closed or renamed from a browser.
+swap, near a side the pane takes that half. On a touch screen, hold the header first.
+Nothing is split, closed or renamed from a browser.
 
 **Text Size**, in the menu under your device's tile, changes the letters of every pane in
 this browser: `−` and `+` move it a pixel, between 9 and 28, and **Reset** goes back to
-the window's size (a phone's own 14). Pinching on a phone changes the same size. The
-window and other browsers keep their own.
+the window's size (a phone's own 14). Pinching changes the same size.
 
-**Fonts.** Nerd Font signs come from an icon font the page brings. At a desk, letters use
-your `font-family` and `font-size` settings. A browser on another machine without that
-font uses the first of `JetBrains Mono`, `Cascadia Mono`, `SF Mono`, `Menlo`, `Roboto
-Mono`, `Consolas`, `Liberation Mono` and `DejaVu Sans Mono` that it has.
+**Fonts.** Letters use your `font-family` and `font-size` settings. A browser on another
+machine without that font uses the first of `JetBrains Mono`, `Cascadia Mono`, `SF Mono`,
+`Menlo`, `Roboto Mono`, `Consolas`, `Liberation Mono` and `DejaVu Sans Mono` that it has.
 
 ### Adding the page to your home screen
 
@@ -4682,20 +4190,17 @@ From the home screen the page opens full screen, like an app.
 2. Open the page from the new icon. On an iPhone it pairs itself by that code, once.
 
 On an iPhone the app has storage of its own, so it's a device of its own: see "A
-home-screen app is a browser of its own" under [In a browser](#in-a-browser). Safari never
-uses the code, and keeps it in the address while you look around first. A code nobody
-used ends after 10 minutes, with its device, and Safari offers the home screen again.
+home-screen app is a browser of its own" under [In a browser](#in-a-browser). A code
+nobody used ends after 10 minutes, with its device, and Safari offers the home screen
+again.
 
-**After you update insensical**, the page updates itself the next time you open it, and
-nothing needs clearing. If you're typing when a newer page is ready, **Reload** takes you
-to it.
+**After you update insensical**, the page updates itself the next time you open it. If
+you're typing when a newer page is ready, **Reload** takes you to it.
 
-`isc hub`, which serves the page, follows your daemon to a new version once you've
-restarted the server: the next time a browser connects, or as soon as the server is back
-if the hub was listening to it for notifications. A joined machine always is while it's
-connected to its hub, so it follows with nobody opening a page there. It keeps its port,
-so paired devices and the Tailscale mapping carry on, and a joined machine dials its hub
-again. Until it has, the page says **Not connected**; `isc hub restart` does it by hand.
+`isc hub` follows your daemon to a new version once you've restarted the server, keeping
+its port, so paired devices and the Tailscale mapping carry on. A joined machine dials its
+hub again. Until it has, the page says **Not connected**; `isc hub restart` does it by
+hand.
 
 The phone keeps no copy of the page, so it doesn't open while the server can't be reached.
 
@@ -4742,8 +4247,7 @@ address on port 443 whose name resolves to public addresses, and follows no redi
 | Command | What it does |
 |---|---|
 | `isc hub push ls` | Lists the browsers that get notifications, and marks the ones that hear your other machines. With `--json`, each names its device as `device`. |
-| `isc hub push test` | Sends a test to each and prints what each service answered. |
-| `isc hub push test --at NAME` | Sends one as from that machine, to the browsers that hear of it. |
+| `isc hub push test --at NAME` | Sends a test as from that machine, to the browsers that hear of it. |
 
 **Your device's tile**, at the top right, opens **This browser**, laid out like a phone's
 own settings. It has:
@@ -4752,8 +4256,10 @@ own settings. It has:
 - **Theme**: the eight that come with insensical. Left alone, the page follows your
   system: `fjord` when it's dark and `paper` when it's light.
 - **Notifications** and **Fit Panes as They Open**, as switches.
-- **Text Size**, and the machines this browser reaches.
-- **Settings**, for a device that may manage.
+- **Text Size**, which changes the terminals in this browser only.
+- **Machines**: each machine this browser reaches and whether it's online. The hub's own
+  machine is tagged **Hub**.
+- **Settings on desk** (your computer's name), for a device that may manage.
 - **Forget This Browser**.
 
 ### When the link drops
@@ -4765,12 +4271,9 @@ itself, then says **Connected**. You can still scroll back, select and copy mean
 **Nothing you type blind reaches an agent.** What you type arrives within a couple of
 seconds or never, and nothing is kept to send later. An answer you press on a card while
 the link is lost isn't sent: the card says **Not sent** and stays unanswered, so read the
-question again and answer then. A line you wrote stays in its field. If you pressed a key
-just before the link dropped, the card stops saying **Sent**; when the link is back it's
-gone if your answer arrived and still there if not.
-
-A change from a page known by its key (removing a device, a setting) that arrives late
-isn't made, and the page tells you to try again.
+question again and answer then. A line you wrote stays in its field. A change from a page
+known by its key (removing a device, a setting) that arrives late isn't made, and the page
+tells you to try again.
 
 If the page says the link is lost on a link that works:
 
@@ -4791,16 +4294,12 @@ when the address opens. A device that only looks never marks a pane as seen.
 
 ### Running isc hub all the time
 
-On Linux a package installs a user unit for it, which nothing turns on:
+`isc hub start` keeps it running: see **Keep it running** above. On Linux, a package
+installs a user unit that nothing turns on:
 
 ```
 systemctl --user enable --now insensical-hub
 ```
-
-`isc hub start` turns it on, writing a unit for you where none is installed. The unit runs
-a plain `isc hub`, which uses the settings the hub keeps. Change them with
-`isc hub restart --name desk.example.ts.net`, not in the unit. On a Mac, `isc hub start`
-has launchd keep it running: see **Keep it running** above.
 
 ### Limits in a browser
 
@@ -4809,8 +4308,6 @@ has launchd keep it running: see **Keep it running** above.
 - **Changes.** You can't open, close, split, minimize or rename anything, and only a
   device with `arrange` moves panes. Settings changes only what [Managing isc hub from the
   page](#managing-isc-hub-from-the-page) lists.
-- **Cards.** The keys under a card are always the same seven. The page never works out an
-  agent's choices for you.
 - **Keys.** The browser keeps `Ctrl+W`, `Ctrl+T`, `Ctrl+N` and the like for itself.
 - **Selecting.** A phone's own selection handles don't appear over a pane. Hold a finger
   still to select.
@@ -4826,9 +4323,9 @@ has launchd keep it running: see **Keep it running** above.
 
 Another computer of yours can join the `isc hub` your browser goes to, and your devices
 then reach it at the hub's address. The joined machine doesn't listen on the network: its
-`isc hub` dials the hub. What a device and that machine say to each other is sealed for the two of
-them, so the hub carries it and can't read it. The exception is notifications, which the
-hub reads, as it reads its own, to tell your devices.
+`isc hub` dials the hub. What a device and that machine say to each other is sealed for the
+two of them, so the hub can't read it. The exception is notifications, which the hub reads,
+as it reads its own, to tell your devices.
 
 **Join a machine to your hub:**
 
@@ -4843,18 +4340,13 @@ hub reads, as it reads its own, to tell your devices.
    minutes.
 
 2. On the other machine, open Settings > Hub, press **Join a Hub** and paste the line. Or
-   run:
-
-   ```
-   isc hub join
-   ```
-
-   and paste the line. It isn't shown as you paste it, and it's never an argument, so it
-   stays out of your shell's history. From a script, give it on standard input.
+   run `isc hub join` and paste the line. It isn't shown as you paste it, and it's never an
+   argument, so it stays out of your shell's history. From a script, give it on standard
+   input.
 
    Devices you'd paired at that machine's own address are removed, and so are its public
-   links, since a joined machine has no guest door. It says how many: your devices reach it
-   through the hub now. Guests you made there stay.
+   links, since a joined machine has no guest door. It says how many. Guests you made there
+   stay.
 
 3. Run `isc hub status` there to see which hub it's joined to and whether it's connected
    (`joined` in `--json`: `address`, `name`, `since`, `connected`).
@@ -4876,10 +4368,6 @@ Good to know:
   `ban`, `unban`, `tailscale on` and `public on`. Run them on the hub, or `isc hub leave` to
   make this machine a hub of its own. `status`, `stop`, `leave`, `rekey`, `device` and
   `push` work as ever.
-- `isc hub leave` tells the hub, which takes the machine off its list at once, and its
-  heading goes from your pages. If the hub can't be reached within a few seconds, the
-  machine leaves all the same and prints the command to run on the hub: `isc hub machine
-  rm` and this machine's id.
 
 **Your devices reach it.** A device paired with the hub reaches every joined machine, with
 what it may do on the hub. There's no code to make on the joined machine. Remove a device
@@ -4889,11 +4377,10 @@ guest, kept to one project or terminal of the hub, reaches no joined machine.
 A joined machine doesn't pair your devices itself: `isc hub device add` there says to pair
 the device with the hub. It can still share one project or terminal of its own with a
 guest, by `isc hub device add --only` or `isc hub open`, and that code is at the hub's
-address. If the hub can't reach this machine, you're told so above the guest's code, since
-it won't work until it can. Either the machine isn't joined any more (the hub was given
-`isc hub machine rm`, or this machine's key changed), so join it again with `isc hub
-invite` and `isc hub join`; or it isn't connected right now, so check that insensical runs
-here and the network.
+address. If the hub can't reach this machine, you're told above the guest's code. Either
+the machine isn't joined any more (the hub was given `isc hub machine rm`, or this
+machine's key changed), so join it again with `isc hub invite` and `isc hub join`; or it
+isn't connected right now, so check that insensical runs here and the network.
 
 **It appears on your page by itself.** A page paired with the hub lists every joined
 machine after the hub's own heading, **online** or **not connected**. Press a heading to
@@ -4902,12 +4389,11 @@ under **Machines**. A machine that's not connected stays in the list, dimmed, an
 once it dials the hub again. One taken away from the hub, or that leaves it, goes from the
 list.
 
-**Notifications from a joined machine.** Turn on **Notifications** in **This browser** on
-a page paired with the hub, and a pane that waits, fails or finishes on any joined machine
-reaches that device, with the machine's name first in the title. The hub reads these
-notifications to post them. A joined machine sends only its own panes' notifications, not
-those of machines it reaches over `ssh`. Its Hub page has no notifications row: the hub
-tells your devices.
+**Notifications from a joined machine.** They reach a device with notifications on, as
+"Who hears what" says under [Notifications on your
+phone](#notifications-on-your-phone). The hub reads these notifications to post them. A
+joined machine sends only its own panes' notifications, not those of machines it reaches
+over `ssh`. Its Hub page has no notifications row.
 
 **Add a device from another device.** A device that may manage a machine can add another
 device by its key, from its page, with no code. The machine decides what the new device
@@ -4920,15 +4406,14 @@ On the page it's **Approve a Device**:
 
 1. On the new device, open the hub's address and press **Already paired a phone? Approve
    from it**. It shows a picture to scan, a link to copy, and three groups of four letters
-   under **This device**. These hold the key the browser just made and nothing secret. **Pair
-   with a Code Instead** goes back to the field.
+   under **This device**. **Pair with a Code Instead** goes back to the field.
 2. On a device that may manage, open **Settings**, then **Your devices**, press **Approve
-   a Device**, and scan the picture or paste the link. The link can't be typed. Anyone can
-   send you a link: approve only for a device you're holding.
+   a Device**, and scan the picture or paste the link. Anyone can send you a link: approve
+   only for a device you're holding.
 3. Under **Check the Device**, look at the new device. If it shows the same three groups,
-   turn on **The same as on the device**; **Approve** stays off until you do. A key someone
+   turn on **The Same as on the Device**; **Approve** stays off until you do. A key someone
    else made shows other groups.
-4. Name it and choose what it may do and how long it stays. **Only look** is chosen first,
+4. Name it and choose what it may do and how long it stays. **Only Look** is chosen first,
    and you're offered only what your own device may do. With machines joined to the hub,
    **On** chooses which one lets it in. If your device reaches your other machines, a switch
    gives the new one that too.
@@ -4946,9 +4431,8 @@ The fourth is refused: add it at the machine with `isc hub device add`.
 |---|---|
 | `isc hub machine ls` | On the hub, lists the joined machines, whether each is connected now (`connected` in `--json`) and when each last dialled. `full` marks a machine that adds no more devices, which usually means it has turned bad. |
 | `isc hub machine rm studio` | Cuts the machine off at once. It joins again only by a new invite. Its id, as `machine ls` shows it, works too. |
-| `isc hub ban ID` | On the hub, carries nothing more for a device, by its id as `isc hub device ls --json` shows it. Each machine still lists it, and the devices it added aren't banned: run `isc hub device rm NAME --with-approved` on each machine. |
-| `isc hub unban ID` | Lifts a ban. |
-| `isc hub leave` | On a joined machine, leaves the hub. The hub takes it off its list at once; if the hub can't be reached, it says what to run there. Its `isc hub` listens again as a hub of its own, and each device pairs again at its own address. |
+| `isc hub ban ID`, `isc hub unban ID` | On the hub, carries nothing more for a device, by its id as `isc hub device ls --json` shows it. Each machine still lists it, and the devices it added aren't banned: run `isc hub device rm NAME --with-approved` on each machine. `unban` lifts a ban. |
+| `isc hub leave` | On a joined machine, leaves the hub. The hub takes it off its list at once. If the hub can't be reached within a few seconds, the machine leaves all the same and prints the command to run on the hub: `isc hub machine rm` and this machine's id. Its `isc hub` listens again as a hub of its own, and each device pairs again at its own address. |
 | `isc hub rekey` | Gives a machine a new key and id, for one whose `hub` folder may have been copied. Each device pairs again. A joined machine leaves its hub too, as `leave` does, and joins again by a new invite. |
 
 **Security.**
@@ -4964,8 +4448,7 @@ The fourth is refused: add it at the machine with `isc hub device add`.
 ### The whole interface in a terminal
 
 Run `isc` with nothing after it and insensical draws in the terminal you're in, with no
-window. It's handy when you'd rather stay in a terminal, on a machine with no desktop, and
-on one you reach over `ssh`:
+window. It's handy on a machine with no desktop, and on one you reach over `ssh`:
 
 ```sh
 ssh build-host -t isc
@@ -4979,8 +4462,7 @@ ssh](#other-machines-over-ssh).
 It's another client of the same daemon: what you do in it shows in a window at once, and
 the other way round. Press `Ctrl+Space` then `D` to leave; nothing ends.
 
-- `isc tui` is the same thing in full. It takes the options `isc` takes before a command:
-  `--host`, `--socket` and `--rights`.
+- `isc tui` is the same thing in full. It takes `--host`, `--socket` and `--rights`.
 - `isc --help` lists the commands. So does `isc` alone where there's no terminal to draw
   in (a script, a pipe) and inside one of insensical's own panes.
 
@@ -5003,9 +4485,8 @@ the other way round. Press `Ctrl+Space` then `D` to leave; nothing ends.
   counts to go to the next pane that needs you.
 - **The list at the left** is your projects, one to a row, each with the state of what
   runs in it.
-- **Each pane is in a box**, with its name and its state at the top, and how long it has
-  needed you. The focused pane's box is in the accent colour, and a waiting one in its
-  waiting colour.
+- **Each pane is in a box**, with its name, its state and how long it has needed you. The
+  focused pane's box is in the accent colour, and a waiting one in its waiting colour.
 - **The line at the foot** says what your keys are doing (`PANE`, `MENU` after the leader,
   `LIST`, `LOCKED`), where the focused pane is, and the keys you'll want most.
 - **The dock**, under the panes, has a pill for each pane you've minimized in the tab.
@@ -5013,11 +4494,9 @@ the other way round. Press `Ctrl+Space` then `D` to leave; nothing ends.
 **Show only activity.** Press `Ctrl+Space` then `Y` (`activity`) to turn the list at the
 left into the panes that are at work or need you, under their projects' names. The same
 key turns it back. It follows the rules in "Showing only activity" under [The
-sidebar](#the-sidebar). Click a row to go to its pane.
-
-`Ctrl+Space` then `}` and `{` walk the rows (`next-activity`, `previous-activity`),
-whether the list is on or not. While it's on, `Ctrl+Space` then `A` goes to the next pane
-that needs you or has finished.
+sidebar](#the-sidebar). Click a row to go to its pane. `Ctrl+Space` then `}` and `{` walk
+the rows (`next-activity`, `previous-activity`), whether the list is on or not. While it's
+on, `Ctrl+Space` then `A` goes to the next pane that needs you or has finished.
 
 **Keys.** Commands follow the leader, `Ctrl+Space`, and the keys after it are those of
 [the leader keymap](#the-leader-keymap): `T` opens a tab, `Shift+S` and `S` split right
@@ -5042,10 +4521,10 @@ lists every key that can follow.
 
 - **The keys are the window's.** Your `keymap`, `leader`, `[keys]`, `[keys.leader]` and
   `[keys.direct]` are read as the window reads them.
-- **The leader always works here**, whichever keymap you use, because your terminal may
-  keep a chord for itself. Your own chords work too where the terminal tells keys apart
-  (Ghostty, kitty, WezTerm, foot and others that speak the Kitty keyboard protocol) and
-  doesn't take the chord first. To free a chord, unbind it in that terminal.
+- **The leader always works here**, whichever keymap you use. Your own chords work too
+  where the terminal tells keys apart (Ghostty, kitty, WezTerm, foot and others that speak
+  the Kitty keyboard protocol) and doesn't take the chord first. To free a chord, unbind it
+  in that terminal.
 - **To get the keys back when locked**, press the leader then `Shift+X`, click `LOCKED` at
   the foot, or press the chord that locks (`Ctrl+Alt+Shift+L` by default).
 - **To stop the interface itself**, send it `SIGTSTP` (`kill -TSTP`) and bring it back
@@ -5061,10 +4540,10 @@ paste, select-all and find, and **Recent**, the last five commands you chose. Th
 commands exist only here and have no default key; give one a key under `[keys.leader]` if
 you use it often.
 
+`rename-project` and `close-project` are here too: see [every key](#keys).
+
 | Palette entry | Command | What it does |
 |---|---|---|
-| Rename this project | `rename-project` | |
-| Close this project and everything in it | `close-project` | |
 | Move this project up / down the list | `move-project-up`, `move-project-down` | Moves it in the list, as dragging its row does. |
 | Move this pane to another tab | `move-to-tab` | Lists every other tab; `Enter` puts the pane at the right of that tab's panes and takes you there. |
 | Choose this project's icon | `project-icon` | See below. |
@@ -5075,8 +4554,8 @@ you use it often.
 1. Open the palette and choose "Choose this project's icon". Colours are across the top
    and marks below.
 2. Type to narrow the marks (`git`, `rust`, `docker`). `Up` and `Down` move through the
-   marks, `Left` and `Right` through the colours. The first colour, "by name", is the one
-   that comes of the project's name.
+   marks, `Left` and `Right` through the colours. The first colour, "by name", comes of the
+   project's name.
 3. Press `Enter` to set it, as `isc project icon` would. `Escape` leaves it as it was.
 
 The first mark is the folder. A project with a drawing of yours (an SVG) shows "Keep your
@@ -5105,7 +4584,8 @@ The palette opens the other two pages directly: "Remote hosts: add, rename or fo
 machine" and "Hub: browsers, phones and devices".
 
 *Settings* lists every setting in sections, and a change is written to your file at once.
-A dot after a name means your file changes it.
+A dot after a name means your file changes it. The mouse works too: click a value to
+choose it or open its list.
 
 | Setting type | Keys |
 |---|---|
@@ -5114,8 +4594,6 @@ A dot after a name means your file changes it.
 | Two values | `Left` takes the first, `Right` the second, `Space` or `Enter` the other. |
 | More values | `Space`, `Enter` or `Right` opens the list; `Up`, `Down`, `Home`, `End` or a letter move; `Enter` or `Space` chooses; `Esc` closes without choosing. |
 | A number | `−` and `+`, or `Left` and `Right`. |
-
-The mouse works too: click a value to choose it or open its list.
 
 *Remote Hosts* lists the machines under `[hosts]`, each tried when you open the page:
 `reached`, `not reached` or `ssh asks`.
@@ -5132,9 +4610,10 @@ The mouse works too: click a value to choose it or open its list.
 has it: see [In a browser](#in-a-browser). With another machine shown, it only says "This
 is set on that computer itself."
 
-- **Open in a browser or on your phone** runs `isc hub start` and `isc hub stop`, and says the address.
-- **Restart the hub**, while it runs, runs `isc hub restart`. If the hub runs an older version
-  than the one installed, it says so.
+- **Open in a browser or on your phone** runs `isc hub start` and `isc hub stop`, and says
+  the address.
+- **Restart the hub**, while it runs, runs `isc hub restart`. If the hub runs an older
+  version than the one installed, it says so.
 - **This computer's browser** opens insensical in the browser here, signed in.
 - **Tailscale** says how it stands. `Enter` turns it on or off, or signs in. Under it are
   the two ways in that need no switch: an `ssh -L` line and a proxy of your own.
@@ -5164,9 +4643,8 @@ terminal you get the address alone and the size it needs.
 panes are empty and what you type reaches nothing, but you don't have to leave: when a
 server runs on that socket again, the card goes and the panes come back, as they were if
 the server kept them: see [What survives what](#what-survives-what). Start one with any
-`isc` command or `isc daemon`; nothing is started for you, since the server may have been
-stopped on purpose. If the server becomes another version (after an update and a restart),
-it says so: leave, and run `isc` again.
+`isc` command or `isc daemon`; nothing is started for you. If the server becomes another
+version, it says so: leave, and run `isc` again.
 
 **The mouse** goes to the pane you press, selects text, scrolls, and drags the edge where
 two panes meet.
@@ -5175,8 +4653,7 @@ two panes meet.
   tab.
 - Press a notice to go to its pane, or its cross to drop it.
 - When a new release is out, a notice says so. Press it to update, read what changed or
-  skip that version, which isn't offered again. In the settings, `c` on "Check for new
-  versions" looks now, and says when it last looked.
+  skip that version. In the settings, `c` on "Check for new versions" looks now.
 - Drag a project's row over another's to move it in the list.
 - Drag a floating pane by the top of its box, and its bottom, right side or corner to
   resize it.
@@ -5203,8 +4680,7 @@ them" in the palette (`lead`).
 - Selecting alone sends your terminal nothing. What you selected is kept here for the
   middle button.
 - Pasting with your terminal's own key always works. The paste command asks the terminal
-  for its clipboard, which many refuse; if yours doesn't answer, a notice says so, and you
-  use the terminal's own key.
+  for its clipboard, which many refuse; if yours doesn't answer, a notice says so.
 - A paste is held and asked about as in the window: see [Pasting](#pasting).
 - A program can put text on your terminal's clipboard only while you're known to be here:
   while your terminal says it has the keyboard, or for a minute after you last pressed a key
@@ -5213,8 +4689,8 @@ them" in the palette (`lead`).
 **Pictures** a program draws with the Kitty graphics protocol are shown where your
 terminal shows them itself: Ghostty, kitty, WezTerm and others that answer when asked. See
 [Pictures](#pictures). A terminal that doesn't answer gets no picture, and inside `tmux`
-or `screen` there are none. A picture is shown whole or not at all: while a list, a
-question, a notice or a floating pane lies over it, it's taken away.
+or `screen` there are none. While a list, a question, a notice or a floating pane lies
+over a picture, it's taken away.
 
 **Notifications.** A pane that needs you says so in a notice at the foot of the list of
 projects, or at the top right of the panes when that list isn't shown. On a machine with
@@ -5226,10 +4702,10 @@ bursts are held back, as [section 12](#12-notifications) says of the application
 
 **Themes.** It uses your insensical theme, the same as the window: the light or dark one
 of a pair, by your terminal's own background. One more theme exists only here, `terminal`,
-which is your terminal's own background, text colour and sixteen colours, so it looks like
-everything else you run there. Choose one in the palette: type `theme`. A theme chosen
-here is the window's too, and the other way round. Only `terminal`, and any theme once
-`[tui]` already names one, are written under `[tui]` for a terminal alone.
+which is your terminal's own background, text colour and sixteen colours. Choose one in the
+palette: type `theme`. A theme chosen here is the window's too, and the other way round.
+Only `terminal`, and any theme once `[tui]` already names one, are written under `[tui]`
+for a terminal alone.
 
 ```toml
 [tui]
@@ -5243,12 +4719,11 @@ theme = "terminal"
 - Put `theme = "terminal"` under `[tui]`, not at the top of the file: the window has no
   terminal to take colours from.
 
-**Settings.** It reads the window's own settings for the theme, the keys and motion; there
-is no second set. Notifications, sounds, scrollback and the rest of what the daemon does
-are the daemon's. A `[tui]` table in `config.toml` can say otherwise for a terminal alone
-about `theme`, `activity-idle`, `interface-style`, `motion`, `attention-glow`,
-`type-ahead`, `clipboard`, `keymap` and `leader`, and holds the two settings only a
-terminal has:
+**Settings.** It reads the window's own settings for the theme, the keys and motion.
+Notifications, sounds, scrollback and the rest of what the daemon does are the daemon's. A
+`[tui]` table in `config.toml` can say otherwise for a terminal alone about `theme`,
+`activity-idle`, `interface-style`, `motion`, `attention-glow`, `type-ahead`, `clipboard`,
+`keymap` and `leader`, and holds the two settings only a terminal has:
 
 ```toml
 [tui]
@@ -5269,9 +4744,10 @@ The settings sheet lists every setting that takes effect here and is set without
 `activity-idle`, `interface-style`, `motion`, `attention-glow`, `keymap`, `notifications`
 and the three `notify-` switches, `long-command`, `sound`, `notify-command-when`,
 `notify-url-when`, `notify-url-body`, `tray`, `scrollback`, `term`, `type-ahead`,
-`clipboard`, `keep-scrollback`, `tmux-shim`, `check-for-updates`, `agents-at-once`, `agents-deep`, `agents-from-other-machines`, and under
-"This terminal", `colours` and `mouse`. `leader`, `shell`, `notify-command`, `notify-url`
-and your own keys are set in the file.
+`clipboard`, `keep-scrollback`, `tmux-shim`, `check-for-updates`, `agents-at-once`,
+`agents-deep`, `agents-from-other-machines`, and under "This terminal", `colours` and
+`mouse`. `leader`, `shell`, `notify-command`, `notify-url` and your own keys are set in the
+file.
 
 **Limits:**
 
@@ -5284,8 +4760,7 @@ and your own keys are set in the file.
   icon, address and `careful` mark.
 - `isc hub open --print`, `isc hub public` and `isc clients` give what the Hub page
   doesn't: a link for this computer's browser, a public link, and who is connected.
-- On a small screen, lists and questions are cut to fit; under 20 columns or 6 rows it
-  says "Needs more room".
+- Under 20 columns or 6 rows it says "Needs more room".
 - A key written as a sign (`?`, `<`) works wherever that sign is on your keyboard. One
   written with `Ctrl` or `Alt` and a sign (`ctrl-}`) is found by where the key is on a US
   keyboard.
@@ -5295,18 +4770,14 @@ and your own keys are set in the file.
 
 ### Other commands
 
-| Command | What it does |
-|---|---|
-| `isc config` | Prints a default settings file. |
-| `isc completions SHELL` | Prints completions for `bash`, `zsh` or `fish`. |
-| `isc version` | Prints this version and the running daemon's, and whether they can talk to each other. When a newer release is out, it says so in one more line. |
-| `isc kill-server` | Stops the daemon and every program it runs, and returns once the daemon is gone. |
-| `isc restart-server [--yes]` | Moves the daemon to this version with everything still running. If no daemon is running, it starts one. If you answer no, everything stays as it is and the command exits with status 1. |
-| `isc upgrade [--version X] [--check [--json]] [--yes]` | Installs the latest release over the copy you're running, after asking. `--check` only says what there is. If a package or Homebrew installed it, it prints the command that updates it instead. See [A new version installed underneath](#a-new-version-installed-underneath). |
+[Every isc command](#isc-commands) is listed in the reference, including `isc config`, `isc completions`, `isc version`, `isc kill-server`, `isc restart-server` and `isc upgrade`. Two things it doesn't say:
 
-**Shell completions.** The packages install
-them for bash, zsh and fish. On a Mac they're also inside the application, in
-`Contents/Resources/completions`. To put them somewhere yourself:
+- `isc restart-server` starts a daemon if none is running. If you answer no, everything stays as it is and the command exits with status 1.
+- `isc upgrade` prints the command that updates insensical if a package or Homebrew installed it: see [A new version installed underneath](#a-new-version-installed-underneath).
+
+**Shell completions.** The packages install them for bash, zsh and fish. On a Mac they're
+also inside the application, in `Contents/Resources/completions`. To put them somewhere
+yourself:
 
 ```sh
 isc completions fish > ~/.config/fish/completions/isc.fish
@@ -5314,28 +4785,25 @@ isc completions zsh > ~/.local/share/zsh/site-functions/_isc    # any directory 
 isc completions bash > ~/.local/share/bash-completion/completions/isc
 ```
 
-Pressing Tab then offers commands and their options, and the session's live panes, tabs
-and projects wherever a command takes one, plus the states `isc status` takes and the
-sides `isc focus` takes. It also offers the devices and machines your hub has (for `isc
-hub device rm`, `isc hub machine rm`, `ban` and `unban`), the names under `[hosts]`, and
-the commands `isc do` runs. A project whose name a shell wouldn't read as one plain word,
-or that another project shares, is offered by its number. A device or machine named that
-way isn't offered.
+Tab then offers commands and their options, the session's live panes, tabs and projects
+wherever a command takes one, the states `isc status` takes, the sides `isc focus` takes,
+the devices and machines your hub has (for `isc hub device rm`, `isc hub machine rm`,
+`ban` and `unban`), the names under `[hosts]`, and the commands `isc do` runs. A project
+whose name a shell wouldn't read as one plain word, or that another project shares, is
+offered by its number. A device or machine named that way isn't offered.
 
-The options `--host`, `--socket` and `--rights` are offered only on commands that take
-them: `isc upgrade` and `isc host` take none of them, and `isc daemon` takes only `--socket`.
+`--host`, `--socket` and `--rights` are offered only on commands that take them: `isc
+upgrade` and `isc host` take none of them, and `isc daemon` takes only `--socket`.
 
-Asking never starts the daemon. If none is running, you still get commands and options. It
-asks the daemon at the default socket or `$INSENSICAL_SOCKET`, not one given with
-`--socket` on the line you're typing. Completions saved from an older version list
-commands only, so print them again.
+Asking never starts the daemon. It asks the daemon at the default socket or
+`$INSENSICAL_SOCKET`, not one given with `--socket` on the line you're typing.
 
 ---
 
 ## 17. Stopping, restarting and new versions
 
-Close the window, update insensical or stop the daemon whenever you like. This section
-tells you what keeps running and what comes back.
+Close the window, update insensical or stop the daemon whenever you like. Here's what keeps
+running and what comes back.
 
 ### What survives what
 
@@ -5349,21 +4817,18 @@ tells you what keeps running and what comes back.
 
 ### After the daemon has been stopped
 
-Your layout is saved to a file whenever it changes: projects, tabs, splits, floats,
-minimized panes, focus, each pane's directory, and names. When the daemon starts, it
-rebuilds all of it. Zoomed, floating, minimized, muted and sleeping things all come back
-as they were.
+Your layout is saved whenever it changes: projects, tabs, splits, floats, minimized panes,
+focus, each pane's directory, and names. When the daemon starts, it rebuilds all of it,
+zoomed, floating, minimized, muted and sleeping things included.
 
-Each pane gets a fresh shell in its directory. If the directory is gone, the shell starts
-in the project's root, or in your home directory. Nothing runs again by itself: a pane
-that was running `nvim` or an agent comes back as a shell, and a program's environment
-isn't kept.
+Each pane gets a fresh shell in its directory, or in the project's root or your home
+directory if that's gone. Nothing runs again by itself: a pane that was running `nvim` or
+an agent comes back as a shell, and a program's environment isn't kept.
 
-Each pane also shows what it showed before, history included, at the same size. A dim
-line, "── from before the server stopped ──", separates it from the new prompt.
+Each pane also shows what it showed before, history included, at the same size. A dim line,
+"── from before the server stopped ──", separates it from the new prompt.
 
-- You can scroll, search and copy it, but it's only the printed text. The programs that
-  printed it are gone.
+- You can scroll, search and copy it, but it's only the printed text.
 - It's written when the daemon is told to stop and when a pane's program ends. A crash or
   power cut keeps the layout but loses the screens.
 
@@ -5374,25 +4839,24 @@ written, and files already there are removed as their panes close.
 **What ran in a pane is offered, not run**
 
 - A pane started with a command, as in `isc run -- npm start`, comes back as a shell with
-  that command typed at the prompt. Press Enter to run it, or edit it first.
-- Only the command the pane started with is offered, not ones you typed in the shell.
+  that command typed at the prompt. Press Enter to run it, or edit it first. Commands you
+  typed in the shell aren't offered.
 - With the Claude Code hooks installed, a pane where Claude was last working gets `claude
   --resume <session>` at the prompt, until you run something else there. Codex, opencode and
   pi are offered their own resume commands (section 11). Gemini CLI isn't.
 
 **A layout file that can't be read**
 
-The daemon sets it aside as `state.json.unreadable`, beside the original, and starts
-empty. That means a file from a version this one can't read, or a damaged one. To go back
-to it, run `isc kill-server`, mend the file, and put it back as `state.json`.
+The daemon sets it aside as `state.json.unreadable`, beside the original, and starts empty.
+That means a file from a version this one can't read, or a damaged one. To go back to it,
+run `isc kill-server`, mend the file, and put it back as `state.json`.
 
 ### A new version installed underneath
 
-insensical looks for a new release once a day. The daemon asks GitHub, a minute after it
-starts and then about every 24 hours, and tells every window and `isc version` what it
-found. The request names only your version and your platform. Nothing else about you or
-your machine is sent. If you're offline, it does nothing and says nothing. To turn the
-daily look off, switch off **Check for updates automatically** on Settings > Hub, or set
+The daemon asks GitHub for a new release a minute after it starts and then about every 24
+hours, and tells every window and `isc version` what it found. The request names only your
+version and platform. If you're offline, it says nothing. To turn the daily look off,
+switch off **Check for updates automatically** on Settings > Hub, or set
 `check-for-updates = false`. Then insensical asks only when you press Check Now or run an
 update yourself.
 
@@ -5402,9 +4866,9 @@ buttons. It's never a desktop notification.
 - **What's New** opens the release notes in your browser.
 - **Update** installs it, as `isc upgrade` does, and then the notice says to restart. If a
   package or Homebrew installed insensical, the button says **How to Update** and shows the
-  command to run, with a copy button. Nothing is installed for you. A copy no release
-  ships, such as a Linux window on arm64 or an Intel Mac, was built from source: How to
-  Update says "This copy was built from source. Build the new version the same way."
+  command to run, with a copy button. A copy no release ships, such as a Linux window on
+  arm64 or an Intel Mac, was built from source: How to Update says "This copy was built from
+  source. Build the new version the same way."
 - **Skip** hides that version in every window. You're told again when a newer one is out.
 
 Settings > Hub says the same in its **Version** row: the version you run, then when the
@@ -5413,16 +4877,16 @@ once, even with the daily look off. **Update** or **How to Update** works as in 
 notice. If a check or an update fails, the row says why in red.
 
 `isc version` prints one more line when a newer release is out, such as `insensical 0.6.0
-is available`, with what's new. If a package or Homebrew installed insensical, it also
-prints the command that updates it, and for a copy built from source, that it's built
-again the same way. No other `isc` command prints this. You can also watch the
-releases' Atom feed on GitHub.
+is available`, with what's new, and the command that updates it if a package or Homebrew
+installed insensical (or, for a copy built from source, that it's built again the same
+way). No other `isc` command prints this. You can also watch the releases' Atom feed on
+GitHub.
 
-`isc upgrade` fetches the latest release and installs it over the copy you're running. It
-checks the download against the release's signed record first, and replaces nothing if
-they differ. If a package or Homebrew installed insensical, it prints the command that
+`isc upgrade` fetches the latest release and installs it over the copy you're running,
+after checking the download against the release's signed record. If they differ, it
+replaces nothing. If a package or Homebrew installed insensical, it prints the command that
 updates it instead. `isc upgrade --check` only says what there is. It never restarts the
-daemon: you move to the new version as below.
+daemon.
 
 Installing replaces files and nothing else. Your daemon and window keep working. The top
 bar says "insensical was updated. Restart to use the new version." `isc version` and `isc
@@ -5440,10 +4904,8 @@ Each one asks first. Press Enter to restart, or Escape to leave everything as it
 no terminal to ask on, `isc restart-server` does nothing unless you pass `--yes`.
 
 Restarting ends nothing. The daemon becomes the installed version in place, with the same
-terminals. Programs, screens and scrollback carry on.
-
-The first move to a version that can do this still ends everything, and the prompt says
-so. After that, updates end nothing.
+terminals, programs, screens and scrollback. The first move to a version that can do this
+still ends everything, and the prompt says so.
 
 **Good to know**
 
@@ -5456,25 +4918,21 @@ so. After that, updates end nothing.
 - If the daemon can't make way, nothing is stopped. The window says "The server did not
   move to the new version" and why. Press Enter to go back. `isc restart-server` prints the
   reason and exits with status 1.
-
-Across a move:
-
-- Windows reconnect by themselves. `isc attach`, `isc events` and `isc wait` end, and you
-  run them again.
+- Across a move, windows reconnect by themselves. `isc attach`, `isc events` and `isc wait`
+  end, and you run them again.
 - With a different terminal engine, screens are redrawn: text, colours, history and cursor
   are kept, a redefined colour isn't.
+- Restarting won't give you a fresh daemon, for instance after it started with the wrong
+  environment. For that, run `isc kill-server`, which ends every program, then run any
+  command or open the window.
 
-Restarting won't give you a fresh daemon, for instance after it started with the wrong
-environment. For that, run `isc kill-server`, which ends every program, then run any
-command or open the window.
-
-**Remote hosts** run exactly your version. When hosts you're connected to run an older
-one, the notice says so, such as "2 remote hosts run 0.5.0", with **Update Them** (**Update
-It** for one) and **Not Now**.
+**Remote hosts** run exactly your version. When hosts you're connected to run an older one,
+the notice says so, such as "2 remote hosts run 0.5.0", with **Update Them** (**Update It**
+for one) and **Not Now**.
 
 - **Update Them** updates each host in turn to this computer's version, never the latest.
-  The notice says how far it's got, such as "Updating agents, 1 of 2", and then how it
-  went. If a host's server would need a restart, its card asks you first.
+  The notice shows progress, such as "Updating agents, 1 of 2", and then how it went. If a
+  host's server would need a restart, its card asks you first.
 - A host where a package or Homebrew installed insensical isn't touched. The notice gives
   the command to run there, with **Copy**.
 - **Not Now** hides the notice until this computer has a new version.
@@ -5506,20 +4964,19 @@ to start one yourself.
 
 ## 18. When something goes wrong
 
-Find what you see, then do what's next to it. Each entry is the symptom, why it happens,
-and the fix.
+Find what you see, then do what's next to it.
 
 ### Starting, stopping and versions
 
 | What you see | Why | What to do |
 |---|---|---|
-| "The insensical server cannot be reached" | No daemon is running and none could be started: `isc` isn't beside the application or on `PATH`, or the socket's directory isn't private | Put `isc` beside `insensical`; check the directory's permissions |
-| "insensical was updated", at launch | A new version was installed under a running daemon | Press Enter to restart it; the card says "Restarting the server" while it works, and the window stays responsive. Everything keeps running, unless the daemon is too old to make way. Escape leaves it |
-| "The server is already the new version, and this window is from before it", at launch | The server moved on while an older application was still running | Press Enter to open the new application, or close the window and open insensical again. Nothing ends |
+| "The insensical server cannot be reached" | No daemon is running and none could start: `isc` isn't beside the application or on `PATH`, or the socket's directory isn't private | Put `isc` beside `insensical`; check the directory's permissions |
+| "insensical was updated", at launch | A new version was installed under a running daemon | Press Enter to restart it. Everything keeps running, unless the daemon is too old to make way. Escape leaves it |
+| "The server is already the new version, and this window is from before it", at launch | An older application was still running when the server moved on | Press Enter to open the new application, or close the window and open insensical again. Nothing ends |
 | `isc: protocol N does not match the running daemon's M` | The same, from the command line | Run `isc restart-server` |
 | "The server has stopped" in the window | The daemon was stopped or crashed | Press Enter to start it; the layout comes back |
 | "This window was disconnected", or "Disconnected" in a terminal or browser | You ended that connection from another client, with `isc disconnect` or **Disconnect** | Press Enter in the window, any key in a terminal, or reload the page |
-| "The server did not move to the new version", or `isc: the daemon was not moved` | The installed `isc` is missing from where the daemon started, or can't take over what it runs | Nothing was lost. Press Enter to go back. Reinstall, or run `isc kill-server` and start again, which ends what's running |
+| "The server did not move to the new version", or `isc: the daemon was not moved` | The installed `isc` is missing from where the daemon started, or can't take over | Press Enter to go back. Reinstall, or run `isc kill-server` and start again (ends what's running) |
 | `daemon: running, but it does not say what it is`, from `isc version` | The daemon is too old to answer, or stuck | Run `isc restart-server` |
 | `a daemon is already running` | `isc daemon` was run twice | Nothing, or run `isc kill-server` first |
 | `path must be shorter than SUN_LEN` | The socket's path is too long | Set a shorter `INSENSICAL_SOCKET` |
@@ -5532,8 +4989,8 @@ and the fix.
 | `isc: this connection was not given the right to …, which … needs. Its rights are: …` | The command ran with `--rights` and left out a right it needs | Run it with that right, or without `--rights` |
 | `` isc: `isc integrate` asks before it changes an agent's settings, and on another machine there is nobody to ask `` | `isc --host NAME integrate` without `--status` or `--yes` | Run it in a terminal there, or look with `--status` and then add `--yes` |
 | `isc: theme is a setting of the interface, read from the file on the machine the interface runs on` | `isc --host NAME config` was given a setting that isn't the daemon's | Leave `--host` out |
-| `` isc: this daemon was not started as `isc daemon`, so it has no `isc` to do that with `` | A test or another program runs the daemon inside itself | Run `isc integrate` or `isc config` on that machine |
-| `isc: the link to the other machine was lost`, or "is out of reach" in the interface | The machine stopped answering, or `ssh` ended | Nothing there was lost. Run the command again; the interface retries by itself |
+| `` isc: this daemon was not started as `isc daemon`, so it has no `isc` to do that with `` | Another program runs the daemon inside itself | Run `isc integrate` or `isc config` on that machine |
+| `isc: the link to the other machine was lost`, or "is out of reach" in the interface | The machine stopped answering, or `ssh` ended | Run the command again; the interface retries by itself |
 | The update notice appears though nothing was updated | The binaries were rebuilt or reinstalled | Restart when convenient |
 
 ### Settings and appearance
@@ -5557,7 +5014,7 @@ and the fix.
 | On another machine, a letter you typed shows and then goes | The program answered the key with something else, or nothing | Nothing: what's left is what the program has |
 | A new variable in a shell profile is missing in panes | The daemon keeps the environment it started with | Same |
 | Programs over `ssh` complain about an unknown terminal | The other machine has no `xterm-ghostty` description | `infocmp -x xterm-ghostty \| ssh host tic -x -`, or `term = "xterm-256color"` |
-| A pane shows the generic terminal icon | It has printed nothing and been sent nothing, or its program isn't in the list | Nothing |
+| A pane shows the generic terminal icon | It has printed nothing, or its program isn't in the list | Nothing |
 | A pasted block waits at the foot of the pane | It has several lines and the program didn't ask for marked pastes, or it holds the sequence that ends one. The card says which | Read the card, then press Enter to paste or Escape to drop |
 | `Ctrl`+click on a path shows it in the file manager | It's a directory, a runnable file, or a kind opening could run | Open it yourself, or set `open-files-with` to your editor |
 | A path isn't underlined under the pointer | Paths are looked up only while `Ctrl` is held | Hold `Ctrl` |
@@ -5575,7 +5032,7 @@ and the fix.
 | A failed command shows `done` | The shell doesn't mark its commands | Use fish 4, or the `isc shell-integration` line for bash or zsh |
 | A pane is stuck in a state | A hook or the program reported it and nothing has reported since | `isc status explain` says who. Run `isc status clear`, or choose "Forget what this pane's program said it was doing" in the palette |
 | `isc status` changes nothing in a pane | The pane's program reports its own state in its terminal, which wins | `isc status explain` says so. It counts again when the program says it's done or idle, or ends |
-| A pane stays `running` or `waiting` after its program was killed | The program reported in its terminal and never took it back, somewhere insensical can't see it end: through `ssh`, in a pane started with a command, or under a shell inside a shell. See "Programs that report by themselves" | Same as above |
+| A pane stays `running` or `waiting` after its program was killed | The program reported in its terminal and never took it back, somewhere insensical can't see it end: through `ssh`, in a pane started with a command, or under a nested shell. See "Programs that report by themselves" | Same as above |
 | A program's reports aren't heard | It runs inside tmux or screen, which don't pass them on | Run it in the pane itself |
 | A Gemini CLI pane stays `running` after a failed or cancelled turn | Gemini CLI has no event for either | The next prompt clears it, or run `isc status idle` |
 | Hooks stopped reporting | `isc` moved since `integrate` | Run `isc integrate` for that agent again |
@@ -5678,9 +5135,7 @@ After the leader, these commands repeat without it for one second: `resize-left`
 `resize-right`, `resize-up`, `resize-down`, `move-left`, `move-right`, `move-up`,
 `move-down`, `move-tab-left` and `move-tab-right`.
 
-Resize mode is `resize-mode`: leader, then `Shift+R`. While it's on, `Left` or `H`, `Down`
-or `J`, `Up` or `K` and `Right` or `L` move the edges of the pane in front. Escape or
-Enter turns it off. See [Changing keys](#changing-keys).
+Resize mode is `resize-mode`: leader, then `Shift+R`. While it's on, the arrows or `H` `J` `K` `L` move the edges of the pane in front. Escape or Enter turns it off. See [Changing keys](#changing-keys).
 
 Five commands have no key and are in the window only:
 
@@ -5700,12 +5155,13 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `theme` | A theme name, or one for each appearance of the desktop: `{ light = "paper", dark = "fjord" }`. A name can be a built-in theme (see [Themes](#themes)), a file in `themes`, `ghostty`, or `ghostty:Name`. | `fjord` when the desktop is dark, `paper` when light |
 | `font-family` | The terminal font. | `JetBrainsMono Nerd Font` |
 | `interface-font` | Font for tabs, sidebar, headers and panels | the system's interface font |
-| `interface-style` | `insensical`: greys around the terminals, with the theme's accent and state colours. `terminal`: the theme's colours (the switch Follow terminal theme in the settings). `isc tui` is `terminal` unless this is written. | `insensical` |
-| `background-opacity` | How much of the desktop behind the window the background hides, 0.2 to 1. Below 1 the desktop shows through behind the text. | `1` |
+| `interface-style` | `insensical`: greys around the terminals, with the theme's accent and state colours. `terminal`: the theme's colours (Follow terminal theme in the settings). `isc tui` is `terminal` unless this is set. | `insensical` |
+| `background-opacity` | How much of the desktop behind the window the background hides, 0.2 to 1. | `1` |
 | `background-blur` | Whether the desktop is asked to blur what shows through. | `true` |
-| `motion` | Whether sheets, notices and moved panes fade in, the working mark turns and cursors blink. `system` follows the desktop; `on` and `off` decide. | `system` |
+| `at-login` | What insensical does when you log in. `off`: nothing. `window`: opens the window. `background`: starts in the tray (the menu bar on a Mac) with no window, or opens the window if your Linux desktop shows no tray. | `off` |
+| `motion` | Whether sheets, notices and moved panes fade in, the working mark turns and cursors blink. `system` follows the desktop. | `system` |
 | `font-ligatures` | Whether symbols side by side are drawn as the font's ligature, such as `->` and `!=` | `true` |
-| `font-size` | Terminal text size in points, 6 to 72. Interface text doesn't follow it. | `12`; on macOS `13` |
+| `font-size` | Terminal text size in points, 6 to 72. | `12`; on macOS `13` |
 | `density` | `comfortable`: each pane is a rounded card with space around it. `compact`: panes sit edge to edge with a hairline between. | `comfortable` |
 | `pane-gap` | Space between panes in pixels, 0 to 40 | `6`, or `0` when `density` is `compact` |
 | `sidebar` | The levels listed under a project's name: `["tabs", "panes"]`, `["tabs"]`, `["panes"]`, or `[]` for names only | `["tabs", "panes"]` |
@@ -5721,12 +5177,12 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `open-files-with` | What a file you `Ctrl`+click opens in: `system`, an editor by name (`code`, `cursor`, `zed`, `subl`, `idea`, `nvim`, `vim`, `hx`, `nano`), or a command with `{file}` in it. See [Web addresses and paths](#web-addresses-and-paths). | `system` |
 | `term` | The `TERM` a pane's program is told. `xterm-ghostty` gives programs every feature. `xterm-256color` is known on every machine, which matters over `ssh`, and has fewer. | `xterm-ghostty` |
 | `scrollback` | History each pane keeps, in megabytes, 1 to 200. | `10` |
-| `keep-scrollback` | Whether what panes show is saved when the daemon stops, so it's above a new shell next time. With `false`, nothing is saved and earlier files are removed as panes close. | `true` |
-| `check-for-updates` | Whether the daemon asks GitHub once a day for a new release. The request names only your version and platform. With `false`, it asks only when you press Check Now or update yourself. See [A new version installed underneath](#a-new-version-installed-underneath). | `true` |
+| `keep-scrollback` | Whether what panes show is saved when the daemon stops. With `false`, nothing is saved and earlier files are removed as panes close. | `true` |
+| `check-for-updates` | Whether the daemon asks GitHub once a day for a new release. With `false`, it asks only when you press Check Now or update yourself. See [A new version installed underneath](#a-new-version-installed-underneath). | `true` |
 | `agents-at-once` | How many agents one agent can have open at once, started with `isc agent start`, 1 to 64 (section 11). | `8` |
 | `agents-deep` | How deep agents can start agents, 1 to 8. | `2` |
-| `agents-from-other-machines` | Whether an agent on another machine, running `isc --host` or `isc tui --host` in a pane there, can use this computer. Off, it's refused and told how to turn this on. You at your own terminal on another machine are never refused (section 11). | `false` |
-| `tmux-shim` | Whether a program in a pane finds a `tmux` that insensical answers, so an agent that opens helpers in tmux panes opens them as panes here (section 11). While on, `tmux` in a pane isn't the real one. | `false` |
+| `agents-from-other-machines` | Whether an agent on another machine, running `isc --host` or `isc tui --host` in a pane there, can use this computer. Off, it's refused and told how to turn this on. You at your own terminal are never refused (section 11). | `false` |
+| `tmux-shim` | Whether `tmux` in a pane is answered by insensical, so an agent that opens helpers in tmux panes opens them as panes here (section 11). While on, `tmux` in a pane isn't the real one. | `false` |
 | `clipboard` | Whether a program can put text on the clipboard. `focused`: only the program in the pane you're looking at. `never`: no program. No program can read the clipboard. | `focused` |
 | `notifications` | Whether you're told when a pane has something for you. | `true` |
 | `attention-glow` | Whether a waiting pane takes the waiting colour at its edge and casts a soft light into the gaps around it | `true` |
@@ -5740,7 +5196,7 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `notify-url-body` | What's posted. `json`: the title, the message and the rest. `text`: the message alone, with the title in a `Title` header. | `json` |
 | `notify-url-token` | A token sent as `Authorization: Bearer …` with what's posted. A secret, shown masked. | none |
 | `notify-url-user`, `notify-url-password` | A user and password sent as Basic. The token wins if both are set. Secrets. | none |
-| `notify-url-headers` | A table of headers sent with what's posted, for a token. Shown masked. | none |
+| `notify-url-headers` | A table of headers sent with what's posted, for a token. Shown masked; set it with `isc config set`. | none |
 | `long-command` | Seconds a command runs before its end is news: the pane is marked done or failed, and you're told if you weren't looking. 1 to 3600. | `30` |
 | `sound` | Which notifications make a sound. `needs-you`: a pane that waits or failed. `all`: those, and a softer sound for a finish. `off`: none. | `needs-you` |
 | `tray` | On Linux, whether insensical has a tray icon, marked while a pane needs you, with a menu of those panes. | `true` |
@@ -5755,9 +5211,7 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `[keys.leader]` | The leader keymap, written out. Each key is the one you press after the leader. It lies over the defaults like `[keys.direct]`. | the keys in the table above |
 | `[hosts]` | Other machines by name and where `ssh` goes for each: `build = "me@build.example.com"`. Also `{ ssh = "…", color = "…", icon = "…", careful = true }`: a colour (`#rrggbb` or `blue`, `green`, `orange`, `purple`, `pink`, `teal`, `gold`, `grey`, `rust`, `indigo`), an icon (`server`, `laptop`, `desktop`, `mini`, `nas`, `board`, `phone`, `container`, `cloud`), and a mark for one to be careful on. `isc host add` writes these, and `node = "…"` for a tailnet machine. See [Other machines, over ssh](#other-machines-over-ssh). | empty |
 
-The file `isc config` prints sets `theme` to `{ light = "paper", dark = "fjord" }`, the
-same as leaving it out. It shows `shell` and `interface-font` as lines to uncomment, and
-writes out `[keys]`, `[keys.direct]` and `[keys.leader]` with their defaults.
+The file `isc config` prints sets `theme` to `{ light = "paper", dark = "fjord" }`, shows `shell` and `interface-font` as lines to uncomment, and writes out `[keys]`, `[keys.direct]` and `[keys.leader]` with their defaults.
 
 For the theme file format, see [A theme file](#a-theme-file).
 
@@ -5767,8 +5221,9 @@ Run these in any terminal. Placeholders and options:
 
 - `PANE` is a pane's number (`3` or `pane:3`) or its name. `TAB` is a tab's number (`7` or
   `tab:7`) or its name. A project is its name or number (`4` or `project:4`).
-- Names match whatever their case. A name that fits more than one does nothing and exits
-  with status 3.
+- A pane's or tab's name matches whatever its case; one that fits more than one does nothing
+  and exits with status 3. A project's name must match exactly, and if two share it, the
+  first listed is meant.
 - Where `[PANE]` is optional, the command acts on the pane you run it in, or outside any
   pane, on the pane with the keyboard.
 - Every command accepts `--socket PATH`. Every command about a daemon also accepts `--host
@@ -5779,8 +5234,8 @@ Run these in any terminal. Placeholders and options:
 
 | Command | What it does |
 |---|---|
-| `isc ls [--json]` | Lists projects, tabs and panes, a line each, with state, program, directory, name or title, what the state is about, whether it floats or is minimized, who opened it, and whether it keeps agents out. `--json` prints everything the daemon knows. `isc list` does the same. |
-| `isc run [--cwd DIR] [--keep] [--name NAME] [--background] [--wait] [--json] [WHERE] [-- COMMAND…]` | Runs a command in a new pane, or the shell if you give none, and prints the pane as `pane:N`. `--cwd` sets the directory (default: where you run `isc`). `--keep` keeps the pane when the command ends; press Enter, or use `isc close`, to close it. `--name` names it. `--background` leaves the keyboard where it is. `--wait` waits for the command, prints the end of its output and exits with its status. `--json` prints the pane's and tab's numbers, and with `--wait` the status and output. Limits: 256 KB for a command and its directory, 4 MB for everything open, 4,096 panes. |
+| `isc ls [--json]` | Lists projects, tabs and panes, a line each, with state, program, directory, name or title, whether it floats or is minimized, who opened it, and whether it keeps agents out. `--json` prints everything the daemon knows. `isc list` does the same. |
+| `isc run [--cwd DIR] [--keep] [--name NAME] [--background] [--wait] [--json] [WHERE] [-- COMMAND…]` | Runs a command in a new pane, or the shell if you give none, and prints the pane as `pane:N`. `--cwd` sets the directory (default: where you run `isc`). `--keep` keeps the pane when the command ends; press Enter, or use `isc close`, to close it. `--name` names it. `--background` leaves the keyboard where it is. `--wait` waits, prints the end of the output and exits with the command's status. `--json` prints the pane's and tab's numbers, and with `--wait` the status and output. Limits: 256 KB for a command and its directory, 4 MB for everything open, 4,096 panes. |
 | `WHERE` for `isc run` | Nothing: a new tab in the current project. `--project NAME`: a new tab in that project. `--new-project [NAME]`: a new project for the working directory, called `NAME` if given. `--split right\|down [--beside PANE]`: beside a pane, sharing its space. `--float [--rect X,Y,W,H]`: floating above the current tab. |
 | `isc split right\|down [PANE] [--keep] [--name NAME] [--background] [--wait] [--json] [-- COMMAND…]` | The same, beside a pane, in that pane's directory |
 | `isc focus PANE`, `isc focus left\|right\|up\|down` | Gives a pane the keyboard: by number, or the focused pane's neighbour on that side |
@@ -5805,7 +5260,7 @@ Run these in any terminal. Placeholders and options:
 | `isc tab close [TAB]` | Closes every pane in a tab, or the current tab |
 | `isc tab move TAB INDEX` | Moves a tab to a position among its project's tabs, counted from 0 |
 | `isc tab rename TAB NAME` | Names a tab. An empty name removes it. |
-| `isc project new [DIR] [--name NAME] [--make]` | Opens a project for a directory, or the current one. It's named after the directory unless you set `--name`. With `--make`, a missing `DIR` is made first, with its parents, on the machine the command is for; if one can't be made, nothing is made and no project opens. |
+| `isc project new [DIR] [--name NAME] [--make]` | Opens a project for `DIR`, or the current directory, named after it unless `--name`. `DIR` must exist: `--make` makes it, with its parents, on the machine the command is for, and opens nothing if that fails. On another machine, give `DIR` from `/` or `~`. |
 | `isc project open [FILE] [--again] [--yes]` | Makes the project a file describes: see [A project in a file](#a-project-in-a-file). `FILE` is the file, or a directory holding `.insensical.toml`; default the current directory. An open project of the same name and root is gone to, unless `--again`. A file that starts programs asks first, and again when it changes; `--yes` answers for you. |
 | `isc project save [FILE] [--force]` | Writes the project in front as such a file: `.insensical.toml` in the project's directory, or `FILE`, or `-` for standard output. It won't write over a file without `--force`. |
 | `isc project select NAME` | Goes to a project |
@@ -5814,7 +5269,7 @@ Run these in any terminal. Placeholders and options:
 | `isc project move NAME INDEX` | Moves a project to a position among the projects, counted from 0 |
 | `isc project close NAME` | Closes a project and everything running in it |
 | `isc send PANE TEXT` | Types text into a pane, as if at its keyboard |
-| `isc upload PANE FILE…` | Keeps files in the pane's directory, in `.insensical-uploads`, and types their paths into the pane |
+| `isc upload PANE FILE…` | Keeps files in the pane's directory, in `.insensical-uploads`, and types their paths into the pane, each followed by a space |
 | `isc key PANE KEY…` | Presses keys by name, in order: `ctrl-c`, `enter`, `escape`, `shift-tab`, `a` |
 | `isc attach [PANE]` | Shows a pane in this terminal and lets you type into it. `Ctrl+]` leaves. |
 | `isc`, `isc tui` | Draws the whole interface in this terminal. `isc` alone does so only for a person at a terminal; in a script, a pipe or one of insensical's own panes it lists the commands. `Ctrl+Space` then `D` leaves. See [The whole interface in a terminal](#the-whole-interface-in-a-terminal). |
@@ -5861,9 +5316,9 @@ Run these in any terminal. Placeholders and options:
 | `isc host ls` | Lists the machines you've named, with where `ssh` goes and what's set on each. `--json` includes `node`. |
 | `isc host answer NAME` | Runs your `ssh` to the machine at your terminal so it can ask: a host key, passphrase, password or sign-in. Then it meets the machine, and succeeds only if it was reached. `NAME` can be where `ssh` goes. |
 | `isc host rm NAME` | Forgets a machine's name |
-| `isc host check NAME` | Meets the machine and prints four lines: reached and round trip, a working insensical version, server running, and what's open. A failing line says what to do. It changes nothing there. |
+| `isc host check NAME` | Meets the machine and prints four lines: reached and round trip, a working insensical version, server running, and what's open. A failing line says what to do. It changes nothing there, and exits non-zero unless the machine is ready. |
 | `isc host restart NAME [--yes]` | Restarts the server on a machine running an older version than its installed `isc`. It says what that comes to and asks; `--yes` doesn't. A server that can move keeps what runs in its panes. |
-| `isc host put NAME` | Brings this version's `isc` to a machine over `ssh`, never a newer one. An `isc` there that can update itself runs `isc upgrade --version` for this version; if it can't reach GitHub, a Linux machine is sent a copy in `~/.local/bin` instead, with no sudo. One that a package or Homebrew owns is left alone, and you get the command to run there; one built from source is left alone too, and you're told to build the new version there the same way. It says what it would do and asks; `--yes` doesn't. A server running there is left alone unless you say `--restart-server` or answer yes to a second question. |
+| `isc host put NAME` | Brings this version's `isc` to a machine over `ssh`, never a newer one. An `isc` there that can update itself runs `isc upgrade --version` for this version; if it can't reach GitHub, a Linux machine is sent a copy in `~/.local/bin` instead, with no sudo. A copy a package or Homebrew owns is left alone, and you get the command to run there; so is one built from source, and you're told to build the new version there. A copy built from source sends itself to a Linux machine. It asks first; `--yes` doesn't. A server running there is left alone unless you pass `--restart-server` or answer yes to a second question. |
 | `isc proxy` | What `isc --host` runs on the other machine, through `ssh`. You don't run it yourself. |
 | `isc hub [--port N] [--listen ADDR] [--tls-cert FILE --tls-key FILE] [--name NAME]… [--guest-port N] [--guest-name NAME]…` | Serves insensical to a browser, on this machine only unless given a certificate. `--name` is another name browsers reach it by. `--guest-port` (7434) and `--guest-name` are the port and names of the door a public address leads to. See [In a browser](#in-a-browser) |
 | `isc hub setup` | Walks you through reaching this computer from a browser or phone: hub or joined machine, how you'll reach a hub, starting by itself, and adding a device with its code. It ends on the equivalent commands. |
@@ -5887,9 +5342,9 @@ Run these in any terminal. Placeholders and options:
 | `isc tmux COMMAND…` | Answers a `tmux` command with insensical's panes, as the `tmux` a pane finds with `tmux-shim` on does. See section 11. |
 | `isc daemon` | Runs the daemon in the foreground |
 | `isc kill-server` | Stops the daemon and every program it runs, and returns once it's gone. The layout comes back the next time it starts. Also works on a daemon of another version. |
-| `isc restart-server [--yes]` | Moves the running daemon to this version while the programs in its panes keep running. It asks first; `--yes` skips the question. |
-| `isc upgrade [--version X] [--check [--json]] [--yes]` | Downloads the latest release's signed record and this machine's file, checks the file against the record, and puts it in place of yours: `isc` alone, or `insensical` and `isc` from the tarball together. It asks first; `--yes` doesn't, and with no terminal and no `--yes` nothing is installed. Where the directory needs a password, it uses `sudo`. `--version` installs that release, older or not; without it, an older one is never installed. `--check` says what there is and installs nothing; with `--json` it prints one object, `{"running": "0.6.0", "latest": "0.6.1" or null, "update": ""}`, where `update` is empty if this copy can replace itself and otherwise says who updates it. A copy from a package or Homebrew isn't replaced: it prints the command that updates it. A copy no release ships, such as a Linux window on arm64 or an Intel Mac, was built from source: it says "This copy was built from source. Build the new version the same way." It exits with status 1 when there's a newer version and nothing was installed. The running daemon keeps running. |
-| `isc version` | Prints this version and the running daemon's, with the protocol and terminal engine of each, the daemon's process number, and whether they can talk to each other. A copy built from source shows the commit it was built from after its version, as `0.7.0+91c21a3d`, with `-dirty` added if files in it had changes you hadn't committed; a release shows the plain version. The Hub page's Version row and the page's computer settings show it too. While `isc hub` runs, one line gives its version and process number, and says if a newer one is installed. When the daemon knows of a newer release, one more line says so and what's new |
+| `isc restart-server [--yes]` | Moves the running daemon to this version while the programs in its panes keep running. It asks first, and exits 1 on no; `--yes` skips the question. With no daemon running, it starts one. |
+| `isc upgrade [--version X] [--check [--json]] [--yes]` | Downloads the latest release's signed record and this machine's file, checks the file against the record, and replaces yours: `isc` alone, or `insensical` and `isc` from the tarball together. It asks first; `--yes` doesn't, and with no terminal and no `--yes` nothing is installed. Where the directory needs a password, it uses `sudo`. `--version` installs that release, older or not; without it, an older one is never installed. `--check` says what there is and installs nothing; with `--json` it prints one object, `{"running": "0.6.0", "latest": "0.6.1" or null, "update": ""}`, where `update` is empty if this copy can replace itself and otherwise says who updates it. A copy from a package or Homebrew isn't replaced: it prints the command that updates it. A copy built from source says "This copy was built from source. Build the new version the same way." It exits with status 1 when there's a newer version and nothing was installed. |
+| `isc version` | Prints this version and the running daemon's, with the protocol and terminal engine of each, the daemon's process number, and whether they can talk to each other. A copy built from source shows its commit after the version, as `0.7.0+91c21a3d`, with `-dirty` added if it had uncommitted changes. While `isc hub` runs, one line gives its version and process number, and says if a newer one is installed. When a newer release is known, one more line says so |
 
 ### Files and directories
 
@@ -5928,13 +5383,9 @@ Run these in any terminal. Placeholders and options:
 the directory for the layout, screens and declined agents. `INSENSICAL_DATA_DIR` replaces
 the directory the hub's folder is in. `INSENSICAL_SOCKET` replaces the socket.
 
-The state directory is closed to other users (`0700`), and so is each file the daemon
-writes in it (`0600`), because the layout names your directories and commands. If they're
-open when the daemon starts, it closes them. It writes nothing in a state directory that
-belongs to someone else.
+The state directory is closed to other users (`0700`), and so is each file in it (`0600`), because the layout names your directories and commands. The daemon closes them if they're open at start, and writes nothing in a state directory that belongs to someone else.
 
-insensical writes these files in other programs' directories, only when you tell it to,
-and nothing else outside the directories above:
+Only when you tell it to, insensical also writes these files in other programs' directories:
 
 | Agent | File |
 |---|---|
