@@ -139,7 +139,7 @@ xattr -dr com.apple.quarantine /Applications/insensical.app
 `isc` is at `/Applications/insensical.app/Contents/MacOS/isc`. There's no build for an
 Intel Mac.
 
-**Starting at login.** Set **At login** in Settings > Interface. **Open the window** opens
+**Starting at login.** Set **At login** in Settings > General. **Open the window** opens
 insensical when you log in; **Start in the tray** (**Start in the menu bar** on a Mac) starts
 it with no window. **Do nothing** turns it off.
 
@@ -359,8 +359,8 @@ These let you reach your machines from one place.
 
 ### Parts
 
-- **Sidebar**, on the left: a row of tools, a field, then the project tree. Shown with
-  `tabs = "sidebar"`.
+- **Sidebar**, on the left: a row of tools, the find field, then the project tree under
+  each machine's heading. Shown with `tabs = "sidebar"`.
 - **Top bar**, shown with `tabs = "top"`: the sidebar button, then where you are (the
   project's tile and name, a slash, the project's tabs), then `+` for a new tab. On the
   right: a settings problem, the update notice, the notice about agents that don't report
@@ -376,14 +376,16 @@ With tabs down the side, the top bar's things are at the top and bottom of the s
 
 | `tabs` | What you get |
 |---|---|
-| `"sidebar"` (default) | The sidebar lists every tab of every project. The count of panes that need you, the floating-panes switch and `+` are at the top of the sidebar, and notices at its bottom. No top bar. |
+| `"sidebar"` (default) | The sidebar lists every tab of every project. Its head has the button that hides it, All and Activity, the bell, the palette and the settings; notices are at its bottom. No top bar. |
 | `"top"` | The top bar shows the current project's tabs only. No sidebar. |
 | Hidden | Panes get the whole window. `Ctrl+Shift+A` still goes to the pane that needs you and the palette still lists them. The window opens with tabs hidden next time. |
 
 ### With nothing open
 
-A window with nothing to show offers four buttons, each with its key: a new tab, a new
-project, the command palette, and the sheet of every key. A setting that couldn't be used
+A project with no tabs shows its name and "Nothing is running here.", over four ways on,
+each with its keys: New tab, New project, Command palette and Show every key. Click one or
+press its keys. A window with no project shows the same under the name insensical, and a
+tab whose panes are all minimized says so over the same four. A setting that couldn't be used
 shows in red at the foot of the sidebar, or in the top bar; click it to see every such
 problem.
 
@@ -397,7 +399,7 @@ zoom, the leader's panel, the restart question) don't.
 ### What the window does not remember
 
 The window remembers its size, whether tabs were hidden, the sidebar's width, which
-projects you unfolded and which tabs you folded. It doesn't remember its position, and a
+projects and tabs you folded or unfolded. It doesn't remember its position, and a
 new window always opens with its keys unlocked.
 
 ### Two windows
@@ -409,6 +411,7 @@ same goes for a window and `isc attach`.
   showing them at that size.
 - A pane sized by another window has a "Sized elsewhere" mark in its header. Press it to
   size the pane for this window.
+- A browser page on a wide screen takes the sizes by itself: see "On a wide screen".
 - If a pane is larger than its space you see its foot, where the cursor is. Hold Shift and
   turn the wheel to move across it, or Alt and the wheel to move up and down.
 
@@ -419,16 +422,16 @@ on another machine works like any other and keeps running if you close the windo
 connection drops. It all goes through your own `ssh`: see
 [Other machines, over ssh](#other-machines-over-ssh).
 
-**Adding a machine.** Press "Add" at the foot of the sidebar and choose Machine. "Add a
+**Adding a machine.** Press "Add a machine" under the projects in the sidebar. "Add a
 machine" in the palette and "Add Remote Host" in the settings sheet do the same.
 
-1. Under the Address field, pick `Tailscale` (your tailnet's machines, those that are on
-   first) or `SSH config` (the names in `~/.ssh/config`). It opens on `Tailscale` when your
-   tailnet has other machines.
+1. Under the field, pick `Your tailnet` (your tailnet's machines, those that are on
+   first) or `ssh configuration` (the names in `~/.ssh/config`). It opens on `Your tailnet`
+   when your tailnet has other machines.
 2. Choose a machine, or type to narrow the list. Anything else you type goes to `ssh` as
    it is: a host, or `user@host`. `Tab` moves between the field and the two tabs, Left and
    Right switch tabs, Up and Down move through the list.
-3. Press Enter. The dialog checks the machine, as `isc host check` does, and a failing
+3. Press Enter, or `Add`. The dialog checks the machine, as `isc host check` does, and a failing
    line says what to do.
 4. A machine that's ready is added at once, and its projects appear in the sidebar.
 
@@ -445,11 +448,13 @@ machine" in the palette and "Add Remote Host" in the settings sheet do the same.
 **In the sidebar,** each machine is a heading over its projects: "This computer" first,
 then the others in your settings' order.
 
-- A heading has the machine's tile and name in its colour, the link's mark, and how many
-  of its panes need you. Press it to fold the machine.
+- A heading has the machine's picture, its name and the link's mark. Folded, it
+  counts the panes that need you. Press it to fold the machine. Under the pointer, its `+`
+  starts a new project there. A machine with nothing open says "Nothing open there", with
+  "New Project".
 - **The link's mark is three bars:** three under 60 ms round trip, two under 200 ms, one
-  beyond. Point at it for the figure. It's struck through and red while the machine is out
-  of reach, and pointing says why.
+  beyond. Point at it for the figure. While the machine is out of reach it's a cut plug,
+  and pointing says why.
 - **A machine with another version of insensical says so under its heading**, as in "atlas
   has insensical 0.2.1, and this computer has 0.3.0". "Update it" offers to put this
   version there. If the machine has the newer one, update this computer, then press "Try
@@ -459,11 +464,9 @@ then the others in your settings' order.
   says which machine a pane is on.
 
 **Which machine you're typing into.** A pane on another machine shows the machine's chip
-(tile and name, in its colour) in its header, with a line in that colour along the top. In
-a narrow pane the chip is the tile alone. A machine's colour comes from its name unless
-you set one.
+(its picture and name) in its header. In a narrow pane the chip is the picture alone.
 
-**A machine marked careful has a filled chip, and a paste of more than one line there asks
+**A machine marked careful has a chip filled in the waiting colour, and a paste of more than one line there asks
 first**, whatever the program asked for. See [Pasting](#pasting).
 
 **One machine is in front at a time.** Keys and commands go to the machine whose pane, tab
@@ -489,8 +492,7 @@ a folded card's row to open it. Open, a card has:
 
 | Control | What it does |
 |---|---|
-| Colour | One of ten, or the one its name gives |
-| Icon | On a tile of its colour: server, laptop, desktop, mini PC, NAS, board (a small computer such as a Raspberry Pi), phone, container or cloud |
+| Icon | A picture of its kind: server, laptop, desktop, mini PC, NAS, board (a small computer such as a Raspberry Pi), container or cloud |
 | careful | On or off |
 | `Check` | Meets the machine again, as adding it did |
 | Pencil | Renames it in its row: Enter keeps, Escape leaves |
@@ -520,23 +522,31 @@ starts. Other machines carry on. Press the heading for the way to start it again
 
 ### Appearance
 
-- **Fonts.** The UI uses the system's proportional font at 13 pixels, whatever `font-size`
+- **Fonts.** The UI uses Inter at 13 pixels, whatever `font-size`
   is. `interface-font` names another. If you name the terminal's font, the UI uses it too.
 - **A program is shown as a tile**: its own mark (Claude's, Neovim's, Docker's and so on)
   on a small glossy card in the program's colours, so you can find a pane by colour.
   Programs without a mark get a terminal's. Tiles appear in the sidebar, pane header, tab
   strip, dock, overview and palette.
-- **A tab is shown as a deck**: the tile of the pane that has or last had the keyboard,
-  with up to two more behind it. Floating and minimized panes count.
-- **The foot of the sidebar** has Settings, Show every key, the overview of every tab, and
-  "Add", a small menu of Project or Machine. With the sidebar hidden, these are at the right
-  end of the top bar.
+- **A tab shows its panes' tiles as a deck**: the one that has or last had the keyboard in
+  front, up to two more smaller behind it. Floating and minimized panes count.
+- **The head of the sidebar** has the bell, which counts what finished and lists it when
+  you press it, the command palette (`⌘`) and Settings. "This computer" heads the list,
+  even with no other machine, and the `+` at its right end starts a new project. Show every key and the
+  overview of every tab are in the palette. With the sidebar hidden, Settings, Show every
+  key and the overview are at the right end of the top bar.
+- **A pane, a tab or a project has a menu** of what you can do to it: right-click it, or
+  press its `⋯` (a row of the sidebar under the pointer, a pane's header). Renaming,
+  clearing, sharing and sleeping a row are there. A pane's menu has its arrangements as a
+  row of signs: split right or down, float, minimize and fill the tab. A key is shown beside a row only for the pane, tab or project in front,
+  since that's the one the key acts on.
 - **Menus** take Up and Down, Home and End, Enter, Escape, and a letter to jump to the
-  next row that begins with it. In "Add", `P` and `M` choose.
+  next row that begins with it.
 - `density = "comfortable"` (default) draws each pane as a rounded card with space around
   it. `"compact"` puts panes edge to edge with a hairline between them.
-- `pane-gap` sets the space between panes, 0 to 40 pixels. Without it, the gap is 6 when
-  comfortable and 0 when compact.
+- `pane-gap` sets the space between panes, 0 to 40 pixels. Without it, the gap is 12 when
+  comfortable and 0 when compact. Panes stay 6 pixels from the window's edges whatever the
+  gap, or touch them when compact.
 - The focused pane has an accent border. Unfocused panes aren't dimmed.
 - **Motion is small.** Sheets and notices fade in, a pane you float or bring back clears
   from a light wash, a cursor blinks and a working mark turns. `motion = "off"` stops all of
@@ -573,21 +583,28 @@ asked for:
 - **Name**, optional. With a directory and no name, the project is named after the
   directory. With neither, it's given a name.
 - **Directory**, where its tabs open. It starts as the directory of the pane you're in.
-  Type a path beginning with `/` or `~`, or leave it empty for none.
+  Type a path beginning with `/` or `~`, or leave it empty for none. For a project on this
+  computer, **Choose** beside it opens your system's folder picker.
 
-As you type a path, up to six matching directories are listed (hidden ones once you type a
-dot). Up and Down select one, and `Tab` goes into it.
+Under the directory, the folders in the directory typed so far are listed, six at a time
+with the rest a scroll away,
+those that start with what you've typed after the last `/` (hidden ones once you type a
+dot). Nothing is marked while you type. Down and Up mark one; Right, or a click, goes into
+it, and the list shows its folders; Left, at the end of a path that ends in `/`, goes up
+one. Enter on a marked folder takes it as the directory; Escape takes the mark away. A line
+under the list says which of these keys work at the moment.
 
 If the path doesn't exist but could, the button reads "Make the directory". Enter asks
 once more ("Make it and create"), and Enter again makes it, and any missing ones above it,
 on the machine the project is for (permissions 755 less your `umask`), then opens the
 project. If it can't be made, the card says why and nothing is made.
 
-`Tab` in the name field moves to the directory field, and `Shift+Tab` moves back. Enter or
-"Create" makes the project and opens a shell in it. Escape, "Cancel" or a click outside
+`Tab` and `Shift+Tab` go round the card's controls: the machine, the name, the directory,
+Choose, Cancel and Create. They never leave the card. Enter with no folder marked, or
+"Create", makes the project and opens a shell in it. Escape, "Cancel" or a click outside
 makes nothing.
 
-`Ctrl+Shift+L` puts the keyboard in the sidebar's field, showing the sidebar if hidden
+`Ctrl+Shift+S` (`⇧⌘S` on a Mac) puts the keyboard in the sidebar's field, showing the sidebar if hidden
 (with `tabs = "top"` it opens the palette instead). That field only narrows the tree:
 Enter on an existing project's name goes there, and nothing typed makes a project.
 
@@ -611,28 +628,35 @@ file](#a-project-in-a-file).
 
 A project's name doesn't follow its panes. Tab and pane rows show where they really are.
 
-**Renaming.** Press the pencil on the project's sidebar row, run `isc project rename OLD
+**Renaming.** Choose "Name and icon" in the project's menu, run `isc project rename OLD
 NEW`, or choose "Rename this project" in the palette. Enter keeps the name, Escape leaves
-the old one, and an empty name isn't allowed. If the row isn't on screen, a small card
-asks.
+the old one, and an empty name isn't allowed. If the row isn't on screen, the Name and
+icon card asks.
 
 **A project's icon.** Every project has a tile beside its name: by default the first letter
-of the name on a colour that comes from the name. To choose, press the tile on the
-project's sidebar row. Each pick applies at once.
+of the name on a colour that comes from the name. To change it, press the tile on the
+project's sidebar row, or choose "Name and icon" in its menu. That card holds the name and
+the icon together. Each icon you pick shows at once. "Save" (Enter) keeps the name and the
+icon; "Cancel" (Escape), or a click outside the card, puts both back as they were. "Save"
+can't be pressed while the name is empty.
 
-- One of ten colours, or "By name" for the one it had.
-- A mark: type to find one, such as `git`, `rust` or `docker`. The first tile is the
-  letter again. Next are insensical's own marks: `folder`, `code`, `web`, `database`,
-  `docs`, `mobile`, `package`, `rocket`, `lab`, `server`, `design`, `chart` and `shield`.
-  After them are the marks programs are shown by.
-- **"Your SVG"** takes a `.svg` file of yours, 256 KB at most, drawn whole in a square.
+- **Icon**: type to find a mark, such as `git`, `rust` or `docker`. The first is the
+  letter. Next are insensical's own tiles: `folder`, `code`, `web`, `database`, `docs`,
+  `mobile`, `package`, `rocket`, `lab`, `server`, `design`, `chart` and `shield`. After
+  them are the marks programs are shown by, each on its maker's card, just as a program's
+  tile is.
+- **Colour of the letter**: one of ten colours, or "From the name" for the one it had.
+  Only the letter takes a colour. A program's mark keeps its maker's colour, and
+  insensical's own tiles and your SVGs keep theirs, so the row is faded while one of them
+  is picked.
+- **"Use an SVG"** takes a `.svg` file of yours, 256 KB at most, drawn whole in a square.
   A copy is kept in `~/.config/insensical/icons/`. A drawing with an `<image>` in it, or
   a gzip-packed one, isn't taken.
 - "Reset" goes back to the letter and the name's colour.
 
-From the command line, `isc project icon NAME --mark rust --colour '#ff8800'` or `--svg
-logo.svg`. What you leave out is left unchanged, so `isc project icon NAME` alone resets
-it. The file is read where you run the command, so `isc --host build project icon api
+From the command line, `isc project icon NAME --mark rust`, `--colour '#ff8800'` for the
+letter, or `--svg logo.svg`. What you leave out is cleared, so `isc project icon NAME`
+alone resets it. The file is read where you run the command, so `isc --host build project icon api
 --svg logo.svg` takes a `logo.svg` from this machine.
 
 | To | Do |
@@ -816,7 +840,7 @@ everything else.**
   the sidebar the heading says `asleep` and its rows are dimmed.
 - **Waking it** puts a shell in each pane, in its directory, under what it showed. What
   ran there is typed at the prompt for you to run again with Enter: an agent's own resume
-  command if it gave one, otherwise the command the pane was started with. This is also what
+  command, once, if it was still working when the project went to sleep, otherwise the command the pane was started with. This is also what
   happens to every pane when the daemon restarts ([section
   17](#17-stopping-restarting-and-new-versions)).
 - A project that's asleep when the daemon stops is asleep when it starts.
@@ -840,8 +864,8 @@ The sidebar is a tree of project, tab and pane. It shows while `tabs = "sidebar"
 
 | Row | Shows |
 |---|---|
-| Project | A fold mark and the name, brighter for the current project. On the right: memory its programs hold, and its pane count. Folded, instead: how many of its panes need you, with the most urgent mark. |
-| Tab | A fold mark, the tab's deck of tiles, then its name, or what its focused pane is called. Folded, on the right: its most urgent pane's mark. |
+| Project | Its icon and the name. On the right: memory its programs hold, and its pane count. Folded, instead: how many of its panes need you, with the most urgent mark. |
+| Tab | The tab's deck of tiles, then its name, or what its focused pane is called. Folded, on the right: its most urgent pane's mark. |
 | Pane | The program's icon, then what the pane is called. On the right: a mark if floating or minimized, and its state. |
 
 **What a pane is called** is the same in the sidebar, on a dock chip, in the palette and
@@ -861,48 +885,63 @@ in a close question:
 - **A row says how long its pane has needed you**: `now` for the first minute, then `2m`,
   `1h`, `3d`. After ten minutes the figure turns bold in the waiting colour.
 - Click a row to go to it. Click a minimized pane's row to bring the pane back.
-- **What an agent started is listed under it**, one level in, whichever tab it's in. A tab
-  whose panes all sit under their agents has no row of its own. Folding the agent's tab or
+- **What an agent started in another tab is listed under it**, one level in. What it
+  started in its own tab stays beside it, with the rest of that tab's panes. A tab whose
+  panes all sit under their agents has no row of its own. Folding the agent's tab or
   project folds its team.
 
-**Sharing.** An eye appears beside the pencil on a project's row under the pointer. It
+**Sharing.** "Share this project" in a project's menu
 shares the project with a guest, or lists who has it: see [Sharing one project or one
 terminal](#sharing-one-project-or-one-terminal). A shared project always shows an eye, or
 a keyboard if a guest can type in it.
 
-**Naming.** Press the pencil at the end of the row under the pointer. Enter keeps the
+**Naming.** Choose "Rename" in the row's menu. Enter keeps the
 name, Escape leaves the old one. For a tab or pane, an empty name removes the name. Names
 survive a restart and appear in the tab strip, the pane's header, notifications and
 `isc ls`.
 
 - From the command line: `isc tab rename TAB NAME` or `isc rename PANE NAME`.
 - From the palette: "Name this pane" or "Name this tab" (`name-pane`, `name-tab`, no
-  default keys). Where the name isn't written on screen, a small card asks.
+  default keys). Where the name isn't written on screen, a "Rename pane" or "Rename tab"
+  card asks. Its empty field shows what the pane or tab goes by without a name.
 
-**Folding.** The mark at the start of a project or tab row hides what's under it. Every
-project starts folded, so a long list reads by name first. Unfold the ones you work in: the
-next window opens with them unfolded. While the filter has text, matches show even inside
-something folded.
+**Folding.** Point at a project or tab row and its icon turns into a fold arrow: click
+the arrow to hide what's under it, or to show it again. With the keys, `Left` and `Right`
+fold and unfold the row you're on. Every
+project starts folded, so a long list reads by name first. When a pane comes to the front,
+however you got there, its project unfolds, unless you folded that project yourself: what
+you fold stays folded. The next window opens with projects and tabs folded as you left
+them. While the filter has text, matches show even inside something folded.
 
-**Filtering.** Type in the field to narrow the tree to projects, tabs and panes whose
-name, title, program or directory contains what you typed. Case doesn't matter.
+**The pane in front** sits on a raised, outlined row. Its pane row carries it when you can
+see it; if its tab is folded, the tab row does, and if its project is folded, the project
+row does. The project and tab above that row have bold names, and the tree lines that lead
+to it are drawn stronger than the rest.
 
-**What is listed.** The `sidebar` setting chooses which levels appear under a project's
-name: `["tabs", "panes"]` (default), `["tabs"]`, `["panes"]`, or `[]` for project names
-alone.
+**Filtering.** Type in "Find a project or pane" (`Ctrl+Shift+S`) to narrow the tree to
+projects, tabs and panes whose name, title, program or directory contains what you typed.
+Case doesn't matter. When nothing matches, "Clear the search" empties the field.
 
-**Showing only activity.** Press the pulse-line button at the head of the sidebar, or
+**What is listed.** In Settings > Interface > Layout, "Tree view" lists what each
+project holds, joined by tree lines. Under it, Tabs and Panes choose the levels: both
+(the default), tabs only, or panes only. One of them always stays on. In a file that is
+`sidebar = ["tabs", "panes"]`; an empty `sidebar = []` is reported as a problem and both
+are used. With Tree view off (`sidebar-tree = false`), each project lists its tabs flat
+beneath it, with no tree lines and no pane rows, and Tabs and Panes keep their values
+until you turn it back on. Folding a project still works.
+
+**Showing only activity.** Press Activity at the head of the sidebar (All goes back), or
 choose "Show only activity in the sidebar, or everything" in the palette (`activity`,
 `Ctrl+Shift+Y`), to list only panes that are agents or have something to say. Shells,
-editors and monitors go. Press it again and everything is back. The window remembers your
-choice. The number beside the button is how many panes need you.
+editors and monitors go. Press All and everything is back. The window remembers your
+choice. With nothing to list it says "Nothing is working or waiting.", with "Show
+everything".
 
 Each row shows the pane's name, how long it has been as it is, and under the name its
 state and what its program says, as `wants permission · Allow the edit?`. An agent another
 agent started says whose it is, as `waiting · from Claude`, and one that started others
 counts them, as `working · 3 started`. Press a row to go to that pane. In each project,
-panes that need you come first, then those at work, then finished, then agents at rest. A
-machine with nothing to list says "nothing at work".
+panes that need you come first, then those at work, then finished, then agents at rest.
 
 - A long command at a shell that marks its commands (`isc shell-integration` sets bash and
   zsh up) gets a row with what you typed and how long it has run.
@@ -922,7 +961,7 @@ terminal](#the-whole-interface-in-a-terminal). So does the page `isc hub` serves
 a browser"), though there agents at rest are always listed, and there's no filter or
 forget arrow.
 
-**From the keyboard.** `Ctrl+Shift+L` (leader `e`) puts the keyboard in the field. Down
+**From the keyboard.** `Ctrl+Shift+S` (`⇧⌘S` on a Mac, leader `e`) puts the keyboard in the field. Down
 and Up move a highlight through the rows, or the matches after you've typed. Left folds
 the highlighted project or tab, Right unfolds it. Enter goes to the row and gives the
 keyboard back to the pane; with none highlighted, it goes to the project whose name you
@@ -937,7 +976,8 @@ with no name is dragged by its pane's row. Panes aren't ordered here.
 ## 7. Tabs
 
 Tabs keep a separate layout of panes for each thing you're working on. A tab lasts as long
-as it holds a pane: close its last pane and the tab closes.
+as it holds a pane: close its last pane and the tab closes. A project with no tabs left
+stays, and the window says nothing is running there, with New tab first among the ways on.
 
 | To | Do |
 |---|---|
@@ -945,7 +985,7 @@ as it holds a pane: close its last pane and the tab closes.
 | Switch | Click the tab; `Ctrl+Tab` / `Ctrl+Shift+Tab`; `Ctrl+PageDown` / `Ctrl+PageUp`; `Alt+1` to `Alt+9` for the project's first to ninth tab (`⌘1` to `⌘9` on macOS, leader `1` to `9`); `isc tab next`, `isc tab prev`, `isc tab select TAB`. |
 | Close | The cross on the tab, a middle click, `Ctrl+Shift+Q`, or `isc tab close [TAB]`. The window asks first. |
 | Move | `Ctrl+Shift+PageUp` / `Ctrl+Shift+PageDown`; `isc tab move TAB INDEX`, counted from 0; or drag the tab onto another, along the top or in the sidebar. It takes that tab's place. |
-| Name | The pencil on its sidebar row, "Name this tab" in the palette, or `isc tab rename TAB NAME`. |
+| Name | "Rename" in its menu, "Name this tab" in the palette, or `isc tab rename TAB NAME`. |
 
 - **Closing a tab closes every pane in it.** `isc tab close` doesn't ask.
 - A tab shows its panes as tiles, with the focused pane's program in front, and its name or
@@ -998,12 +1038,14 @@ A pane with no command runs the first of these that applies:
 - **Title**: what the program set, without a busy mark such as an agent's spinner. `isc ls`
   shows the title exactly as set.
 - **Tile**: chosen from the program's name. About six hundred programs have their own mark,
-  in their maker's colour; anything else gets the terminal's. To give your own program one,
+  in white on their maker's colour; a maker whose colour is black, as OpenAI or GitHub, gets
+  a black mark on a white card, and a mark drawn in several colours, as Gemini's,
+  Firefox's or Julia's, keeps them on a white card. Anything else gets the terminal's. To give your own program one,
   see [Icons for your own programs](#icons-for-your-own-programs). The list is fixed.
 
   | Kind | Programs |
   |---|---|
-  | Agents | claude, codex, gemini, copilot, cursor-agent, opencode, pi, amp, goose, hermes, openclaw, nemoclaw, cline, qwen, kiro, kilo, roo, kimi, trae, codebuddy, qoder, jules, junie, devin, openhands, grok, antigravity, zencoder, vibe, and aider, crush, droid, auggie and paperclipai, which share one mark in different colours |
+  | Agents | claude, codex, gemini, copilot, cursor-agent, opencode, pi, amp, goose, hermes, openclaw, nemoclaw, cline, qwen, kiro, kilo, roo, kimi, trae, codebuddy, qoder, jules, junie, devin, openhands, grok, antigravity, zencoder, vibe, aider, crush, droid, auggie and paperclipai |
   | Models | ollama, lms, vllm, deepseek, hf, nvidia-smi |
   | Editors | nvim, vim, emacs, hx, zed, codium, subl, the JetBrains editors, xcodebuild |
   | Version control | git, lazygit, tig, gitui, jj, gh, glab, hg, svn, git-lfs, tea, gt |
@@ -1033,15 +1075,22 @@ A pane with no command runs the first of these that applies:
 The header shows, in order: the icon; the title, or the name you gave the pane; the
 directory, unless the title has it; a mute mark; a crossed-out robot while the pane keeps
 agents out (see [Agents](#11-agents)); an eye or a keyboard while a guest can look at the
-pane or type in it; the state as a word, when the pane isn't idle; a percentage, when the
-program reports progress; what the state is about; and "Enter closes" on a kept pane whose
-program has ended.
+pane or type in it; a chip with the state, when the pane isn't idle, with a percentage when
+the program reports progress, what the state is about and how long; "Floating" on a float;
+and "Enter closes" on a kept pane whose program has ended.
+
+The focused pane has an accent outline and a tinted header. A pane that's waiting for you
+has an amber outline, an amber header and a glow round its edge.
 
 Buttons show on the focused pane and the pane under the pointer: split right, split down,
-float (on a float: put into the layout, keep on top, show over every tab), minimize, fill
-the tab, share (an eye: see [Sharing one project or one
-terminal](#sharing-one-project-or-one-terminal)), close. A pane on another machine has no
-share button. A two-pixel line under the header shows the state as a colour.
+float (put into the layout, on a float), minimize and fill the tab, or "Stop filling" while
+the pane fills the tab; then `⋯` for the pane's menu, and close. Under the pointer the
+header also says how much memory the pane's programs use, and how much processor while
+they're busy. The pane's menu (`⋯`, or right-click the header) has the same five
+arrangements along its top, and everything else: rename, clear history, keep on
+top and show over every tab (on a float), share (see [Sharing one project or one
+terminal](#sharing-one-project-or-one-terminal)), mute, keep agents out, and close. A pane
+on another machine has no share item.
 
 The `pane-header` setting:
 
@@ -1056,7 +1105,7 @@ this setting resizes the terminals.
 
 ### Splitting and focus
 
-- **Split right / down**: `Ctrl+Shift+O` / `Ctrl+Shift+E`, the header buttons, or
+- **Split right / down**: `Ctrl+Shift+O` / `Ctrl+Shift+E`, the pane's menu, or
   `isc split right|down [PANE] [-- COMMAND…]`. The new pane takes half of the pane it
   splits. With a floating pane focused, the tiled layout is split.
 - **Focus by direction**: `Ctrl+Alt+arrow`, or `isc focus left|right|up|down`, across tiled
@@ -1108,8 +1157,9 @@ of the space being divided. From the command line:
 
 ### Filling the tab (zoom)
 
-Press `Ctrl+Shift+Enter`, use the header button, or run `isc zoom [PANE] [--off]`. The pane
-fills the tab and the others keep their size underneath.
+Press `Ctrl+Shift+Enter`, choose "Fill the tab" in the pane's menu, or run `isc zoom [PANE]
+[--off]`. The pane fills the tab and the others keep their size underneath. "Stop filling"
+in its header puts it back.
 
 ### Floating panes
 
@@ -1122,7 +1172,7 @@ as you like.
 | Float the focused pane, or put it back | `Ctrl+Shift+G`; `isc float [PANE] [--rect X,Y,W,H]`, `isc tile [PANE]` |
 | Move | Drag the header |
 | Resize | Drag any edge or corner |
-| Keep on top of other floats | `Ctrl+Shift+K`, the header button, `isc pin [PANE] [--off]` |
+| Keep on top of other floats | `Ctrl+Shift+K`, the pane's menu, `isc pin [PANE] [--off]` |
 | Put over the left half, right half, middle or whole tab | The palette commands `float-left`, `float-right`, `float-centre`, `float-fill`. They have no default keys. |
 | Hide or show every float in the tab | `Ctrl+Shift+H`, the switch in the top bar, `isc floats show\|hide` |
 | Hide one float, and bring it back | `isc hide [PANE]`, `isc show PANE` |
@@ -1135,7 +1185,7 @@ as you like.
 - Hidden floats keep running. A float closes when its command exits, like every pane.
 
 **Over every tab.** To make a float show over whichever tab of the project is in front, in
-the same place and size, use the button beside "keep on top" in its header, "Show this
+the same place and size, choose "Show over every tab" in the pane's menu, "Show this
 floating pane over every tab" in the palette, leader `I`, or `isc follow [PANE] [--off]`.
 
 - Closing a tab doesn't close it while the project has another tab.
@@ -1192,6 +1242,8 @@ Escape sequences behave as they do in Ghostty.
 
 Every pane also has `COLORTERM=truecolor`, `TERM_PROGRAM=insensical`, `TERM_PROGRAM_VERSION`, `INSENSICAL_PANE` and `INSENSICAL_SOCKET`.
 
+On a Mac, a pane gets `LANG` when insensical has none of `LANG`, `LC_ALL` and `LC_CTYPE`, as it doesn't when you open it from the Dock or Finder. It's your language and region from System Settings in UTF-8, such as `en_US.UTF-8`, or `en_US.UTF-8` if your Mac has no locale for them. Without it, programs treat every letter outside ASCII as bytes. A `LANG` you set yourself is kept.
+
 ### Scrollback
 
 Each pane keeps 10 MB of history. The `scrollback` setting changes it, from 1 to 200 megabytes, for panes started afterwards. The daemon holds the history; section 17 covers what happens to it when the daemon stops.
@@ -1204,6 +1256,15 @@ Each pane keeps 10 MB of history. The `scrollback` setting changes it, from 1 to
 
 - It needs a shell that marks its prompts: fish 4 does, and bash and zsh do with the line `isc shell-integration` prints. Without marks the keys do nothing.
 - After the last command, `Ctrl+Shift+Down` goes to the bottom.
+
+**Clearing it.** `Ctrl+Shift+L` (`⌘K` on a Mac, leader `C`) empties the pane's history and its screen, in every window and browser that shows it. The program then draws again: a shell its prompt, a full-screen program its screen. Nothing is typed into it. What the pane keeps for after a restart is emptied too.
+
+- The eraser button in a pane's header does the same. One on a tab, and on a project's heading in the sidebar, clears every pane in it. Each is also in the palette.
+- A pane is busy when something other than its shell runs there, or it says it's running. A busy pane isn't cleared until you say so: you're told what runs there and asked. A tab or a project always asks first, and names its busy panes.
+- `isc clear` does the same from any terminal. It clears the pane you run it in, or the one with the keyboard. Name another by number or name.
+
+- `--tab` clears every pane of this pane's tab, or of the tab you name. `--project` does the same for a project.
+- With busy panes, `isc clear` clears nothing, names them and exits with an error. `--force` clears them anyway.
 
 ### Text
 
@@ -1219,7 +1280,7 @@ Each pane keeps 10 MB of history. The `scrollback` setting changes it, from 1 to
 ### Colours
 
 - The sixteen named colours come from the theme. 256 colours and true colour show as the program gives them.
-- **On a light theme**, text with less than 3:1 contrast against its background is painted a darker shade of the same hue. What you copy is unchanged.
+- **On a light theme**, text that programs drew for a dark terminal, such as pale yellow or white, is painted in a darker colour from the theme's own, so you can read it against its background (4.5:1). Text on a coloured cell is measured against that cell. What you copy is unchanged.
 
 ### Selecting and copying
 
@@ -1411,6 +1472,8 @@ Each state has its own mark in its own colour. `running` is a spinning ring, the
 - **On the pane**: its header says the state in words, what the program said about it, and how long it has needed you. A waiting pane glows.
 - **Everywhere else the pane appears**: its tab, its sidebar row, its dock chip. Hover over a mark to read the words.
 - **As counts**, at the top of the sidebar or in the top bar: how many panes need you, and how many finished. The tray, the Mac's menu bar and `isc tui` show the same numbers.
+- **In the sidebar's Needs you panel**, at its bottom, while any pane waits or failed: each one's tile, its name in its project and what it says, in the order `Ctrl+Shift+A` walks them. Click a row to go to that pane, or right-click it for its menu.
+- **Under the bell**: press it for the list "Finished, not looked at yet". Click a row to go to that pane. Escape or a click outside closes it.
 - **On a folded tab or project**: the most urgent state of what's inside, in this order: `waiting`, `failed`, `done`, `running`. Unfolded, the rows beneath show their own states.
 
 A waiting pane says what it waits for when its program tells it: "wants permission", "asks a question" or "needs you to sign in". An agent's permission question names the tool and what it would act on, such as `Needs permission: Bash · git push origin main`.
@@ -1441,7 +1504,7 @@ insensical works out a state from four things. The strongest wins.
    - **Progress** (OSC 9;4): a percentage or an unknown amount is `running`; removed is `done` if the pane was running; error is `failed`; paused is `waiting` until the command ends or you look.
    - **A notification** (OSC 9, 777 or 99) is `waiting` with its text, until you look. It doesn't change a `done` or `failed` that was reported.
    - **The bell**, while nobody is looking, is `waiting` until you look. It marks the pane and never sends a desktop notification.
-   - **A password prompt** is `waiting`, with the line it asks on, such as `[sudo] password for you:`. It's spotted when the terminal stops showing what you type while still taking a whole line, as `sudo`, `ssh`, `git` and `read -s` do. It stops when typing shows again or the command ends.
+   - **A password prompt** is `waiting` and "needs you to sign in", with the line it asks on, such as `[sudo] password for you:`. The page's card for it has a password field. It's spotted when the terminal stops showing what you type while still taking a whole line, as `sudo`, `ssh`, `git` and `read -s` do. It stops when typing shows again or the command ends.
 3. **The foreground command ending**: `done` if the pane was `running`, or if the command ran for 30 seconds or more (or as long as `long-command` says). This needs no shell integration.
 4. **The program itself ending** in a kept pane: `failed` if it exited with a non-zero status.
 
@@ -1478,7 +1541,7 @@ A program can also:
 
 - **Say what it's blocked on**: `permission`, `question` or `auth`. The pane shows "wants permission", "asks a question" or "needs you to sign in", in `isc ls` too.
 - **Give its name**, as Claude Code gives `claude-code`. If insensical has an icon for it, or you gave one under `[icons]`, the pane uses that icon.
-- **Report on tasks of its own**, such as an agent's helpers. The pane shows the most urgent one, and the overview adds a count like "3 tasks · 1 waiting".
+- **Report on tasks of its own**, such as an agent's helpers. The pane shows the most urgent one, and the overview adds a count like "3 tasks · 1 waiting". If the program itself says done or idle while a task still works, the pane shows running, unless another task waits or failed.
 - **Take back what it said** (`state=clear`).
 
 It outranks an agent's own hooks while it says working or waiting, and the hooks count again after it says anything else. If it has been silent while working, a hook that says waiting, done or failed is believed. Working and waiting end when the command ends at your shell's prompt. `done` and `failed` stay until you've seen them.
@@ -1566,11 +1629,15 @@ crossed-out robot.
   insensical work as ever. `isc` run in another pane is refused, whoever typed it, and
   so are `isc --host` and `isc tui --host` run in a pane, on the other machine, once
   you've let agents on other machines in. A terminal you open from a pane is in that pane too.
+  A window or `isc hub` you start from a pane is you, as long as it's the one installed
+  beside the server. Anything else in a pane is a program, whatever it says it is.
 - Only you let agents in again: `isc protect --off` run in a pane is refused.
 - It holds back an agent that follows what it's told. It isn't a wall: a program that
   runs as you can't always be told from you. One that leaves the pane, such as tmux or
   `setsid` at a shell, counts as you, and so does `isc --host` run in a pane without
-  `INSENSICAL_PANE`.
+  `INSENSICAL_PANE`. So does a browser connection carried by `isc proxy` run in a pane,
+  and a program that runs the window or `isc` its own way, or starts it in its own
+  place after connecting.
 
 > [!WARNING]
 > Letting an agent run `isc` lets it do anything you can. `isc run`, `isc split` and
@@ -1696,7 +1763,7 @@ What each agent reports:
 
 | Agent | `running` | `waiting` | `done` | `failed` | `idle` |
 |---|---|---|---|---|---|
-| Claude Code | A prompt; a tool has run | A permission or a question | It finished responding, with its first line | It stopped on an error | A session starts or ends |
+| Claude Code | A prompt; a tool has run | A permission or a question | It finished responding, with its first line; not while work it started in the background is still going | It stopped on an error | A session starts or ends |
 | Codex | A prompt; a finished tool | A request for approval | End of a turn, with its first line | Not reported | An interrupted turn |
 | Gemini CLI | A prompt; a finished tool | Asking to use a tool | End of a turn, with its first line | Not reported | None |
 | opencode | Working | A permission or a question | Going quiet after working | An error, with its message | A turn you stopped |
@@ -1763,7 +1830,7 @@ isc notify "Build" "Finished"
 ```
 
 - `--resume` says how to pick the work up again. The pane offers that command at its
-  prompt after the daemon has stopped.
+  prompt after the daemon has stopped, once, and not if the program ended by itself.
 - Inside a pane they need nothing more. Outside one they need `--pane`.
 - A message that begins with a hyphen works: `isc status done -m "- fixed"`. In a script,
   `--message="$text"` keeps the text and the option together.
@@ -1852,8 +1919,9 @@ terminal.
   pane; `×` closes it.
 - A finish goes after six seconds; a wait or failure stays until you've seen the pane.
 - Three show at once; a line above them counts the rest and opens the overview.
-- When the daemon refuses something you asked for, a notice headed "It could not be done"
-  says why.
+- What the window says of no pane, such as "It could not be done" when the daemon refuses
+  something you asked for and why, shows at the middle of the window's foot. It goes by
+  itself after six seconds, or when you click it.
 
 **Sound.** A pane that waits or failed makes a short sound of two rising notes. A finish
 makes a softer single note, if you ask for it.
@@ -1902,7 +1970,7 @@ whether to allow them. The menu bar and the Dock also say what needs you.
 - At the top of **Notifications** in the settings, a line says whether macOS lets
   insensical notify you and badge its Dock icon. **Open System Settings** takes you there.
 - `menu-bar = false` removes the menu bar item and `dock-badge = false` the Dock number,
-  both under **Menu bar and Dock** in the settings, a section only a Mac has.
+  both under **Menu bar and Dock** on Settings > General, a card only a Mac has.
 
 ### When nobody is attached
 
@@ -2109,12 +2177,14 @@ back, set it to `none` in `[keys]`, use the leader keymap, or lock the keys.
 ### Seeing every key
 
 Press `Ctrl+Shift+/` or `Ctrl+F1`, or leader `?`, or choose "Show every key" in the palette.
-A sheet lists every command under its heading with its keys, for the keymap in use with your
-changes.
+A sheet lists the commands in a card for each heading, each with its keys, for the keymap in
+use with your changes.
 
-- A command with no key is listed greyed. If your own `[keys.direct]` or `[keys.leader]`
-  table took its key, the sheet says `not in your [keys.direct]`.
-- Typing narrows the sheet by a command's words, heading or keys: `split`, `ctrl alt`.
+- Commands with no key are folded at the foot of their card, under a line such as
+  "2 without a key". Click it to show them. If your own `[keys.direct]` or `[keys.leader]`
+  table took a command's key, it isn't folded: its row says `not in your [keys.direct]`.
+- Typing narrows the sheet by a command's words, heading or keys: `split`, `ctrl alt`. It
+  searches every command, with a key or without.
 - **A chord you press while the sheet is open is described, not run.** The foot shows what
   you pressed and the command it runs. This is also how to find out how a key is written.
 - Escape, Enter, "Close" or a click outside closes it.
@@ -2300,7 +2370,8 @@ timeout = 3
 | A kept pane whose program has ended | Enter closes it |
 | The restart question | Enter restarts, Escape doesn't |
 | The question before a tab or a project closes | Enter closes, Escape doesn't |
-| The new project's name and directory | The keys of a field below, Tab, Shift+Tab, Up, Down, Enter, Escape |
+| The question before panes are cleared | Enter clears, Escape doesn't |
+| The new project's name and directory | The keys of a field below; Tab and Shift+Tab go round the card; Up and Down mark a folder, Right goes into it, Left goes up; Enter, Escape |
 | The question about agents | Enter adds the hooks, Escape doesn't, `N` stops the offer |
 | Adding a machine | The keys of a field below, Up, Down; Enter meets the marked machine, then gives the answer of the coloured button; Escape leaves |
 | Where one of several machines is chosen: a new project, the settings sheet | `Alt+M` goes to the next machine |
@@ -2486,7 +2557,7 @@ prints the same complete file as without `--host`.
 An example:
 
 ```toml
-theme = { light = "paper", dark = "fjord" }   # or "ghostty", or "ghostty:Tokyo Night"
+theme = { light = "fjord", dark = "fjord" }   # or "ghostty", or "ghostty:Tokyo Night"
 font-family = "JetBrainsMono Nerd Font"
 font-size = 12
 shell = "fish"
@@ -2522,10 +2593,10 @@ over the window. Nothing is typed as a value: a setting is switched, picked or s
 number steps by one, the background's opacity by 0.05, and `long-command` (up to 3600
 seconds) by five.
 
-- **Pages are down the left**, under the search field: **Hub**, Interface, Themes, Terminal,
-  Shortcuts, Remote Hosts, Notifications and Agents. On a Mac, Menu bar and Dock follows
-  Themes. The sheet opens on the page you last looked at. Arrows by the page's name go back
-  and forward through pages you've visited. `Esc` or the X at its top right closes it.
+- **Pages are down the left**, under the search field: General, **Hub**, Interface, Terminal,
+  Shortcuts, Remote Hosts, Notifications and Agents. The sheet opens on the page you last
+  looked at. Arrows by the page's name go back and forward through pages you've visited.
+  `Esc` or the X at its top right closes it.
 - **A change applies at once** and is written to that setting's one line in `config.toml`.
 - **Type to find a setting** by name or what it does.
 - **To reset a setting** your file changes, put the pointer on its row and press the small
@@ -2540,7 +2611,7 @@ seconds) by five.
 | A switch | on or off | Click, or `Enter` |
 | Two words on a track | one of two, such as the density or where the tabs are | Click one, or `Enter` for the other |
 | A word with `⌄` | one of more than two, such as the pane header, motion, or how long a device stays paired | Click or `Enter` for a menu with the current value ticked. Arrows, `Home`, `End`, a letter, `Enter` to choose, `Esc` to leave it |
-| Buttons side by side | any of a few, such as what the sidebar lists | Click one to tick or untick it, or `Enter` to go through every combination |
+| Buttons side by side, `✓` on those that are on | any of a few, such as what the sidebar lists | Click one to tick or untick it, or `Enter` to go through every combination |
 | A number with `−` `+` | text size, space between panes | Click `−` or `+`, or `Ctrl+Right` and `Ctrl+Left` |
 | A value with `›` | a theme, a font, a shell | Click or `Enter` for a list in place of the rows. Type to narrow, `Enter` chooses, `Esc` goes back |
 | Key caps | the leader | Click or `Enter`, then press the key. It needs `Ctrl`, `Alt` or `Cmd` held (`⌃`, `⌥`, `⌘`). `Esc` cancels |
@@ -2559,11 +2630,12 @@ seconds) by five.
 The pages:
 
 - **Hub** is for this computer's server and who can reach it.
-  - **Server and Connected**: the server's state, version and the paths of its socket and
-    settings file, each with a copy button, and `Restart Server`, which asks first. The
-    Version row has `Check Now`, and `Update` when a new release is out, with the switch
-    **Check for updates automatically** under it. See [A new version installed
-    underneath](#a-new-version-installed-underneath). **Connected** lists every window,
+  - **Server and Connected**: the server's state over the version and protocol of the hub.
+    On a hub that's this computer's own. On a computer that joined a hub, it's what that hub
+    said as it connected, or `Version not known` when it isn't connected or is older than
+    this. A protocol that isn't this app's is shown as a warning. With no hub running and none
+    joined, it says `Version not known` too. Then the path of the server's socket
+    with a copy button, and `Restart Server`, which asks first. **Connected** lists every window,
     browser, `isc tui` and the hub's notifications looking at this computer's terminals, with
     what each can do and when it connected. `Disconnect` asks, then ends one; for a named browser or phone,
     `Disconnect and Remove Device` also ends its pairing.
@@ -2590,24 +2662,39 @@ The pages:
     managed on** the hub: add and remove them in Settings > Hub there. It has no browser
     link, Tailscale row, notifications row, Joined machines or Add a Device. **Guests** lists
     the guests it shared something with.
-- **Interface** has five cards: **Starting** (what insensical does when you log
-  in), **Panes** (density, space between panes, pane header), **Tabs
-  and sidebar** (where the tabs are, what the sidebar lists), **Terminal text** (terminal
-  font, text size, ligatures) and **Window** (interface font, motion). The terminal font list
-  shows only fonts of one width; name any other in the file.
-- **Themes** has two cards: **Colours** (the theme, the interface colours) and **Behind the
-  window** (the background's opacity and blur). A theme is shown on the whole window as you
-  move through the list; `Esc` puts back the one you had. A pair, `{ light = …, dark = … }`,
-  shows as "By the desktop's appearance". Picking a theme from the list replaces the pair
-  with one theme; write the pair in the file to have it again.
-- **Terminal** has four cards: **Shell** (the shell, from `/etc/shells`, and the terminal
-  type), **Typing** (input method, Option as Alt, type ahead), **History** (how much each pane
-  keeps, and whether it's kept when the server stops) and **Files and clipboard** (what opens
-  a file, and whether programs may write the clipboard).
+- **General** is the app itself: **At login** (what insensical does when you log in);
+  **Updates**, the version you run and the protocol it speaks, such as `insensical 0.8.0 ·
+  protocol 36`, and when it was last checked, with `Check Now`, `Update`
+  when a new release is out (see [A new version installed
+  underneath](#a-new-version-installed-underneath)), and **Check for updates
+  automatically**; on a Mac, **Power**, with **Keep this Mac awake** (`keep-awake`), and
+  **Menu bar and Dock**, with **Show in the menu bar** and **Count on the Dock icon**; and the
+  **Settings file**, which opens when pressed, with a copy button.
+- **Interface** is the window around your terminals. **Look**: the interface colours,
+  **Neutral** or **From the terminal theme**, the interface font, and motion. **Layout**:
+  density, space between panes, the pane header, where the tabs are, what the sidebar lists,
+  and whether to show idle agents in Activity. **Window**: the interface's opacity and blur
+  behind the window. **Panes**: the panes' opacity. Each opacity shows as a percent; 100% is
+  solid.
+- **Terminal** is what's inside each pane. **Appearance**: System, Light or Dark, as three
+  pictures. System follows the desktop; Light and Dark hold the window there. **Terminals**:
+  Same as the window, Light or Dark.
+  **Dark** and **Light** show every theme's dark and light versions as small previews in
+  their own colours, the one in use ringed. Where both are in use, on System or with the
+  terminals on the other side from the window, you see both, each saying what uses it;
+  otherwise only the one. Pick a preview and it's used for that side, written
+  as `theme = { light = …, dark = … }`. **All themes** opens a list that also has Ghostty's
+  theme and your own: a theme is shown on the whole window as you move through it, `Esc`
+  puts back the one you had, and picking one uses it for both sides.
+  **Text**: the font, text size and ligatures. The font list shows only fonts of one width;
+  name any other in the file. **Behaviour**: the shell (from `/etc/shells`), the terminal
+  type, answering as tmux, type ahead, how much each pane keeps and whether it's kept when
+  the server stops, whether programs may write the clipboard, what opens a file, the input
+  method, and Option as Alt.
 - **Remote Hosts** has one card per computer you've named. The first row shows its state
   (Connected, Can't be reached, or that its server can't be used) and where ssh goes, with a
   `Check` button that meets it and says what's wrong in plain words. Press the row to fold or
-  open the card. Open, it has the colour and icon, whether it's careful (it asks before a
+  open the card. Open, it has the icon, whether it's careful (it asks before a
   paste of more than a line), `Rename`, the address (`Change`, type it, `Enter` keeps it,
   `Esc` leaves it) and `Forget`, which asks once and changes nothing on that computer.
   - A card starts open if it's your only one, just added, or needs you; otherwise folded.
@@ -2618,7 +2705,7 @@ The pages:
     copy button. Where the copy there was built from source, the row says to build the new version there
     the same way. A host with a newer insensical says to update this computer. Where `ssh`
     has a question, the row has an `Answer` button.
-  - `Add Remote Host` opens a dialog with the machines of your tailnet and the names in your
+  - `Add Remote Host`, at the top of the page, opens a dialog with the machines of your tailnet and the names in your
     ssh configuration under two tabs; anything you type is given to ssh.
 - **Notifications** has three cards: **Being told** (notifications at all, the tray's icon),
   **What you're told of** (a pane that waits, something that fails, something that finishes,
@@ -2678,7 +2765,7 @@ Eight themes come with insensical:
 
 | Name | Looks like | Has |
 |---|---|---|
-| `fjord` | Cool blue-grey, with a sea-green accent | dark |
+| `fjord` | Cool blue-grey, with a sky-blue accent; by day, cool paper with a deeper blue | dark and light |
 | `ember` | Warm brown, with an amber accent | dark |
 | `paper` | Warm off-white, with dark ink | light |
 | `tidepool` | Deep sea-green water, with coral | dark and light |
@@ -2688,7 +2775,17 @@ Eight themes come with insensical:
 | `quartz` | Quiet grey with soft colours and a touch of rose | dark and light |
 
 A theme with both follows the desktop: `theme = "lantern"` is dark when the desktop is dark
-and light when it's light. It can't be held to one side.
+and light when it's light. To hold the window to one side whatever the desktop is, set
+`appearance = "dark"` or `"light"`. You then get that side of your theme: the `dark` or
+`light` of a pair, or that version of a single theme. A theme with only one version, such
+as `ember`, stays as it is.
+
+The terminals can have their own side. `terminal-appearance = "dark"` keeps them, and
+their panes' ground, in your theme's dark version while the window around them follows
+`appearance`, for example a light window with dark terminals. The window's greys, accent
+and state colours stay the window's side; with `interface-style = "terminal"` the window
+is worked out from its own side's version. `"light"` is the other way round, and
+`"interface"`, the default, has the terminals follow the window.
 
 A theme name is looked up like this:
 
@@ -2707,8 +2804,8 @@ A theme name is looked up like this:
 ### A neutral interface
 
 By default the window around the terminals is grey: near-black on a dark desktop, near-white
-on a light one. That leaves the colour to the terminals. `interface-style = "terminal"` (the
-switch Follow terminal theme in the settings) works the window out from the theme instead, so
+on a light one. That leaves the colour to the terminals. `interface-style = "terminal"` (From
+the terminal theme in the settings) works the window out from the theme instead, so
 a warm theme gives a warm sidebar. `isc tui` is the other way round: it's in the theme's
 colours unless you write `interface-style = "insensical"`.
 
@@ -2719,21 +2816,34 @@ colours unless you write `interface-style = "insensical"`.
 
 ### A see-through window
 
-`background-opacity` sets how much of what's behind the window its background hides, from
-`0.2` to `1`. At `1` the window is solid but for the little `background-blur`
-lets through. Below that, your desktop shows through behind the text:
+By default your desktop shows through the window, blurred. The sidebar and
+the panes are tinted thick enough that their words read over any desktop, and between the
+panes the desktop shows. Two settings set how much shows through, each from `0.2` to `1`,
+or 20% to 100% on Settings > Interface:
 
 ```toml
-background-opacity = 0.85
+interface-opacity = 0.7     # the sidebar
+background-opacity = 1      # each pane; 1 is the theme's background, solid
 background-blur = true
 ```
 
-- Only the background thins. Text, cells a program coloured, tiles, borders, sheets, questions
-  and floating or zoomed panes stay solid.
-- `background-blur` asks the desktop to blur what shows through, and even at an opacity of `1` it lets a little through the sidebar and the space
-  around the panes. On Hyprland and other compositors that blur by their own rules, turn blur
-  on for the window there (the class and title are both `insensical`). On a desktop that
-  doesn't blur, turn it off if you'd rather the sidebar be fully solid.
+- `interface-opacity` sets the sidebar. The words beside the panes keep a ground thick
+  enough to read on, whatever you set.
+- `background-opacity` sets the panes and nothing else. Text, cells a program coloured,
+  tiles, borders and floating or zoomed panes stay solid.
+- Left out, both follow the blur: with `background-blur` on, the sidebar is 0.5 and the
+  panes 0.58 on a dark theme, 0.66 on a light one; with it off, both are solid, since
+  see-through over a sharp desktop is hard to read. What you set is used either way.
+- Dialogs, the palette, the settings and the overview are translucent. While one is open, the
+  window under it fades, so you see your blurred desktop through it, not the text behind.
+  With blur off and both opacities left out they're solid and nothing fades.
+- `background-blur` asks the desktop to blur what shows through the window, as strongly as
+  your desktop blurs. It's one request for the whole window, so it can't differ between the
+  sidebar and the panes. On Hyprland and other compositors that blur by their own rules,
+  turn blur on for the window there (the class and title are both `insensical`). On a
+  desktop that doesn't blur, turn it off.
+- A waiting pane's glow is left out on a pane thinner than the default: it's too thin to
+  hide it.
 - With no compositor there's nothing to show through, and the window is drawn over black.
 - Both apply as you save. Text over a busy picture is harder to read.
 
@@ -2748,7 +2858,7 @@ name = "Fjord"
 foreground = "#d0d4dc"
 background = "#101216"
 cursor = "#d0d4dc"        # optional: the foreground if left out
-selection = "#7fd1c7"     # optional: the accent if left out
+selection = "#3aaceb"     # optional: the accent if left out
 palette = [               # the sixteen named colours: eight normal, then eight bright
     "#1b1e25", "#f0706a", "#7fd18b", "#f0b35a", "#6fa8ff", "#c58fe8", "#7fd1c7", "#c5cad3",
     "#4c5464", "#ff8f8a", "#9be3a5", "#ffc978", "#93beff", "#d9aef5", "#9fe6dc", "#eef1f6",
@@ -2800,7 +2910,7 @@ border = "#242933"
 text = "#d0d4dc"
 text-muted = "#767f90"
 text-faint = "#4c5464"
-accent = "#7fd1c7"       # the focused pane, the current item
+accent = "#3aaceb"       # the focused pane, the current item
 running = "#6fa8ff"      # pane states
 waiting = "#f0b35a"
 done = "#7fd18b"
@@ -3248,15 +3358,13 @@ failure aren't tried and are marked `·`. `→` marks what `isc host put` can pu
 server running yet isn't a failure: the first command that needs one starts it.
 
 The names are lines under `[hosts]` in your settings file: `build = "me@build.example.com"`.
-A machine can also carry a colour, an icon and a mark that it's one to be careful on:
+A machine can also carry an icon and a mark that it's one to be careful on:
 
 ```toml
-build = { ssh = "me@build.example.com", color = "teal", icon = "server", careful = true }
+build = { ssh = "me@build.example.com", icon = "server", careful = true }
 ```
 
-- `color` is `#rrggbb` or one of `blue`, `green`, `orange`, `purple`, `pink`, `teal`,
-  `gold`, `grey`, `rust` and `indigo`. With none set, a machine gets one from its name.
-- `icon` is one of `server`, `laptop`, `desktop`, `mini`, `nas`, `board`, `phone`,
+- `icon` is one of `server`, `laptop`, `desktop`, `mini`, `nas`, `board`,
   `container` and `cloud`. Any other word shows as a server.
 - A tailnet machine that `isc host add` found also keeps its node: `build = { ssh =
   "me@build", node = "nABC123CNTRL" }`. See "A machine of your tailnet" below.
@@ -3409,8 +3517,8 @@ you haven't named, give it where `ssh` goes: `isc host answer me@build`. In the 
 
 `isc hub` lets you use insensical from a phone, a tablet, or a laptop with nothing
 installed. On a phone it opens on what needs you, with each agent's question and keys to
-answer it, and it can notify you when you're away. On a wide screen it's the sidebar and
-the tab in front. Anywhere, you can open a pane, read it, scroll back, and type into it.
+answer it, and it can notify you when you're away. On a wide screen a column at the left
+leads to everything, and Home or the pane you chose is beside it. Anywhere, you can open a pane, read it, scroll back, and type into it.
 
 It's a separate program that runs only when you ask for it, and a client of the daemon like
 the window. The daemon still listens on nothing but its socket.
@@ -3460,7 +3568,6 @@ restart` moves it. On a joined machine it names the hub and whether it's connect
 `--json` adds `owner` (`systemd`, `launchd`, `window` or `terminal`), `version` and
 `installed`, and a `tailscale` object with `state`, `address` and `serves_port`; a joined
 machine's leaves out `door`, `tailscale` and `members`, and `devices` counts its guests.
-On a Mac, status also says the hub keeps the Mac awake while it's on power.
 
 The hub keeps what you start it with. `--name`, `--port`, `--listen`, `--tls-cert` with
 `--tls-key`, `--guest-port` and `--guest-name` each replace the one it kept; what you leave
@@ -3541,20 +3648,18 @@ or no terminal, it prints the link on one line and the letters on the next. `--j
 `url`, `code` (the same link) and `typed`. `--url https://desk.example.ts.net` prints the
 address and code for a name other than this machine's own.
 
-**Icon and colour.** A device has an icon (phone, tablet, laptop, desktop or browser) and
-a colour (blue, green, orange, purple, pink, teal, gold, grey, rust or indigo). Add a
-Device has an **Icon** row to pick both. Left alone, the icon is the one the device's
-browser reports and the colour comes from its name. Your choice is never replaced by a
-guess.
+**Icon.** A device is shown by a picture of what it is: phone, tablet, laptop, desktop or
+browser. Add a Device has an **Icon** row to pick it. Left alone, it's the one the
+device's browser reports. Your choice is never replaced by a guess.
 
 ```
-isc hub device add --name slate --icon tablet --color teal
+isc hub device add --name slate --icon tablet
 isc hub device set slate --icon laptop
-isc hub device set slate --no-icon --no-color
+isc hub device set slate --no-icon
 ```
 
-`--no-icon` and `--no-color` take a choice away. `isc hub device ls` shows both; `--json`
-has `icon` and `color`, null where none was chosen.
+`--no-icon` takes the choice away. `isc hub device ls` shows it; `--json` has `icon`, null
+where none was chosen.
 
 **How many, and for how long.** A code pairs one device, within 10 minutes, unless you say
 otherwise. In the window that's under **More options**.
@@ -3615,11 +3720,12 @@ nothing up.
 - **Scan the Code** on the page opens the camera, where the browser may use one.
 - **A home-screen app is a browser of its own.** On an iPhone, the app you add to the home
   screen doesn't share Safari's pairing, so Safari hands it one: press **Add** where the
-  page offers the home screen, and it becomes a device of its own, named after yours, as in
-  `iPhone · home screen`. It may do what yours may and ends when yours does. Its code works
-  once, for 10 minutes, and counts among the devices added from pages. If nothing paired by
-  then, the device is removed and Safari offers the home screen again. A guest's app pairs
-  by a link of its own. You remove or ban each apart. If the app still asks to pair, give
+  page offers the home screen. When the app pairs, it takes your device's place: it keeps
+  its name, as `iPhone`, and Safari's pairing ends, so Safari asks to pair again. It may do
+  what yours did and ends when yours does. Its code works once, for 10 minutes, and counts
+  among the devices added from pages. If nothing paired by then, nothing changes: your
+  device stays and Safari offers the home screen again. A guest's app pairs by a link of
+  its own. You remove or ban it as any device. If the app still asks to pair, give
   it a code of its own and scan with **Scan the Code** in the app, not the Camera app,
   which would open Safari and use the code up.
 - **A paired browser opened at a link with a code** says it's already paired. The code
@@ -3672,7 +3778,7 @@ after it expires.
 - `isc hub device pair-again phone` gives a device a new code and link without removing
   it, for a phone you've replaced or a browser that forgot its pairing. `--json` is for
   scripts, and `--expires` sets how long the code works (10 minutes if left out). The device
-  keeps its name, icon, colour, rights and how long it stays. The browser that pairs takes
+  keeps its name, icon, rights and how long it stays. The browser that pairs takes
   the place of the ones it had, which stay paired until then. The window's and `isc tui`'s
   device lists (`p`) and the page's list have **Pair Again**. A guest is ended and shared
   again instead.
@@ -3697,10 +3803,12 @@ the share ends if that's sooner.
 
 | Option | Default | Other choices |
 |---|---|---|
-| **What they see** | Fixed: only this project and anything you open in it, or only this terminal wherever you move it | |
-| **They can** | `Look` | `Look and type`: shows a warning, and the link can't be made until you press `Let Them Type`. Typing in a terminal here is typing as you |
-| **Where they are** | `On my network` | `Anywhere on the internet`, see [Sharing with someone who isn't on your network](#sharing-with-someone-who-isnt-on-your-network) |
-| **Ends** | `1 day` | `1 hour`, `1 week`, `When I end it`. When time is up they're signed out |
+| **What they can do** | `Only look` | `Look and type`: shows a warning, and the link can't be made until you press `Let Them Type`. Typing in a terminal here is typing as you |
+| **Where they are** | `Your network` | `Anywhere`, see [Sharing with someone who isn't on your network](#sharing-with-someone-who-isnt-on-your-network) |
+| **For how long** | `For a day` | `For an hour`, `For a week`, `Until I end it`. When time is up they're signed out |
+
+They see only this project and anything you open in it, or only this terminal wherever
+you move it.
 
 If "Open in a browser or on your phone" is off, the button reads `Turn On and Make the
 Link` and turns it on first. If the link's address opens only on this computer, the dialog
@@ -3716,8 +3824,8 @@ share only what's on this computer, not a project on another machine.
 ### Sharing with someone who isn't on your network
 
 A client outside your network or tailnet can't open that link. In the dialog, set **Where
-they are** to `Anywhere on the internet`. Then **They can** is `Look` only, and **Ends**
-is `1 hour`, `1 day` or `1 week`: a public link always ends, a week at most.
+they are** to `Anywhere`. Then **What they can do** is `Only look`, and **For how long**
+is `For an hour`, `For a day` or `For a week`: a public link always ends, a week at most.
 
 Press `Open a Public Link`. It has `isc hub` answer to this computer's Tailscale name at
 its guest door (`isc hub --guest-name`, which restarts it and drops no paired device),
@@ -3918,7 +4026,7 @@ The second and third give it to a device that's already paired, and take it back
 
 From a phone you can do what `isc hub device`, `isc hub push`, `isc notify` and `isc
 clients` do. A browser paired as a device that may do everything, or at least change
-settings, has **Settings** in the menu under its letter. Other browsers aren't shown it,
+settings, has **Settings** in the menu under your device's tile (on a wide screen, the settings button). Other browsers aren't shown it,
 and the server refuses if they ask. It covers the computer `isc hub` runs on.
 
 - **This computer** shows its name, that insensical is running, and its version.
@@ -4048,10 +4156,8 @@ background instead and remembers that you asked, so opening the window starts it
 |---|---|
 | `isc hub stop` | Stops the hub now and turns it off: the service is switched off, and the window doesn't start it again. A service file is left for the next `start`; on a Mac the file in `~/Library/LaunchAgents` is removed. Lingering is left as it is: `loginctl disable-linger` is yours to run |
 
-While `isc hub` runs and the Mac is on power, it keeps the Mac awake (the display still
-sleeps), since a sleeping Mac can't be reached. On battery the Mac sleeps as usual.
-Activity Monitor's Energy tab and `pmset -g assertions` show it as `isc`. If macOS refuses,
-`isc hub` says so and runs anyway.
+A Mac that sleeps can't be reached, so insensical keeps it awake whether or not a hub
+runs, unless you turn off `keep-awake` ([Settings](#settings)).
 
 **Headscale, or a proxy of your own.** Point it at `127.0.0.1:7433`, with your own
 certificate. It has to speak TLS to the browser, pass the `Host` and `Origin` headers on
@@ -4081,10 +4187,18 @@ it speaks `https` only.
 
 ### On a phone: Home
 
-**Home** shows what needs you right now, with every project under it.
+**Home** shows what needs you right now, and what's running under it. Your machine's name
+and the bell head it, as they head every place.
 
-At the top is a card for each pane that wants you, most urgent first: waiting, then
-failed, then finished. To answer one:
+The bar at the bottom has three tabs: **Home**, **Everything** and **Activity**. Each keeps
+where you left it: a project you opened in Everything is still open when you come back from
+Activity. Tap the tab you're on to go back to its top.
+
+Under **Needs you** is a deck of cards, one for each pane that wants you, most urgent first:
+waiting, then failed, then finished. You see one card at a time, with the next two peeking
+out under it and where you are in the deck, such as "1 of 4". Swipe the card sideways, or
+press the arrows, for the next one; tap a card that peeks to bring it to the front. To
+answer one:
 
 1. Read the question in large type. Under it is the foot of the pane's real screen, live,
    so you can see the choices the agent drew. Tap it to open the pane.
@@ -4098,20 +4212,45 @@ failed, then finished. To answer one:
 | Password field | Hides what you type, with `Enter` and `Esc`. |
 | **Open the pane**, **Seen** | For a pane that only failed or finished. |
 
-With nothing waiting, the top says **All quiet**.
+With nothing waiting, the deck becomes **All clear**: cards of how things stand, made from
+what your machines report. Swipe or press the arrows to go through them.
 
-Under the cards, each machine has a section with a card per project, lit if it needs you.
-Tap a card to open the pane that needs you, else the one at work, else the one you used
-last.
+| Card | What it shows |
+|---|---|
+| **Agents now** | A ring of your agents by state: at work, needing you, done, failed, at rest. Under it, how many commands are running and how many shells are at a prompt. |
+| **Projects** | Each project, on each machine, with a block per pane coloured by its state. |
+| **Longest at work** | The pane that has been at work longest and for how long, and the next two. Tap one to open it. Shown while something is at work. |
+| **Machines** | Each of your machines and whether it's reachable, with **Start** for one whose server isn't running. Shown when you have more than one machine. |
+| **Meanwhile** | A short line to smile at, first in the deck. The die gives you another. **Share** makes a picture of the line in your theme's colours: on a phone it opens the share sheet, where you can pick X; on a computer it downloads the picture and opens a post on X for you to add it to. |
 
-**Everything**, at the bottom, lists every project, tab and pane as the window's sidebar
-does. Projects start folded; your browser keeps the ones you unfold. The switch over its
-foot narrows it to **Activity**: only panes at work or with something for you, by the rules
-in "Showing only activity" under [The sidebar](#the-sidebar). Your browser remembers the
-choice.
+**Running now** is under the deck: a card for each project with something at work, and in
+it a row for each pane at work, an agent or a command, with what it's doing and for how
+long. Tap a row to open that pane. A project with nothing at work isn't here:
+**Everything** has it.
 
-The number on the title, on **Home** and on the switch counts panes that need you: waiting
-and failed, not finished. The page's tab and the home-screen icon's badge show it too.
+On a wide screen the cards stand side by side, from two to six as the width allows, and
+the arrows by **Needs you** move along when there are more. **All clear** has no title
+over it: its cards stand side by side too.
+
+**Everything** lists your projects in a group for each machine. Each row
+says what its panes are doing, like "1 needs you · 1 working" or "1 pane · at rest", with
+the number that need you. A machine that's out of reach says so under its name, with
+**Start** or **Try again** where that helps. Type in **Search** to keep only the projects
+whose name, or one of whose panes' names, has what you typed.
+
+Tap a project to open it: a group for each tab, and a row for each pane with its state, how
+long it has waited and its mark. Tap a pane to open it. **Everything** at the top of the
+project, the **Everything** tab, or your browser's way back, returns to the list.
+
+**Activity** is one list of the panes at work or with something for you, by the rules in
+"Showing only activity" under [The sidebar](#the-sidebar). What needs you comes first,
+then what's working, then what finished, each row saying its project.
+
+The number on **Home** counts panes that need you: waiting and failed, not finished. The
+page's tab and the home-screen icon's badge show it too. With notifications on, each
+notification brings the count with it, so the icon's badge keeps up while the page is
+closed, and goes once nothing needs you. A joined machine's panes are counted as of its
+last notification.
 
 ### A pane in the browser
 
@@ -4122,6 +4261,10 @@ Tap a pane to open it at your screen's width. Tap it again for the keyboard.
 - **Copy** by holding a finger on a word, dragging to select more, and pressing **Copy**.
   **Copy everything**, under `…`, copies all the pane holds.
 - **Search** with **Find**, under `…`.
+- **Keep the screen on** with the switch under `…`, so the screen doesn't dim while you
+  watch a pane. It works in home-screen apps on iOS 18.4 and later, on Android, and in
+  desktop browsers; elsewhere the switch isn't shown. It's one choice for this browser,
+  and it lets go when you leave the pane or the page is hidden.
 - **Open a web address** by tapping it. A sheet shows where it really leads, with **Open**
   and **Copy**. Only `http` and `https` open. With a mouse, hold `Ctrl` (`⌘` on a Mac) and
   click.
@@ -4155,16 +4298,28 @@ A device that only looks has no paperclip and no fit button.
 
 ### On a wide screen
 
-From 900 pixels wide, the list sits at the side as the window's sidebar, and beside it is
-a tab with its panes where its layout puts them, each one live.
+From 900 pixels wide, a column at the left holds your machine's name, the bell, your
+device's tile and the settings, and under them **Home**, **Everything** and **Activity**.
+Beside it is Home, or the pane you opened.
 
+- **Everything** and **Activity** open in the column, as they do on a phone: a group of
+  projects for each machine, a project's own screen of tabs and panes, or one list of what
+  needs you and what's at work. **Back** at the top leads back. Nothing folds.
+- **Click a pane's row** to open it beside the column, in its tab, with the tab's other
+  panes where its layout puts them, each one live. Which tab you look at is your
+  browser's own and doesn't change what's in front at your desk.
 - **Click a pane** to type in it. The button at the end of its header makes it fill the
   tab, and puts it back. The paperclip and `…` work as on a phone.
-- **Click a row** to go to that pane's tab. Which tab you look at is your browser's own
-  and doesn't change what's in front at your desk.
-- **Home**, **Everything** and **Activity** work as on a phone.
-- **Fit to this screen** takes the size of every pane in the tab, and **Give the sizes
-  back** returns them.
+- **Home**, in the column, shows Home again.
+- **The bell** opens what you were told under it, and asks your browser first where
+  notifications are off.
+- **The settings button** opens Settings, with its pages at the left. It's there for a
+  device that may do everything.
+- **The panes fit your screen by themselves.** When a tab is shown, when its space changes
+  size, and when you come back to the page after using the window at your desk, every pane
+  in the tab takes the size that fits the page. A device that only looks leaves the sizes
+  alone. **Fit panes as they open** in the page's menu turns this off. Leaving the tab
+  gives the sizes back.
 
 A device that may arrange can also drag the border between two panes (`Escape` while you
 hold it puts it back), or drag a pane by its header onto another: in the middle the two
@@ -4191,8 +4346,7 @@ From the home screen the page opens full screen, like an app.
 
 On an iPhone the app has storage of its own, so it's a device of its own: see "A
 home-screen app is a browser of its own" under [In a browser](#in-a-browser). A code
-nobody used ends after 10 minutes, with its device, and Safari offers the home screen
-again.
+nobody used ends after 10 minutes, and Safari offers the home screen again.
 
 **After you update insensical**, the page updates itself the next time you open it. If
 you're typing when a newer page is ready, **Reload** takes you to it.
@@ -4202,7 +4356,7 @@ its port, so paired devices and the Tailscale mapping carry on. A joined machine
 hub again. Until it has, the page says **Not connected**; `isc hub restart` does it by
 hand.
 
-The phone keeps no copy of the page, so it doesn't open while the server can't be reached.
+While the hub can't be reached, the page opens on one that says why, and opens itself once the hub answers: see [When the page can't open](#when-the-page-cant-open).
 
 ### Notifications on your phone
 
@@ -4213,12 +4367,26 @@ front of you.
 2. Make sure the page is on `https`: `tailscale serve` gives you that, and so does a
    certificate of your own. Over `ssh -L` the address is `http://127.0.0.1`, which a browser
    also allows.
-3. Press the bell, or say yes when the page offers after your first answer.
+3. Press the bell, or **Tell me** when the page offers after your first answer. Your
+   browser asks whether the page may notify you. If you don't allow it, notifications
+   stay off; you can allow them later in your browser's settings for the site.
+
+With notifications on, the bell opens **Notifications**: what needed you, finished or
+failed since the page opened, newest first, with what wanted you as it opened. Each row
+says which pane, in which project, on which machine if it isn't this one, and how long
+ago. Tap one to open its pane, or its card if it still needs you. **Clear** empties the
+list. The page keeps no history of its own: a list cleared or a page reloaded starts
+again.
 
 You're told what the daemon would tell a window: the machine's name, the state, and the
 program's words. What you've muted stays quiet. Press one and the page opens at that
 pane's card, on the machine it belongs to. You aren't told while the page is open in front
 of you.
+
+On an iPhone with iOS 18.4 or later, the phone shows a notification and sets the badge by
+itself, so a notification still arrives, and still opens its pane, when iOS has cleared the
+page's stored data. If you turned notifications on before your hub was updated, turn them
+off and on again for this.
 
 Turn notifications off under your device's tile. **Forget This Browser** and `isc hub
 device rm` turn them off too.
@@ -4252,9 +4420,15 @@ address on port 443 whose name resolves to public addresses, and follows no redi
 **Your device's tile**, at the top right, opens **This browser**, laid out like a phone's
 own settings. It has:
 
-- **Icon**: five icons and ten colours.
-- **Theme**: the eight that come with insensical. Left alone, the page follows your
-  system: `fjord` when it's dark and `paper` when it's light.
+- **Icon**: one of five pictures.
+- **Theme**: **Appearance** is **System**, **Light** or **Dark**. System follows your
+  phone or computer; Light and Dark hold the page on that side whatever it says.
+  **Terminals** is **Same as Page**, **Light** or **Dark**: held to a side, the panes are
+  drawn in that side's theme while the page around them keeps its own, so a light page can
+  have dark terminals. Under these you pick a dark theme and a light theme from the ones
+  that come with insensical, each shown in its own colours. Only the sides in use are
+  shown, each headed by what uses it. Both start as `fjord`. The row shows what's in use,
+  such as `System · fjord / paper` or `Light · terminals dark`.
 - **Notifications** and **Fit Panes as They Open**, as switches.
 - **Text Size**, which changes the terminals in this browser only.
 - **Machines**: each machine this browser reaches and whether it's online. The hub's own
@@ -4264,14 +4438,28 @@ own settings. It has:
 
 ### When the link drops
 
-If your connection fails, the page keeps what it last showed, dimmed, says **Link to desk
-lost · trying again** (with your computer's name in place of `desk`), reconnects by
-itself, then says **Connected**. You can still scroll back, select and copy meanwhile.
+If your connection fails, the page keeps what it last showed and reconnects by itself. A
+phone that puts the page away breaks its connection, so coming back to the page, or your
+phone coming back online, reconnects at once. For the first 5 seconds the page says
+nothing, because most links are back by then. You can still scroll back, select and copy
+meanwhile.
+
+If it's still down after that, a small line under the top bar says **Reconnecting to
+desk** (with your computer's name in place of `desk`), and the page dims a step. Other
+machines you reach are named in the same line: **Reconnecting to desk and atlas**, or
+**Reconnecting to atlas** when only that one is down. A machine's panes say so too.
+
+- After about 25 seconds it says **Can't reach desk**, with **Try again** to retry now.
+  When the page is at a Tailscale address it adds **Is Tailscale on?**, and after a
+  minute it says when it last heard from the machine.
+- With your device offline it says **You're offline** until the device is back online.
+- When the link is back the line just goes away.
 
 **Nothing you type blind reaches an agent.** What you type arrives within a couple of
 seconds or never, and nothing is kept to send later. An answer you press on a card while
 the link is lost isn't sent: the card says **Not sent** and stays unanswered, so read the
-question again and answer then. A line you wrote stays in its field. A change from a page
+question again and answer then. A key typed into a pane meanwhile shows the line at once,
+in its first 5 seconds too, and the line beats once. A line you wrote stays in its field. A change from a page
 known by its key (removing a device, a setting) that arrives late isn't made, and the page
 tells you to try again.
 
@@ -4281,6 +4469,23 @@ If the page says the link is lost on a link that works:
 - A proxy in front has to pass WebSocket messages on as they come.
 - **Not connected · this page is older than its server: load it again** means your browser
   kept an older page. It reloads by itself; reload it yourself if it doesn't.
+
+### When the page can't open
+
+If you open the page and the hub can't be reached, you see a page that says why, instead
+of a blank screen:
+
+- **You're offline** when your phone or computer has no connection at all.
+- **Can't reach** and your machine's name when it has a connection but not to the hub:
+  Tailscale is off, you're on another network, its name can't be looked up, or `isc hub`
+  isn't running.
+
+It shows after about 4 seconds at most, and sooner when the connection fails at once. It
+tries again by itself, after 2, 4, 8 and then every 15 seconds, and at once when your
+connection comes back or you come back to the page; **Try again** tries now. When the hub
+answers, the page opens. It shows only once you've opened the page from the hub at least
+once in that browser. It names your machine as the page last knew it, or says "your hub",
+and has a line to smile at with a die for another.
 
 ### The page's addresses
 
@@ -4701,7 +4906,7 @@ terminal rings, unless you've silenced the pane or project. Titles and text are 
 bursts are held back, as [section 12](#12-notifications) says of the application.
 
 **Themes.** It uses your insensical theme, the same as the window: the light or dark one
-of a pair, by your terminal's own background. One more theme exists only here, `terminal`,
+of a pair, by your terminal's own background, unless `appearance` holds it to one. One more theme exists only here, `terminal`,
 which is your terminal's own background, text colour and sixteen colours. Choose one in the
 palette: type `theme`. A theme chosen here is the window's too, and the other way round.
 Only `terminal`, and any theme once `[tui]` already names one, are written under `[tui]`
@@ -4721,8 +4926,8 @@ theme = "terminal"
 
 **Settings.** It reads the window's own settings for the theme, the keys and motion.
 Notifications, sounds, scrollback and the rest of what the daemon does are the daemon's. A
-`[tui]` table in `config.toml` can say otherwise for a terminal alone about `theme`,
-`activity-idle`, `interface-style`, `motion`, `attention-glow`, `type-ahead`, `clipboard`,
+`[tui]` table in `config.toml` can say otherwise for a terminal alone about `appearance`,
+`theme`, `activity-idle`, `interface-style`, `motion`, `attention-glow`, `type-ahead`, `clipboard`,
 `keymap` and `leader`, and holds the two settings only a terminal has:
 
 ```toml
@@ -4756,8 +4961,8 @@ file.
   double-click on a pane's name fills the tab with it. A pane isn't dragged with the mouse;
   the move commands, `move-to-tab` and `isc put` do it.
 - Sharing, opening and saving a project file, and "Add a machine" are the window's. `isc
-  host add` and the Remote Hosts page add a machine, and `isc host set` changes its colour,
-  icon, address and `careful` mark.
+  host add` and the Remote Hosts page add a machine, and `isc host set` changes its icon,
+  address and `careful` mark.
 - `isc hub open --print`, `isc hub public` and `isc clients` give what the Hub page
   doesn't: a link for this computer's browser, a public link, and who is connected.
 - Under 20 columns or 6 rows it says "Needs more room".
@@ -4841,9 +5046,10 @@ written, and files already there are removed as their panes close.
 - A pane started with a command, as in `isc run -- npm start`, comes back as a shell with
   that command typed at the prompt. Press Enter to run it, or edit it first. Commands you
   typed in the shell aren't offered.
-- With the Claude Code hooks installed, a pane where Claude was last working gets `claude
-  --resume <session>` at the prompt, until you run something else there. Codex, opencode and
-  pi are offered their own resume commands (section 11). Gemini CLI isn't.
+- With the Claude Code hooks installed, a pane where Claude was still working when the
+  daemon stopped gets `claude --resume <session>` at the prompt, once. If you quit Claude
+  yourself, or don't run it, it isn't offered again. Codex, opencode and pi are offered
+  their own resume commands (section 11). Gemini CLI isn't.
 
 **A layout file that can't be read**
 
@@ -4856,7 +5062,7 @@ run `isc kill-server`, mend the file, and put it back as `state.json`.
 The daemon asks GitHub for a new release a minute after it starts and then about every 24
 hours, and tells every window and `isc version` what it found. The request names only your
 version and platform. If you're offline, it says nothing. To turn the daily look off,
-switch off **Check for updates automatically** on Settings > Hub, or set
+switch off **Check for updates automatically** on Settings > General, or set
 `check-for-updates = false`. Then insensical asks only when you press Check Now or run an
 update yourself.
 
@@ -4871,7 +5077,7 @@ buttons. It's never a desktop notification.
   source. Build the new version the same way."
 - **Skip** hides that version in every window. You're told again when a newer one is out.
 
-Settings > Hub says the same in its **Version** row: the version you run, then when the
+Settings > General says the same in its **Updates** row: the version you run, then when the
 daemon last checked, or the version that's out with What's New. **Check Now** looks at
 once, even with the daily look off. **Update** or **How to Update** works as in the
 notice. If a check or an update fails, the row says why in red.
@@ -5062,7 +5268,7 @@ leader means the letter with Shift, written `shift-h` in `[keys]`.
 |---|---|---|---|---|
 | New tab | `new-tab` | `Ctrl+Shift+T` | `⌘T` | `t` |
 | New project | `new-project` | `Ctrl+Shift+N` | `⇧⌘N` | `o` |
-| Find a project, tab or pane in the sidebar | `filter` | `Ctrl+Shift+L` | `⌘K` | `e` |
+| Find a project, tab or pane in the sidebar | `filter` | `Ctrl+Shift+S` | `⇧⌘S` | `e` |
 | Close pane | `close-pane` | `Ctrl+Shift+W` | `⌘W` | `x` |
 | Close tab | `close-tab` | `Ctrl+Shift+Q` | `⇧⌘W` | `q` |
 | Split right | `split-right` | `Ctrl+Shift+O` | `⌘D` | `S` |
@@ -5096,6 +5302,9 @@ leader means the letter with Shift, written `shift-h` in `[keys]`.
 | Size the panes for this window, when another window or a terminal sized them last | `lead` | — | — | — |
 | Name this pane | `name-pane` | — | — | — |
 | Name this tab | `name-tab` | — | — | — |
+| Clear this pane's history | `clear-pane` | `Ctrl+Shift+L` | `⌘K` | `C` |
+| Clear this tab's history | `clear-tab` | — | — | — |
+| Clear this project's history | `clear-project` | — | — | — |
 | Show every key | `keys` | `Ctrl+Shift+/`; `Ctrl+F1` | `⇧⌘/` | `?` |
 | Settings | `settings` | `Ctrl+,` | `⌘,` | `,` |
 | See every tab of every project | `overview` | `Ctrl+Shift+Space` | `⇧⌘O` | `w` |
@@ -5152,19 +5361,23 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 
 | Key | Meaning | Default |
 |---|---|---|
-| `theme` | A theme name, or one for each appearance of the desktop: `{ light = "paper", dark = "fjord" }`. A name can be a built-in theme (see [Themes](#themes)), a file in `themes`, `ghostty`, or `ghostty:Name`. | `fjord` when the desktop is dark, `paper` when light |
+| `appearance` | Whether the window is light or dark. `system` follows the desktop; `light` and `dark` hold it there. | `system` |
+| `terminal-appearance` | Whether the window's terminals are light or dark. `interface` follows `appearance`; `light` and `dark` hold the terminals in that version of the theme while the window keeps its own. `isc tui` doesn't read it. | `interface` |
+| `theme` | A theme name, or one for light and one for dark: `{ light = "fjord", dark = "fjord" }`. A name can be a built-in theme (see [Themes](#themes)), a file in `themes`, `ghostty`, or `ghostty:Name`. | `fjord`, dark or light as the appearance is |
 | `font-family` | The terminal font. | `JetBrainsMono Nerd Font` |
-| `interface-font` | Font for tabs, sidebar, headers and panels | the system's interface font |
-| `interface-style` | `insensical`: greys around the terminals, with the theme's accent and state colours. `terminal`: the theme's colours (Follow terminal theme in the settings). `isc tui` is `terminal` unless this is set. | `insensical` |
-| `background-opacity` | How much of the desktop behind the window the background hides, 0.2 to 1. | `1` |
-| `background-blur` | Whether the desktop is asked to blur what shows through. | `true` |
+| `interface-font` | Font for tabs, sidebar, headers and panels | Inter |
+| `interface-style` | `insensical`: greys around the terminals, with the theme's accent and state colours. `terminal`: the theme's colours (From the terminal theme in the settings). `isc tui` is `terminal` unless this is set. | `insensical` |
+| `background-opacity` | How much of the desktop each pane hides, 0.2 to 1. At 1 a pane is the theme's background, solid. Settings > Interface > Panes. | 0.58 dark, 0.66 light; 1 with `background-blur = false` |
+| `interface-opacity` | How much of the desktop the sidebar hides, 0.2 to 1. The space around the panes is never thinner than its words can be read on. Settings > Interface > Window. | 0.5; 1 with `background-blur = false` |
+| `background-blur` | Whether the desktop is asked to blur what shows through the window, as strongly as it blurs. It's one request for the whole window. | `true` |
 | `at-login` | What insensical does when you log in. `off`: nothing. `window`: opens the window. `background`: starts in the tray (the menu bar on a Mac) with no window, or opens the window if your Linux desktop shows no tray. | `off` |
 | `motion` | Whether sheets, notices and moved panes fade in, the working mark turns and cursors blink. `system` follows the desktop. | `system` |
 | `font-ligatures` | Whether symbols side by side are drawn as the font's ligature, such as `->` and `!=` | `true` |
 | `font-size` | Terminal text size in points, 6 to 72. | `12`; on macOS `13` |
 | `density` | `comfortable`: each pane is a rounded card with space around it. `compact`: panes sit edge to edge with a hairline between. | `comfortable` |
-| `pane-gap` | Space between panes in pixels, 0 to 40 | `6`, or `0` when `density` is `compact` |
-| `sidebar` | The levels listed under a project's name: `["tabs", "panes"]`, `["tabs"]`, `["panes"]`, or `[]` for names only | `["tabs", "panes"]` |
+| `pane-gap` | Space between panes in pixels, 0 to 40 | `12`, or `0` when `density` is `compact` |
+| `sidebar-tree` | Tree view: what each project holds, joined by tree lines. `false` lists a project's tabs flat, with no lines and no panes. | `true` |
+| `sidebar` | The levels the tree lists under a project's name: `["tabs", "panes"]`, `["tabs"]` or `["panes"]`. An empty list is a problem, and both are used. | `["tabs", "panes"]` |
 | `activity-idle` | Whether agents at rest are listed when the sidebar shows only activity | `true` |
 | `tabs` | Where tabs show. `sidebar`: down the side, for every project. `top`: along the top, for the current project. | `sidebar` |
 | `pane-header` | `full`: what the pane is and does, plus arrange buttons. `name`: the same without buttons. `hidden`: no header; a floating pane keeps its name. | `full` |
@@ -5179,6 +5392,7 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `scrollback` | History each pane keeps, in megabytes, 1 to 200. | `10` |
 | `keep-scrollback` | Whether what panes show is saved when the daemon stops. With `false`, nothing is saved and earlier files are removed as panes close. | `true` |
 | `check-for-updates` | Whether the daemon asks GitHub once a day for a new release. With `false`, it asks only when you press Check Now or update yourself. See [A new version installed underneath](#a-new-version-installed-underneath). | `true` |
+| `keep-awake` | On a Mac, whether insensical keeps the Mac from sleeping while it runs, so your devices can reach it through a hub or over `ssh`. The display still sleeps, the screen still locks, and closing the lid still sleeps the Mac. A change applies within two seconds. Activity Monitor's Energy tab and `pmset -g assertions` show it as `isc`. If macOS refuses, the daemon says so in its log and runs anyway. On Linux it does nothing. | `true` |
 | `agents-at-once` | How many agents one agent can have open at once, started with `isc agent start`, 1 to 64 (section 11). | `8` |
 | `agents-deep` | How deep agents can start agents, 1 to 8. | `2` |
 | `agents-from-other-machines` | Whether an agent on another machine, running `isc --host` or `isc tui --host` in a pane there, can use this computer. Off, it's refused and told how to turn this on. You at your own terminal are never refused (section 11). | `false` |
@@ -5202,16 +5416,16 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `tray` | On Linux, whether insensical has a tray icon, marked while a pane needs you, with a menu of those panes. | `true` |
 | `menu-bar` | On a Mac, whether insensical has a menu bar item that counts and lists the panes that need you. | `true` |
 | `dock-badge` | On a Mac, whether the number of panes that need you is on the Dock icon. | `true` |
-| `[tui]` | What `isc tui` does differently from the window, which never reads this table: `theme` (`terminal` is the terminal's own colours), `activity-idle`, `interface-style`, `motion`, `attention-glow`, `type-ahead`, `clipboard`, `keymap` and `leader`, each overriding the top-level one, plus `colours` (`auto`, `truecolor`, `256`, `16`) and `mouse` | `colours = "auto"`, `mouse = true` |
+| `[tui]` | What `isc tui` does differently from the window, which never reads this table: `appearance`, `theme` (`terminal` is the terminal's own colours), `activity-idle`, `interface-style`, `motion`, `attention-glow`, `type-ahead`, `clipboard`, `keymap` and `leader`, each overriding the top-level one, plus `colours` (`auto`, `truecolor`, `256`, `16`) and `mouse` | `colours = "auto"`, `mouse = true` |
 | `[keys]` | Keys and the command each one runs, or `none`, in either keymap | empty |
 | `[modes]` | Modes of your own, and the resize mode: a table for each, with a `title`, a `timeout` and the keys that work in it. See [Changing keys](#changing-keys). | `resize` |
 | `[icons]` | A program's name and its tile: a program that has one, a mark, or `{ mark = "docker", colour = "#ff8800" }`. See [Icons for your own programs](#icons-for-your-own-programs). | empty |
 | `[commands]` | Commands of your own: a name and a list of steps. See [Changing keys](#changing-keys). | empty |
 | `[keys.direct]` | The direct keymap, written out. It lies over the defaults: your lines win, a default you don't mention stays, and `none` takes a default key away. | the keys in the table above |
 | `[keys.leader]` | The leader keymap, written out. Each key is the one you press after the leader. It lies over the defaults like `[keys.direct]`. | the keys in the table above |
-| `[hosts]` | Other machines by name and where `ssh` goes for each: `build = "me@build.example.com"`. Also `{ ssh = "…", color = "…", icon = "…", careful = true }`: a colour (`#rrggbb` or `blue`, `green`, `orange`, `purple`, `pink`, `teal`, `gold`, `grey`, `rust`, `indigo`), an icon (`server`, `laptop`, `desktop`, `mini`, `nas`, `board`, `phone`, `container`, `cloud`), and a mark for one to be careful on. `isc host add` writes these, and `node = "…"` for a tailnet machine. See [Other machines, over ssh](#other-machines-over-ssh). | empty |
+| `[hosts]` | Other machines by name and where `ssh` goes for each: `build = "me@build.example.com"`. Also `{ ssh = "…", icon = "…", careful = true }`: an icon (`server`, `laptop`, `desktop`, `mini`, `nas`, `board`, `container`, `cloud`), and a mark for one to be careful on. `isc host add` writes these, and `node = "…"` for a tailnet machine. See [Other machines, over ssh](#other-machines-over-ssh). | empty |
 
-The file `isc config` prints sets `theme` to `{ light = "paper", dark = "fjord" }`, shows `shell` and `interface-font` as lines to uncomment, and writes out `[keys]`, `[keys.direct]` and `[keys.leader]` with their defaults.
+The file `isc config` prints sets `theme` to `{ light = "fjord", dark = "fjord" }`, shows `shell` and `interface-font` as lines to uncomment, and writes out `[keys]`, `[keys.direct]` and `[keys.leader]` with their defaults.
 
 For the theme file format, see [A theme file](#a-theme-file).
 
@@ -5252,6 +5466,7 @@ Run these in any terminal. Placeholders and options:
 | `isc put PANE left\|right\|above\|below [--of OTHER] [--tab TAB]` | Moves a pane to that side of another pane, or of all the panes of a tab |
 | `isc resize left\|right\|up\|down [PANE] [--by PERCENT]` | Moves the divider a pane shares with its neighbours in that direction, by 5% of the divided space unless you set `--by`. |
 | `isc rename PANE NAME` | Names a pane, shown instead of its directory and title. `""` removes the name. |
+| `isc clear [PANE] [--tab [TAB]] [--project [NAME]] [--force]` | Empties a pane's history and screen, or every pane's of a tab or project, and has each program draw again. Busy panes are named and nothing is cleared, unless you give `--force`. |
 | `isc close [PANE]` | Closes a pane and ends its program |
 | `isc close --opened [PANE]` | Closes every pane that `isc run`, `isc split` or `isc agent start` opened from inside the pane you run it in (or `PANE`), and those they opened, except one you've typed into or focused |
 | `isc tab new` | Opens a tab with a shell in the current project |
@@ -5311,8 +5526,8 @@ Run these in any terminal. Placeholders and options:
 | `isc config reset NAME` | Takes a setting out of the settings file, leaving its default. With `--host`, as `set`. |
 | `isc completions bash\|zsh\|fish` | Prints what that shell needs to complete `isc` commands, including the panes, tabs and projects that exist |
 | `isc shell-integration bash\|zsh\|fish` | Prints what that shell needs to tell its pane where each command starts and ends, and its exit status. fish 4 and later doesn't need it. |
-| `isc host add NAME WHERE` | Names another machine. `WHERE` is what you'd give `ssh`. `--color C`, `--icon I` and `--careful` set those on it. A tailnet machine is kept by its node; `--no-node` keeps it as typed. |
-| `isc host set NAME` | Changes what's set on a machine: `--ssh WHERE`, `--color C` or `--no-color`, `--icon I` or `--no-icon`, `--careful` or `--no-careful`, and `--name NEW` to rename it. Only what you give changes. |
+| `isc host add NAME WHERE` | Names another machine. `WHERE` is what you'd give `ssh`. `--icon I` and `--careful` set those on it. A tailnet machine is kept by its node; `--no-node` keeps it as typed. |
+| `isc host set NAME` | Changes what's set on a machine: `--ssh WHERE`, `--icon I` or `--no-icon`, `--careful` or `--no-careful`, and `--name NEW` to rename it. Only what you give changes. |
 | `isc host ls` | Lists the machines you've named, with where `ssh` goes and what's set on each. `--json` includes `node`. |
 | `isc host answer NAME` | Runs your `ssh` to the machine at your terminal so it can ask: a host key, passphrase, password or sign-in. Then it meets the machine, and succeeds only if it was reached. `NAME` can be where `ssh` goes. |
 | `isc host rm NAME` | Forgets a machine's name |
@@ -5425,7 +5640,8 @@ Only when you tell it to, insensical also writes these files in other programs' 
 | `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `GEMINI_CLI_HOME`, `PI_CODING_AGENT_DIR` | `isc integrate` | Where each agent keeps its settings, instead of its default directory. |
 
 Set in every pane: `TERM`, `COLORTERM=truecolor`, `TERM_PROGRAM=insensical`,
-`TERM_PROGRAM_VERSION`, `INSENSICAL_PANE`, `INSENSICAL_SOCKET`.
+`TERM_PROGRAM_VERSION`, `INSENSICAL_PANE`, `INSENSICAL_SOCKET`. On a Mac with no locale set,
+`LANG` too.
 
 Set for `notify-command`: `INSENSICAL_EVENT`, `INSENSICAL_TITLE`, `INSENSICAL_BODY`,
 `INSENSICAL_KIND`, `INSENSICAL_PANE`, `INSENSICAL_PROJECT`, `INSENSICAL_MACHINE` and

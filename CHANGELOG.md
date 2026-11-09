@@ -5,6 +5,53 @@ its release notes.
 
 ## Unreleased
 
+## 0.9.0 - 2026-11-09 23:44 +06:00
+
+### New
+
+- The page's pane menu has Keep the screen on, so a phone or computer doesn't dim while you watch a pane.
+- Hold the window, or the page, light or dark whatever your system says, and give the terminals their own side, such as dark terminals in a light window. Pick a dark and a light theme from previews in their own colours.
+- A redesigned window that lets your desktop show through, with a new sidebar, top bar, pane headers, dialogs, palette and settings. Every row and header has a menu (`⋯` or a right-click), and a Needs you panel lists the panes that wait.
+- Clear a pane's history and screen with `Ctrl+Shift+L` (`⌘K` on a Mac), its menu, or `isc clear`; the menus of a tab and a project clear every pane in them, and busy panes are asked about first. Finding in the sidebar moves to `Ctrl+Shift+S` (`⇧⌘S`).
+- The page on a phone has a new look and a new Home: what needs you is a deck of cards, one at a time. With nothing waiting, All clear shows how things stand, and a Meanwhile line you can share to X. Under it is what's running now.
+- On a phone, a bar at the bottom has Home, Everything and Activity, each keeping its place. Everything groups projects by machine, with a search, and Activity is one list, what needs you first.
+- The page's bell opens a list of what needed you, finished or failed since the page opened; where notifications are off it asks your browser first.
+- The page on a wide screen has a column at the left that leads to Home, Everything and Activity as a phone's does, with nothing to fold; Home's cards stand side by side, the bell opens under itself, and Settings is a button of its own, drawn larger.
+- When the page can't reach the hub, it says why (you're offline, or the hub can't be reached) in place of a blank screen, and opens by itself once the hub answers.
+- With notifications on, the home-screen icon's badge counts the panes that need you even while the page is closed, and clears once nothing does.
+- On an iPhone with iOS 18.4 or later, notifications arrive and open their pane even after iOS clears the page's stored data.
+
+### Improvements
+
+- A pane at a password prompt, from `sudo`, `ssh`, a script's `read -s` or any program that hides what you type, needs you to sign in, and its card on the page asks with a password field.
+- On an iPhone, the home-screen app takes the place of the device in Safari once it pairs: it keeps its name, and Safari asks to pair again.
+- The page reconnects quietly when you come back to it: nothing is said for the first few seconds, then a small line under the top bar says what it's reconnecting to, and only a longer outage says what may be wrong, with Try again.
+- New project: Tab moves between the card's fields and buttons and stays in the card; the arrows walk the folders listed under the directory, and Choose opens your system's folder picker. Tab stays inside every other dialog and sheet too.
+- The page on a wide screen fits its panes to its own space by itself, when a tab is shown, when the space changes and when you come back to it; the Fit to this screen and Give the sizes back buttons are gone.
+- On a Mac, insensical keeps the Mac awake whenever it runs, not only while `isc hub` runs. Turn it off with Keep this Mac awake on Settings > General.
+- Machines and devices are shown by their pictures; their colour setting is gone, and a machine's chip and heading are no longer tinted.
+- Settings > Hub shows the version and protocol of the hub: this computer's own, or the one it joined, with a different protocol shown as a warning. Settings > General > Updates shows your own version and protocol.
+- Settings > Interface > Layout has a Tree view switch for the sidebar: turned off, each project lists its tabs flat, without tree lines or pane rows; Tabs and Panes switches under it choose the levels.
+- The sidebar tree is tighter, projects, tabs and panes share one card, and the sheet of every key has a card per heading.
+- Settings has General, Interface and Terminal pages in place of Themes. Interface sets the sidebar's and the panes' opacity apart, and on a Mac, Menu bar and Dock is a card on General.
+- New icons: plain signs for controls, and full-colour pictures for machines, devices, projects and settings pages.
+- The interface uses the Inter font, and Fjord has a light side and is the default in both light and dark.
+- On a light theme, text that programs drew for dark terminals is made readable in the theme's own colours, in the window and on the web page.
+- A pane whose program says done or idle while one of its tasks still works now shows running.
+- Programs' marks are one size along a row and in their makers' real colours. Many more are in full colour, and Aider, Crush, Droid, Auggie and Paperclip have marks of their own.
+- In the sidebar, a pane an agent started in its own tab is listed beside it with the tab's other panes; only what it started in another tab is listed under it.
+- The sidebar shows the pane in front on a raised row, with the names above it in bold. A pane coming to the front unfolds its project unless you folded it.
+- A Claude Code pane stays running while Claude waits on work it started in the background (a command, a subagent, a workflow), and is done when that has finished.
+
+### Bug fixes
+
+- On a Mac, panes opened from an insensical started from the Dock or Finder use UTF-8: they get your language and region as `LANG` when nothing set one, so letters outside ASCII are no longer read as bytes.
+- A project shown by a program's mark is on the mark maker's card, as the program is, and not on the colour picked for its letter; in Name and icon the colour row is faded unless the letter is picked.
+- A project's own drawing has no dark rim or jagged corners at its edge.
+- A long line that wrapped before insensical was updated or restarted copies as one line, and a link on it opens whole, where each row came out as a line of its own.
+- A pane offers an agent's resume command only once, and only if the agent was still running when the daemon stopped, not after you quit it.
+- A program in a pane can no longer pass for the window by saying it is one; only the window or `isc hub` installed beside the server, started from a pane, counts as you.
+
 ## 0.8.0 - 2026-10-28 01:55 +06:00
 
 ### New
