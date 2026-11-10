@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="banner.svg" alt="insensical: a terminal multiplexer with a native window. Run many agents; know which one needs you." width="100%">
+  <img src="banner.png" alt="insensical: a terminal multiplexer with a native window. Run many agents; know which one needs you." width="100%">
 </h1>
 
 A terminal multiplexer with a native window, for running many terminals and coding

@@ -843,7 +843,8 @@ everything else.**
   command, once, if it was still working when the project went to sleep, otherwise the command the pane was started with. This is also what
   happens to every pane when the daemon restarts ([section
   17](#17-stopping-restarting-and-new-versions)).
-- A project that's asleep when the daemon stops is asleep when it starts.
+- A project that's asleep when the daemon stops, or moves to a new version, is still asleep
+  afterwards, with everything it kept.
 
 To sleep one, hover its heading and press the sleep mark; or choose "Put this project to
 sleep, or wake it" in the palette (command `sleep-project`, no default key); or run `isc
@@ -2663,7 +2664,7 @@ The pages:
     link, Tailscale row, notifications row, Joined machines or Add a Device. **Guests** lists
     the guests it shared something with.
 - **General** is the app itself: **At login** (what insensical does when you log in);
-  **Updates**, the version you run and the protocol it speaks, such as `insensical 0.8.0 ·
+  **Updates**, the version you run and the protocol it speaks, such as `insensical 0.9.0 ·
   protocol 36`, and when it was last checked, with `Check Now`, `Update`
   when a new release is out (see [A new version installed
   underneath](#a-new-version-installed-underneath)), and **Check for updates
@@ -2816,9 +2817,9 @@ colours unless you write `interface-style = "insensical"`.
 
 ### A see-through window
 
-By default your desktop shows through the window, blurred. The sidebar and
-the panes are tinted thick enough that their words read over any desktop, and between the
-panes the desktop shows. Two settings set how much shows through, each from `0.2` to `1`,
+By default your desktop shows through the window, blurred: a little through the sidebar,
+and between the panes. The panes themselves are solid. Two settings set how much shows
+through, each from `0.2` to `1`,
 or 20% to 100% on Settings > Interface:
 
 ```toml
@@ -2828,15 +2829,15 @@ background-blur = true
 ```
 
 - `interface-opacity` sets the sidebar. The words beside the panes keep a ground thick
-  enough to read on, whatever you set.
+  enough to read on, whatever you set. A light sidebar is never thinner than 0.88, since
+  thinner light glass turns grey over a dark wallpaper.
 - `background-opacity` sets the panes and nothing else. Text, cells a program coloured,
   tiles, borders and floating or zoomed panes stay solid.
-- Left out, both follow the blur: with `background-blur` on, the sidebar is 0.5 and the
-  panes 0.58 on a dark theme, 0.66 on a light one; with it off, both are solid, since
-  see-through over a sharp desktop is hard to read. What you set is used either way.
-- Dialogs, the palette, the settings and the overview are translucent. While one is open, the
-  window under it fades, so you see your blurred desktop through it, not the text behind.
-  With blur off and both opacities left out they're solid and nothing fades.
+- Left out, the panes are solid, and the sidebar is 0.9 with `background-blur` on and solid
+  with it off, since see-through over a sharp desktop is hard to read. What you set is used
+  either way.
+- While a dialog, the palette, the settings or the overview is open, the window under it is
+  dimmed and keeps the opacities you set.
 - `background-blur` asks the desktop to blur what shows through the window, as strongly as
   your desktop blurs. It's one request for the whole window, so it can't differ between the
   sidebar and the panes. On Hyprland and other compositors that blur by their own rules,
@@ -4577,7 +4578,7 @@ Good to know:
 **Your devices reach it.** A device paired with the hub reaches every joined machine, with
 what it may do on the hub. There's no code to make on the joined machine. Remove a device
 on the hub, or change what it may do, and it's so on every joined machine at once. A
-guest, kept to one project or terminal of the hub, reaches no joined machine.
+guest sees only the project or terminal you shared, and none of the joined machines.
 
 A joined machine doesn't pair your devices itself: `isc hub device add` there says to pair
 the device with the hub. It can still share one project or terminal of its own with a
@@ -5367,8 +5368,8 @@ Settings go in `config.toml`. Every key is optional, and an unknown key is an er
 | `font-family` | The terminal font. | `JetBrainsMono Nerd Font` |
 | `interface-font` | Font for tabs, sidebar, headers and panels | Inter |
 | `interface-style` | `insensical`: greys around the terminals, with the theme's accent and state colours. `terminal`: the theme's colours (From the terminal theme in the settings). `isc tui` is `terminal` unless this is set. | `insensical` |
-| `background-opacity` | How much of the desktop each pane hides, 0.2 to 1. At 1 a pane is the theme's background, solid. Settings > Interface > Panes. | 0.58 dark, 0.66 light; 1 with `background-blur = false` |
-| `interface-opacity` | How much of the desktop the sidebar hides, 0.2 to 1. The space around the panes is never thinner than its words can be read on. Settings > Interface > Window. | 0.5; 1 with `background-blur = false` |
+| `background-opacity` | How much of the desktop each pane hides, 0.2 to 1. At 1 a pane is the theme's background, solid. Settings > Interface > Panes. | `1` |
+| `interface-opacity` | How much of the desktop the sidebar hides, 0.2 to 1. The space around the panes is never thinner than its words can be read on. A light sidebar is never thinner than 0.88. Settings > Interface > Window. | 0.9; 1 with `background-blur = false` |
 | `background-blur` | Whether the desktop is asked to blur what shows through the window, as strongly as it blurs. It's one request for the whole window. | `true` |
 | `at-login` | What insensical does when you log in. `off`: nothing. `window`: opens the window. `background`: starts in the tray (the menu bar on a Mac) with no window, or opens the window if your Linux desktop shows no tray. | `off` |
 | `motion` | Whether sheets, notices and moved panes fade in, the working mark turns and cursors blink. `system` follows the desktop. | `system` |

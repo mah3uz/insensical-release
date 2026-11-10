@@ -5,6 +5,19 @@ its release notes.
 
 ## Unreleased
 
+## 0.9.1 - 2026-11-10 22:56 +06:00
+
+### Improvements
+
+- The window stays as you set it while a dialog or the settings is open, only dimmed; it no longer fades almost away.
+- Panes are solid by default and the sidebar shows only a little of the desktop (0.9); set `background-opacity` and `interface-opacity` for more.
+
+### Bug fixes
+
+- A sleeping project keeps its tabs and screens through an update; it used to wake as a blank project.
+- A pane's `⋯` in the sidebar opens its menu there, not under the pane's header.
+- A light sidebar stays light and readable over a dark wallpaper, without a pale band above Needs you or a smudge round a tab's tile.
+
 ## 0.9.0 - 2026-11-09 23:44 +06:00
 
 ### New
